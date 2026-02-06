@@ -1,8 +1,18 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import type { Tables } from "@/integrations/supabase/types";
+import { supabase } from "@/supabaseCustom";
 
-export type Product = Tables<"products">;
+export interface Product {
+  id: string;
+  name: string;
+  description: string | null;
+  price: number;
+  category: string;
+  images: string[];
+  sizes: string[] | null;
+  fabric_details: string | null;
+  shipping_info: string | null;
+  created_at: string;
+}
 
 export const useProducts = (category?: string) =>
   useQuery({
@@ -12,7 +22,7 @@ export const useProducts = (category?: string) =>
       if (category) query = query.eq("category", category);
       const { data, error } = await query;
       if (error) throw error;
-      return data;
+      return data as Product[];
     },
   });
 
@@ -26,7 +36,7 @@ export const useProduct = (id: string) =>
         .eq("id", id)
         .maybeSingle();
       if (error) throw error;
-      return data;
+      return data as Product | null;
     },
     enabled: !!id,
   });

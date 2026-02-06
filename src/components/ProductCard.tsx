@@ -16,7 +16,7 @@ const ProductCard = ({ product, index = 0 }: ProductCardProps) => (
     viewport={{ once: true }}
   >
     <Link to={`/product/${product.id}`} className="group block">
-      <div className="aspect-[3/4] overflow-hidden bg-muted mb-3">
+      <div className="aspect-[3/4] overflow-hidden bg-muted mb-3 shadow-sm transition-shadow duration-300 group-hover:shadow-lg">
         <ImageFallback
           src={product.images[0]}
           hoverSrc={product.images[1]}

@@ -1,6 +1,7 @@
 import { useProducts } from "@/hooks/useProducts";
 import ButterflyLoader from "./ButterflyLoader";
 import ImageFallback from "./ImageFallback";
+import FloatingButterflies from "./FloatingButterflies";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
@@ -15,8 +16,9 @@ const ClassicsSection = () => {
   const { data: products, isLoading } = useProducts("classics");
 
   return (
-    <section className="py-20 bg-accent">
-      <div className="container mx-auto px-4 lg:px-8">
+    <section className="py-20 bg-accent relative">
+      <FloatingButterflies />
+      <div className="container mx-auto px-4 lg:px-8 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
           <div className="lg:col-span-3 lg:sticky lg:top-32">
             <motion.div
@@ -45,7 +47,7 @@ const ClassicsSection = () => {
                   {products?.map((product) => (
                     <CarouselItem key={product.id} className="pl-4 basis-full sm:basis-1/2 lg:basis-1/3">
                       <Link to={`/product/${product.id}`} className="group block">
-                        <div className="aspect-[3/4] overflow-hidden bg-muted mb-3">
+                        <div className="aspect-[3/4] overflow-hidden bg-muted mb-3 shadow-sm transition-shadow duration-300 group-hover:shadow-lg">
                           <ImageFallback
                             src={product.images[0]}
                             hoverSrc={product.images[1]}

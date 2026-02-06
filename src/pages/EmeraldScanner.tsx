@@ -3,22 +3,28 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { supabase } from "@/integrations/supabase/client";
+import { Slider } from "@/components/ui/slider";
+import { supabase } from "@/supabaseCustom";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { Upload, Leaf } from "lucide-react";
+import ScanningRadar from "@/components/ScanningRadar";
 
 const EmeraldScanner = () => {
   const [brand, setBrand] = useState("");
   const [material, setMaterial] = useState("");
   const [garmentType, setGarmentType] = useState("");
+  const [qualitySlider, setQualitySlider] = useState([50]);
   const [uploading, setUploading] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
   const [score, setScore] = useState<number | null>(null);
 
   const handleManualSubmit = async () => {
     setAnalyzing(true);
-    const mockScore = Math.floor(Math.random() * 40) + 60;
+    setScore(null);
+    // Simulate scanning delay
+    await new Promise((r) => setTimeout(r, 2500));
+    const mockScore = Math.min(100, Math.floor(qualitySlider[0] * 0.6 + Math.random() * 40));
     const { error } = await supabase.from("scanner_requests").insert({
       brand,
       material,
@@ -39,6 +45,9 @@ const EmeraldScanner = () => {
     const file = e.target.files?.[0];
     if (!file) return;
     setUploading(true);
+    setAnalyzing(true);
+    setScore(null);
+
     const filePath = `${Date.now()}-${file.name}`;
     const { error: uploadError } = await supabase.storage
       .from("scanner_uploads")
@@ -47,10 +56,12 @@ const EmeraldScanner = () => {
     if (uploadError) {
       toast.error("Errore durante il caricamento.");
       setUploading(false);
+      setAnalyzing(false);
       return;
     }
 
     const { data: urlData } = supabase.storage.from("scanner_uploads").getPublicUrl(filePath);
+    await new Promise((r) => setTimeout(r, 2500));
     const mockScore = Math.floor(Math.random() * 40) + 60;
 
     await supabase.from("scanner_requests").insert({
@@ -60,6 +71,7 @@ const EmeraldScanner = () => {
     });
 
     setUploading(false);
+    setAnalyzing(false);
     setScore(mockScore);
     toast.success(`Punteggio sostenibilità: ${mockScore}/100`);
   };
@@ -123,6 +135,11 @@ const EmeraldScanner = () => {
                     <Label htmlFor="garment" className="text-xs tracking-widest uppercase font-sans">Tipo di capo</Label>
                     <Input id="garment" value={garmentType} onChange={(e) => setGarmentType(e.target.value)} placeholder="Es. Abito lungo" className="mt-1" />
                   </div>
+                  <div>
+                    <Label className="text-xs tracking-widest uppercase font-sans">Qualità percepita</Label>
+                    <Slider value={qualitySlider} onValueChange={setQualitySlider} max={100} step={1} className="mt-3" />
+                    <p className="text-xs text-muted-foreground mt-1 text-right">{qualitySlider[0]}%</p>
+                  </div>
                 </div>
                 <Button
                   onClick={handleManualSubmit}
@@ -135,7 +152,9 @@ const EmeraldScanner = () => {
               </TabsContent>
             </Tabs>
 
-            {score !== null && (
+            {analyzing && <ScanningRadar />}
+
+            {score !== null && !analyzing && (
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}

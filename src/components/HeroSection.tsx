@@ -18,7 +18,7 @@ const HeroSection = () => (
         transition={{ duration: 1, delay: 0.3 }}
         className="font-serif text-4xl md:text-6xl lg:text-7xl tracking-wide mb-4"
       >
-        SENSUALITÀ MEDITERRANEA
+        LUSSO, RINATO.
       </motion.h1>
       <motion.p
         initial={{ opacity: 0, y: 20 }}
@@ -37,7 +37,7 @@ const HeroSection = () => (
           to="/collezioni"
           className="inline-block border border-white/80 px-8 py-3 text-xs tracking-[0.2em] uppercase font-sans hover:bg-white hover:text-black transition-all duration-500"
         >
-          Scopri la collezione
+          Esplora
         </Link>
       </motion.div>
     </div>

@@ -33,7 +33,7 @@ const Navbar = () => {
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           transparent
             ? "bg-transparent text-white"
-            : "bg-background/95 backdrop-blur-sm text-foreground shadow-sm"
+            : "bg-background/80 backdrop-blur-md text-foreground shadow-sm"
         }`}
       >
         <div className="container mx-auto flex items-center justify-between h-16 px-4 lg:px-8">
