@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 
 // --- DATI DEL CAROSELLO (Già approvati) ---
 const slides = [
@@ -98,12 +98,12 @@ const CollectionCTA = () => (
             Scopri la collezione che unisce sensualità moderna e rispetto per il pianeta. Pezzi iconici per i momenti
             più importanti.
           </p>
-          <Button
-            size="lg"
-            className="bg-emerald-900 text-white hover:bg-emerald-800 px-8 py-6 text-lg rounded-none tracking-widest"
+          <HoverBorderGradient
+            containerClassName="rounded-full"
+            className="bg-[#e4ffec] text-emerald-950 flex items-center gap-2"
           >
-            SCOPRI LA COLLEZIONE <ArrowRight className="ml-2 w-5 h-5" />
-          </Button>
+            SCOPRI LA COLLEZIONE <ArrowRight className="w-5 h-5" />
+          </HoverBorderGradient>
         </motion.div>
 
         {/* Dynamic Photo Stack (L'effetto "Instagram" interattivo) */}

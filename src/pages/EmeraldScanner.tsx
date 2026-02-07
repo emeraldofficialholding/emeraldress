@@ -1,6 +1,7 @@
 import { useState } from "react";
+import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
+import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
@@ -134,14 +135,13 @@ const EmeraldScanner = () => {
                     <p className="text-xs text-muted-foreground mt-1 text-right">{qualitySlider[0]}%</p>
                   </div>
                 </div>
-                <Button
+                <HoverBorderGradient
                   onClick={handleManualSubmit}
-                  disabled={analyzing || !brand}
-                  className="w-full"
-                  size="lg"
+                  containerClassName={cn("rounded-full w-full justify-center", (analyzing || !brand) && "opacity-50 pointer-events-none")}
+                  className="bg-[#e4ffec] text-emerald-950 w-full text-center"
                 >
                   {analyzing ? "Analisi in corso…" : "Analizza Sostenibilità"}
-                </Button>
+                </HoverBorderGradient>
               </TabsContent>
             </Tabs>
 

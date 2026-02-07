@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import heroVideo from "@/assets/hero-video.mp4";
+import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 
 const HeroSection = () => (
   <section className="relative h-screen w-full overflow-hidden">
@@ -36,11 +37,14 @@ const HeroSection = () => (
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1, delay: 0.9 }}
       >
-        <Link
-          to="/collezioni"
-          className="inline-block border border-white/80 px-8 py-3 text-xs tracking-[0.2em] uppercase font-sans hover:bg-white hover:text-black transition-all duration-500"
-        >
-          Esplora
+        <Link to="/collezioni">
+          <HoverBorderGradient
+            containerClassName="rounded-full"
+            className="bg-[#e4ffec] text-emerald-950"
+            as="span"
+          >
+            Esplora
+          </HoverBorderGradient>
         </Link>
       </motion.div>
     </div>
