@@ -1,12 +1,15 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import heroBg from "@/assets/hero-bg.jpg";
+import heroVideo from "@/assets/hero-video.mp4";
 
 const HeroSection = () => (
   <section className="relative h-screen w-full overflow-hidden">
-    <img
-      src={heroBg}
-      alt="EMERALDRESS Mediterranean Fashion"
+    <video
+      src={heroVideo}
+      autoPlay
+      muted
+      loop
+      playsInline
       className="absolute inset-0 w-full h-full object-cover"
     />
     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
