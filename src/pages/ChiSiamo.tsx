@@ -88,7 +88,7 @@ const ChiSiamo = () => {
         mediaType="image"
         mediaSrc="https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/sfondo%20emerald%20scanner.PNG"
         bgImageSrc="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=2073&auto=format&fit=crop"
-        title="Chi Siamo"
+        title="Emerald Dress"
         scrollToExpand="Scorri per esplorare"
         textBlend
       >
