@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { Upload, Leaf } from "lucide-react";
 import ScanningRadar from "@/components/ScanningRadar";
+import { ContainerScroll } from "@/components/ui/container-scroll-animation";
 
 const EmeraldScanner = () => {
   const [brand, setBrand] = useState("");
@@ -22,7 +23,6 @@ const EmeraldScanner = () => {
   const handleManualSubmit = async () => {
     setAnalyzing(true);
     setScore(null);
-    // Simulate scanning delay
     await new Promise((r) => setTimeout(r, 2500));
     const mockScore = Math.min(100, Math.floor(qualitySlider[0] * 0.6 + Math.random() * 40));
     const { error } = await supabase.from("scanner_requests").insert({
@@ -77,38 +77,31 @@ const EmeraldScanner = () => {
   };
 
   return (
-    <main className="pt-24 pb-16">
-      <div className="container mx-auto px-4 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-start">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            <Leaf className="w-10 h-10 text-primary mb-4" />
-            <h1 className="font-serif text-3xl md:text-4xl mb-4">Emerald Scanner</h1>
-            <p className="text-muted-foreground font-sans leading-relaxed mb-6">
-              Analizza la sostenibilità del tuo capo. Carica una foto o inserisci manualmente le informazioni
-              per ottenere un punteggio di sostenibilità basato su materiali, produzione e impatto ambientale.
+    <main className="pt-10 pb-16">
+      <ContainerScroll
+        titleComponent={
+          <div className="flex flex-col items-center gap-3">
+            <Leaf className="w-10 h-10 text-primary" />
+            <h1 className="font-serif text-3xl md:text-5xl lg:text-6xl font-bold">
+              Emerald Scanner
+            </h1>
+            <p className="text-muted-foreground font-sans text-sm md:text-base max-w-xl mx-auto leading-relaxed">
+              Analizza la sostenibilità del tuo capo. Il nostro algoritmo valuta materiali e impatto ambientale direttamente dal tuo schermo.
             </p>
-            <div className="aspect-video bg-accent rounded-sm overflow-hidden flex items-center justify-center">
-              <span className="font-serif text-accent-foreground text-lg">Moda Consapevole</span>
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-          >
+          </div>
+        }
+      >
+        {/* SCANNER INTERFACE INSIDE THE IPAD SCREEN */}
+        <div className="h-full w-full overflow-y-auto p-4 md:p-8">
+          <div className="max-w-xl mx-auto">
             <Tabs defaultValue="manual" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-8">
+              <TabsList className="grid w-full grid-cols-2 mb-6">
                 <TabsTrigger value="photo">Carica Foto</TabsTrigger>
                 <TabsTrigger value="manual">Inserimento Manuale</TabsTrigger>
               </TabsList>
 
               <TabsContent value="photo" className="space-y-6">
-                <div className="border-2 border-dashed border-border rounded-sm p-12 text-center">
+                <div className="border-2 border-dashed border-border rounded-sm p-10 text-center">
                   <Upload className="w-8 h-8 mx-auto mb-4 text-muted-foreground" />
                   <p className="text-sm text-muted-foreground font-sans mb-4">Trascina o carica un'immagine</p>
                   <label className="cursor-pointer">
@@ -152,21 +145,25 @@ const EmeraldScanner = () => {
               </TabsContent>
             </Tabs>
 
-            {analyzing && <ScanningRadar />}
+            {analyzing && (
+              <div className="mt-6">
+                <ScanningRadar />
+              </div>
+            )}
 
             {score !== null && !analyzing && (
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="mt-8 p-6 bg-accent rounded-sm text-center"
+                className="mt-6 p-6 bg-accent rounded-sm text-center"
               >
                 <p className="text-xs tracking-widest uppercase font-sans text-muted-foreground mb-2">Punteggio Sostenibilità</p>
                 <p className="font-serif text-5xl text-accent-foreground">{score}<span className="text-2xl">/100</span></p>
               </motion.div>
             )}
-          </motion.div>
+          </div>
         </div>
-      </div>
+      </ContainerScroll>
     </main>
   );
 };
