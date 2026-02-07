@@ -9,16 +9,10 @@ const Index = () => {
   return (
     <main>
       <HeroSection />
+      <TrustMarquee />
       <EmeraldTouchSection />
       <ClassicsSection />
       <ManifestoSection />
-
-      {/* Ora usiamo il componente "TrustMarquee" che abbiamo appena costruito.
-         Contiene già al suo interno la logica dello stop al mouse, 
-         la velocità lenta (0.5) e l'effetto zoom.
-         Non serve passare parametri qui.
-      */}
-      <TrustMarquee />
     </main>
   );
 };
