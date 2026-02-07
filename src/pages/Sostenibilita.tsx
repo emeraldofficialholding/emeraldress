@@ -1,9 +1,10 @@
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom"; // Assicurati di avere react-router-dom o usa <a> se preferisci
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 
-// --- DATI DEL CAROSELLO (Già approvati) ---
+// --- DATI DEL CAROSELLO (Già approvati - INVARIATI) ---
 const slides = [
   {
     id: 1,
@@ -43,10 +44,31 @@ const slides = [
   },
 ];
 
-// --- COMPONENTE 1: HERO SECTION (Video Background + Titolo Sx) ---
+// --- DATI NUOVA COLLEZIONE (Per i 3 Riquadri) ---
+const latestDrops = [
+  {
+    id: 101,
+    name: "Midnight Silk Dress",
+    price: "€320",
+    image: "https://images.unsplash.com/photo-1539008835657-9e8e9680c956?w=600&auto=format&fit=crop&q=60",
+  },
+  {
+    id: 102,
+    name: "Emerald Corset",
+    price: "€240",
+    image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&auto=format&fit=crop&q=60",
+  },
+  {
+    id: 103,
+    name: "Riviera Linen Set",
+    price: "€280",
+    image: "https://images.unsplash.com/photo-1502716119720-b23a93e5fe1b?w=600&auto=format&fit=crop&q=60",
+  },
+];
+
+// --- COMPONENTE 1: HERO SECTION (INVARIATO) ---
 const HeroSustainability = () => (
   <section className="relative h-[85vh] w-full overflow-hidden">
-    {/* Background Video con sfocatura e overlay scuro */}
     <div className="absolute inset-0">
       <video autoPlay loop muted playsInline className="w-full h-full object-cover blur-[2px] scale-105">
         <source
@@ -54,10 +76,8 @@ const HeroSustainability = () => (
           type="video/mp4"
         />
       </video>
-      <div className="absolute inset-0 bg-black/30" /> {/* Overlay per leggibilità */}
+      <div className="absolute inset-0 bg-black/30" />
     </div>
-
-    {/* Contenuto a Sinistra (INVARIATO) */}
     <div className="absolute inset-0 container mx-auto px-4 flex items-center">
       <motion.div
         initial={{ opacity: 0, x: -50 }}
@@ -80,86 +100,91 @@ const HeroSustainability = () => (
   </section>
 );
 
-// --- COMPONENTE 3: CTA FINALE (Card Stack Animation) ---
-const CollectionCTA = () => (
-  <section className="py-24 bg-[#F9FAF9] overflow-hidden">
-    <div className="container mx-auto px-4">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-        {/* Testo CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-          className="text-center lg:text-left"
-        >
-          <h2 className="font-serif text-4xl md:text-6xl text-emerald-950 mb-6">Indossa il Cambiamento.</h2>
-          <p className="text-neutral-600 text-lg mb-8 max-w-md mx-auto lg:mx-0">
-            Scopri la collezione che unisce sensualità moderna e rispetto per il pianeta. Pezzi iconici per i momenti
-            più importanti.
+// --- NUOVA SEZIONE: LATEST COLLECTION SHOWCASE (Design Reference) ---
+const LatestCollectionShowcase = () => {
+  return (
+    <section className="py-32 bg-white relative overflow-hidden">
+      {/* Background Glow Effect (The Beam from reference, adapted to Emerald) */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-emerald-100/50 rounded-full blur-[120px] pointer-events-none" />
+
+      <div className="container mx-auto px-4 relative z-10">
+        {/* Title */}
+        <div className="text-center mb-16">
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="font-serif text-4xl md:text-6xl text-emerald-950 mb-4"
+          >
+            Nuovi Arrivi
+          </motion.h2>
+          <p className="text-neutral-500 font-sans tracking-wide uppercase text-sm">
+            La Sostenibilità incontra lo Stile
           </p>
-          <HoverBorderGradient
-            containerClassName="rounded-full"
-            className="bg-[#e4ffec] text-emerald-950 flex items-center gap-2"
-          >
-            SCOPRI LA COLLEZIONE <ArrowRight className="w-5 h-5" />
-          </HoverBorderGradient>
-        </motion.div>
+        </div>
 
-        {/* Dynamic Photo Stack (L'effetto "Instagram" interattivo) */}
-        <div className="relative h-[500px] w-full flex items-center justify-center group cursor-pointer perspective-1000">
-          {/* Foto 1 (Sinistra) */}
-          <motion.div
-            className="absolute w-64 h-80 md:w-72 md:h-96 rounded-sm shadow-2xl overflow-hidden border-4 border-white z-10"
-            initial={{ rotate: -5, x: 0 }}
-            whileHover={{ rotate: -15, x: -120, y: 20 }}
-            transition={{ type: "spring", stiffness: 300, damping: 20 }}
-          >
-            <img
-              src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800"
-              className="w-full h-full object-cover"
-              alt="Look 1"
-            />
-          </motion.div>
+        {/* The 3 Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6 lg:gap-12 items-center justify-center max-w-6xl mx-auto mb-20">
+          {latestDrops.map((item, index) => (
+            <motion.div
+              key={item.id}
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.2, duration: 0.8 }}
+              whileHover={{ y: -10, scale: 1.02 }}
+              className={`relative group rounded-2xl overflow-hidden shadow-2xl border border-neutral-200 bg-white
+                ${index === 0 ? "md:rotate-[-3deg] md:mt-12" : ""}
+                ${index === 1 ? "md:z-10 md:-mt-8 shadow-[0_20px_50px_rgba(5,150,105,0.15)]" : ""} 
+                ${index === 2 ? "md:rotate-[3deg] md:mt-12" : ""}
+              `}
+              // Note: The rotations mimic the "fan" layout in the reference photo
+            >
+              {/* Card Image */}
+              <div className="aspect-[3/4] overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60 z-10" />
+                <img
+                  src={item.image}
+                  alt={item.name}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                />
+              </div>
 
-          {/* Foto 2 (Centro - Sopra) */}
-          <motion.div
-            className="absolute w-64 h-80 md:w-72 md:h-96 rounded-sm shadow-2xl overflow-hidden border-4 border-white z-20"
-            initial={{ rotate: 0, y: 0 }}
-            whileHover={{ y: -40, scale: 1.05 }}
-            transition={{ type: "spring", stiffness: 300, damping: 20 }}
-          >
-            <img
-              src="https://images.unsplash.com/photo-1539008835657-9e8e9680c956?w=800"
-              className="w-full h-full object-cover"
-              alt="Look 2"
-            />
-          </motion.div>
+              {/* Card Content (Bottom) */}
+              <div className="absolute bottom-0 left-0 w-full p-6 z-20 text-white">
+                <div className="w-10 h-1 bg-emerald-400 mb-4 rounded-full" />
+                <h3 className="font-serif text-2xl mb-1">{item.name}</h3>
+                <p className="font-sans text-emerald-200 text-sm tracking-widest">{item.price}</p>
+              </div>
 
-          {/* Foto 3 (Destra) */}
-          <motion.div
-            className="absolute w-64 h-80 md:w-72 md:h-96 rounded-sm shadow-2xl overflow-hidden border-4 border-white z-10"
-            initial={{ rotate: 5, x: 0 }}
-            whileHover={{ rotate: 15, x: 120, y: 20 }}
-            transition={{ type: "spring", stiffness: 300, damping: 20 }}
-          >
-            <img
-              src="https://images.unsplash.com/photo-1502716119720-b23a93e5fe1b?w=800"
-              className="w-full h-full object-cover"
-              alt="Look 3"
-            />
-          </motion.div>
+              {/* Glossy Overlay Effect (Reference Style) */}
+              <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+            </motion.div>
+          ))}
+        </div>
+
+        {/* CTA Button */}
+        <div className="flex justify-center">
+          <Link to="/collezioni">
+            <HoverBorderGradient
+              containerClassName="rounded-full"
+              className="bg-[#e4ffec] text-emerald-950 flex items-center gap-3 px-8 py-4 font-bold tracking-widest uppercase text-sm"
+            >
+              Vedi Tutte le Collezioni
+              <ArrowRight className="w-4 h-4" />
+            </HoverBorderGradient>
+          </Link>
         </div>
       </div>
-    </div>
-  </section>
-);
+    </section>
+  );
+};
 
 // --- PAGINA PRINCIPALE (ASSEMBLAGGIO) ---
 const Sostenibilita = () => {
   return (
     <main className="bg-white">
-      {/* 1. HERO SECTION */}
+      {/* 1. HERO SECTION (Video) */}
       <HeroSustainability />
 
       {/* 2. IL CAROSELLO (Il Processo) */}
@@ -185,7 +210,10 @@ const Sostenibilita = () => {
                       <div className="absolute top-0 left-0 h-full w-16 bg-white/90 backdrop-blur-sm flex items-center justify-center border-r border-emerald-100">
                         <span
                           className="text-emerald-900 font-serif tracking-widest uppercase text-sm whitespace-nowrap"
-                          style={{ writingMode: "vertical-lr", transform: "rotate(180deg)" }}
+                          style={{
+                            writingMode: "vertical-lr",
+                            transform: "rotate(180deg)",
+                          }}
                         >
                           {slide.verticalText}
                         </span>
@@ -220,8 +248,8 @@ const Sostenibilita = () => {
         </Carousel>
       </section>
 
-      {/* 3. CTA FINALE */}
-      <CollectionCTA />
+      {/* 3. NUOVA SEZIONE: LATEST COLLECTION SHOWCASE */}
+      <LatestCollectionShowcase />
     </main>
   );
 };
