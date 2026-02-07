@@ -1,35 +1,43 @@
 import { motion } from "framer-motion";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { Card, CardContent } from "@/components/ui/card";
 
-// Dati delle slide (ne ho create 3 basandomi sull'esempio)
+// Dati aggiornati in 4 STEP (Recupero - Rigenerazione - Creazione - Circolarità)
 const slides = [
   {
     id: 1,
-    percentage: "oltre 20%",
-    title: "ENERGIA RISPARMIATA",
-    verticalText: "Efficienza Energetica",
+    percentage: "0%",
+    title: "RECUPERO",
+    verticalText: "Dallo Scarto alla Risorsa",
     description:
-      "Oggi, grazie all'utilizzo di fonti rinnovabili ed energia autoprodotta, per realizzare 1 kg di tessuto utilizziamo quasi il 20% di energia in meno rispetto al 2012. Un risparmio energetico concreto, reso possibile dall'adozione di sistemi illuminanti di ultima generazione.",
-    image: "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?auto=format&fit=crop&q=80&w=1000", // Esempio: Luce artistica
+      "Non attingiamo a nuove risorse fossili. Il nostro processo inizia dal recupero di materiali di scarto pre e post-consumo, come reti da pesca abbandonate nei mari e scarti tessili industriali, ripulendo l'ambiente mentre creiamo bellezza.",
+    image: "https://images.unsplash.com/photo-1621451537084-482c73073a0f?auto=format&fit=crop&q=80&w=1000", // Reti/Mare
   },
   {
     id: 2,
     percentage: "100%",
-    title: "NYLON RIGENERATO",
-    verticalText: "ECONYL® System",
+    title: "RIGENERAZIONE",
+    verticalText: "Nuova Vita alla Fibra",
     description:
-      "Non usiamo petrolio vergine. Ogni filo dei nostri costumi proviene dal recupero di reti da pesca fantasma e scarti di tessuto pre-consumer. La qualità è identica, ma il pianeta ringrazia.",
-    image: "https://images.unsplash.com/photo-1621451537084-482c73073a0f?auto=format&fit=crop&q=80&w=1000", // Esempio: Reti/Mare
+      "Attraverso un processo di depolimerizzazione avanzato, i materiali recuperati vengono trasformati in un nuovo filato rigenerato. Il risultato è un tessuto chimicamente identico al nylon vergine, puro e performante, ma a impatto zero.",
+    image: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=80&w=1000", // Texture Fibra/Tecnologia
   },
   {
     id: 3,
-    percentage: "-40%",
-    title: "EMISSIONI CO2",
-    verticalText: "Carbon Footprint",
+    percentage: "ITALY",
+    title: "CREAZIONE",
+    verticalText: "Manifattura Etica",
     description:
-      "Grazie alla filiera corta interamente italiana e all'uso di materiali rigenerati, abbiamo abbattuto drasticamente l'impronta carbonica rispetto alla produzione di costumi sintetici tradizionali.",
-    image: "https://images.unsplash.com/photo-1611273426761-53c8577a20fa?auto=format&fit=crop&q=80&w=1000", // Esempio: Foglia/Natura
+      "La sostenibilità è anche umana. Ogni capo Emeraldress è confezionato esclusivamente in Italia da laboratori locali. Valorizziamo l'artigianalità sartoriale e garantiamo condizioni di lavoro etiche e controllate.",
+    image: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?auto=format&fit=crop&q=80&w=1000", // Mani/Sartoria
+  },
+  {
+    id: 4,
+    percentage: "RE-USE",
+    title: "CIRCOLARITÀ",
+    verticalText: "Packaging di Valore",
+    description:
+      "Non crediamo nel 'usa e getta'. Il nostro packaging è una custodia di design pensata per essere riutilizzata per proteggere i tuoi capi o per i tuoi viaggi. Anche le dust bag sono realizzate in materiale riciclato, chiudendo il cerchio.",
+    image: "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?auto=format&fit=crop&q=80&w=1000", // Packaging/Scatola/Minimal
   },
 ];
 
@@ -57,7 +65,7 @@ const Sostenibilita = () => {
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                       />
 
-                      {/* Testo Verticale (Layout identico alla foto) */}
+                      {/* Testo Verticale */}
                       <div className="absolute top-0 left-0 h-full w-16 bg-white/90 backdrop-blur-sm flex items-center justify-center border-r border-emerald-100">
                         <span
                           className="text-emerald-900 font-serif tracking-widest uppercase text-sm whitespace-nowrap"
@@ -75,7 +83,7 @@ const Sostenibilita = () => {
                       transition={{ duration: 0.8, delay: 0.2 }}
                       className="text-center lg:text-left py-10 lg:py-0 px-6 lg:px-0"
                     >
-                      {/* Percentuale Gigante (Stile Foto) */}
+                      {/* Dato Gigante */}
                       <h2 className="text-[5rem] md:text-[8rem] leading-none font-serif text-emerald-600 font-medium mb-4">
                         {slide.percentage}
                       </h2>
@@ -99,7 +107,7 @@ const Sostenibilita = () => {
             ))}
           </CarouselContent>
 
-          {/* Bottoni di Navigazione (Stile quadrato rosso/verde come in foto) */}
+          {/* Bottoni di Navigazione Quadrati */}
           <div className="absolute top-1/2 -translate-y-1/2 w-full flex justify-between px-2 pointer-events-none">
             <div className="pointer-events-auto">
               <CarouselPrevious className="relative left-0 md:-left-12 h-14 w-14 bg-emerald-600 hover:bg-emerald-700 text-white border-none rounded-none" />
