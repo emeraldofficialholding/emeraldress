@@ -1,8 +1,19 @@
 import { motion } from "framer-motion";
-import { ArrowRight, Recycle, Leaf, ShoppingBag } from "lucide-react";
+import { ArrowRight, Recycle, Leaf, ShoppingBag, Gem } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
+
+// --- CUSTOM ICONS ---
+const Butterfly = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" className={className} xmlns="http://www.w3.org/2000/svg">
+    <path
+      d="M12 2C12 2 13 5 14 6C16 8 21 8 22 10C23 12 19 16 17 17C15 18 13 17 12 16C11 17 9 18 7 17C5 16 1 12 2 10C3 8 8 8 10 6C11 5 12 2 12 2Z"
+      opacity="0.8"
+    />
+    <path d="M12 16V22" stroke="currentColor" strokeWidth="1" strokeLinecap="round" />
+  </svg>
+);
 
 // --- DATI DEL CAROSELLO ---
 const slides = [
@@ -66,6 +77,42 @@ const latestDrops = [
   },
 ];
 
+// --- BACKGROUND ANIMATO (Smeraldi & Farfalle) ---
+const EnchantedBackground = () => (
+  <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+    {/* Sfumature di sfondo */}
+    <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-white via-emerald-50/50 to-white" />
+    <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-emerald-200/20 rounded-full blur-[100px] animate-pulse" />
+    <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-teal-200/20 rounded-full blur-[100px] animate-pulse delay-1000" />
+
+    {/* Particelle Fluttuanti (Gemme & Farfalle) */}
+    {[...Array(6)].map((_, i) => (
+      <motion.div
+        key={`gem-${i}`}
+        className="absolute opacity-20 text-emerald-400"
+        initial={{
+          top: `${Math.random() * 100}%`,
+          left: `${Math.random() * 100}%`,
+          scale: Math.random() * 0.5 + 0.5,
+        }}
+        animate={{
+          y: [0, -30, 0],
+          rotate: [0, 10, -10, 0],
+          opacity: [0.1, 0.3, 0.1],
+        }}
+        transition={{
+          duration: Math.random() * 5 + 5,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: Math.random() * 5,
+        }}
+      >
+        {i % 2 === 0 ? <Gem className="w-12 h-12" /> : <Butterfly className="w-16 h-16" />}
+      </motion.div>
+    ))}
+  </div>
+);
+
 // --- COMPONENTE HERO ---
 const HeroSustainability = () => (
   <section className="relative h-[85vh] w-full overflow-hidden">
@@ -100,7 +147,7 @@ const HeroSustainability = () => (
   </section>
 );
 
-// --- NUOVO COMPONENTE: BLACK BANNER (ICONS) ---
+// --- NUOVO BANNER: DARK LUXURY (Potenziato) ---
 const SustainabilityBanner = () => {
   const items = [
     {
@@ -121,8 +168,19 @@ const SustainabilityBanner = () => {
   ];
 
   return (
-    <section className="bg-neutral-950 text-white py-20 border-t border-neutral-900">
-      <div className="container mx-auto px-4">
+    <section className="relative py-24 overflow-hidden">
+      {/* Sfondo Banner: Gradiente Scuro + Noise Texture */}
+      <div className="absolute inset-0 bg-neutral-950 z-0">
+        <div className="absolute inset-0 bg-gradient-to-r from-neutral-950 via-emerald-950/30 to-neutral-950" />
+        <div
+          className="absolute inset-0 opacity-[0.05]"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+          }}
+        ></div>
+      </div>
+
+      <div className="container mx-auto px-4 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
           {items.map((item, index) => (
             <motion.div
@@ -131,19 +189,30 @@ const SustainabilityBanner = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.2, duration: 0.6 }}
               viewport={{ once: true }}
-              className="flex flex-col items-center text-center group relative"
+              className="flex flex-col items-center text-center group relative p-6 rounded-2xl hover:bg-white/5 transition-colors duration-500"
             >
               {/* Separatore verticale (solo desktop, tra gli elementi) */}
               {index !== 0 && (
-                <div className="hidden md:block absolute left-0 top-1/2 -translate-y-1/2 w-px h-24 bg-neutral-800" />
+                <div className="hidden md:block absolute left-0 top-1/2 -translate-y-1/2 w-px h-24 bg-gradient-to-b from-transparent via-neutral-800 to-transparent" />
               )}
 
-              {/* Icona con cerchio glow */}
-              <div className="w-20 h-20 rounded-full bg-emerald-900/20 border border-emerald-800 flex items-center justify-center mb-6 group-hover:bg-emerald-900/40 group-hover:border-emerald-500 transition-all duration-500">
-                <item.icon className="w-8 h-8 text-emerald-400" />
+              {/* Icona con cerchio glow e animazione Butterfly hover */}
+              <div className="relative w-24 h-24 mb-6">
+                <div className="absolute inset-0 bg-emerald-500/20 rounded-full blur-xl group-hover:bg-emerald-400/30 transition-all duration-500" />
+                <div className="relative w-full h-full rounded-full border border-emerald-800/50 bg-black/40 backdrop-blur-sm flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
+                  <item.icon className="w-10 h-10 text-emerald-400 group-hover:text-emerald-300 transition-colors" />
+                </div>
+                {/* Farfalla decorativa sull'icona */}
+                <motion.div
+                  className="absolute -top-2 -right-2 text-emerald-200 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                  animate={{ y: [0, -5, 0] }}
+                  transition={{ repeat: Infinity, duration: 2 }}
+                >
+                  <Butterfly className="w-6 h-6" />
+                </motion.div>
               </div>
 
-              <h3 className="font-serif text-2xl mb-3 text-emerald-50">{item.title}</h3>
+              <h3 className="font-serif text-2xl mb-3 text-emerald-50 tracking-wide">{item.title}</h3>
               <p className="text-neutral-400 font-sans max-w-xs leading-relaxed">{item.desc}</p>
             </motion.div>
           ))}
@@ -156,10 +225,16 @@ const SustainabilityBanner = () => {
 // --- COMPONENTE: LATEST COLLECTION SHOWCASE ---
 const LatestCollectionShowcase = () => {
   return (
-    <section className="py-32 bg-white relative overflow-hidden">
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-emerald-100/50 rounded-full blur-[120px] pointer-events-none" />
+    <section className="py-32 relative overflow-hidden">
       <div className="container mx-auto px-4 relative z-10">
         <div className="text-center mb-16">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            className="inline-block mb-4"
+          >
+            <Gem className="w-8 h-8 text-emerald-500 mx-auto mb-2" />
+          </motion.div>
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -182,14 +257,20 @@ const LatestCollectionShowcase = () => {
               viewport={{ once: true }}
               transition={{ delay: index * 0.2, duration: 0.8 }}
               whileHover={{ y: -10, scale: 1.02 }}
-              className={`relative group rounded-2xl overflow-hidden shadow-2xl border border-neutral-200 bg-white
+              className={`relative group rounded-2xl overflow-hidden shadow-2xl border border-neutral-200/60 bg-white/80 backdrop-blur-md
                 ${index === 0 ? "md:rotate-[-3deg] md:mt-12" : ""}
                 ${index === 1 ? "md:z-10 md:-mt-8 shadow-[0_20px_50px_rgba(5,150,105,0.15)]" : ""} 
                 ${index === 2 ? "md:rotate-[3deg] md:mt-12" : ""}
               `}
             >
-              <div className="aspect-[3/4] overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60 z-10" />
+              <div className="aspect-[3/4] overflow-hidden relative">
+                <div className="absolute inset-0 bg-gradient-to-t from-emerald-950/90 via-transparent to-transparent opacity-60 z-10" />
+
+                {/* Farfalla sulla card */}
+                <div className="absolute top-4 right-4 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+                  <Butterfly className="w-6 h-6 text-white drop-shadow-md" />
+                </div>
+
                 <img
                   src={item.image}
                   alt={item.name}
@@ -224,74 +305,79 @@ const LatestCollectionShowcase = () => {
 // --- PAGINA PRINCIPALE (ASSEMBLAGGIO) ---
 const Sostenibilita = () => {
   return (
-    <main className="bg-white">
+    <main className="bg-white relative">
       {/* 1. HERO SECTION */}
       <HeroSustainability />
 
-      {/* 2. IL CAROSELLO (Il Processo) */}
-      <section className="py-20 bg-white">
-        <div className="container mx-auto px-4 mb-12 text-center">
-          <span className="text-emerald-600 tracking-[0.2em] text-sm font-bold uppercase">Il Ciclo Virtuoso</span>
-          <h2 className="font-serif text-3xl md:text-5xl text-emerald-950 mt-4">Dalla Natura alla Natura</h2>
-        </div>
+      {/* WRAPPER CON SFONDO ANIMATO per le sezioni successive */}
+      <div className="relative">
+        <EnchantedBackground />
 
-        <Carousel className="w-full max-w-6xl mx-auto">
-          <CarouselContent>
-            {slides.map((slide) => (
-              <CarouselItem key={slide.id}>
-                <div className="p-1">
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 lg:gap-12 items-center min-h-[500px]">
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      whileInView={{ opacity: 1 }}
-                      className="relative h-[400px] lg:h-[600px] w-full overflow-hidden group"
-                    >
-                      <img src={slide.image} alt={slide.title} className="w-full h-full object-cover" />
-                      <div className="absolute top-0 left-0 h-full w-16 bg-white/90 backdrop-blur-sm flex items-center justify-center border-r border-emerald-100">
-                        <span
-                          className="text-emerald-900 font-serif tracking-widest uppercase text-sm whitespace-nowrap"
-                          style={{
-                            writingMode: "vertical-lr",
-                            transform: "rotate(180deg)",
-                          }}
-                        >
-                          {slide.verticalText}
-                        </span>
-                      </div>
-                    </motion.div>
-                    <motion.div className="text-center lg:text-left py-10 px-6">
-                      <h2 className="text-[5rem] md:text-[8rem] leading-none font-serif text-emerald-600 font-medium mb-4">
-                        {slide.percentage}
-                      </h2>
-                      <h3 className="text-3xl md:text-4xl font-bold uppercase tracking-wide text-neutral-900 mb-8">
-                        {slide.title}
-                      </h3>
-                      <div className="w-24 h-1 bg-emerald-600 mx-auto lg:mx-0 mb-8"></div>
-                      <p className="text-neutral-600 font-sans text-lg leading-relaxed max-w-xl mx-auto lg:mx-0">
-                        {slide.description}
-                      </p>
-                    </motion.div>
-                  </div>
-                </div>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          <div className="absolute top-1/2 -translate-y-1/2 w-full flex justify-between px-2 pointer-events-none">
-            <div className="pointer-events-auto">
-              <CarouselPrevious className="relative bg-emerald-600 hover:bg-emerald-700 text-white border-none rounded-none h-14 w-14" />
-            </div>
-            <div className="pointer-events-auto">
-              <CarouselNext className="relative bg-emerald-600 hover:bg-emerald-700 text-white border-none rounded-none h-14 w-14" />
-            </div>
+        {/* 2. IL CAROSELLO (Il Processo) */}
+        <section className="py-20 relative z-10">
+          <div className="container mx-auto px-4 mb-12 text-center">
+            <span className="text-emerald-600 tracking-[0.2em] text-sm font-bold uppercase">Il Ciclo Virtuoso</span>
+            <h2 className="font-serif text-3xl md:text-5xl text-emerald-950 mt-4">Dalla Natura alla Natura</h2>
           </div>
-        </Carousel>
-      </section>
 
-      {/* 3. NUOVO BANNER NERO (Tra Carosello e Nuovi Arrivi) */}
-      <SustainabilityBanner />
+          <Carousel className="w-full max-w-6xl mx-auto">
+            <CarouselContent>
+              {slides.map((slide) => (
+                <CarouselItem key={slide.id}>
+                  <div className="p-1">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 lg:gap-12 items-center min-h-[500px]">
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        whileInView={{ opacity: 1 }}
+                        className="relative h-[400px] lg:h-[600px] w-full overflow-hidden group rounded-xl shadow-lg"
+                      >
+                        <img src={slide.image} alt={slide.title} className="w-full h-full object-cover" />
+                        <div className="absolute top-0 left-0 h-full w-16 bg-white/90 backdrop-blur-sm flex items-center justify-center border-r border-emerald-100">
+                          <span
+                            className="text-emerald-900 font-serif tracking-widest uppercase text-sm whitespace-nowrap"
+                            style={{
+                              writingMode: "vertical-lr",
+                              transform: "rotate(180deg)",
+                            }}
+                          >
+                            {slide.verticalText}
+                          </span>
+                        </div>
+                      </motion.div>
+                      <motion.div className="text-center lg:text-left py-10 px-6">
+                        <h2 className="text-[5rem] md:text-[8rem] leading-none font-serif text-emerald-600 font-medium mb-4">
+                          {slide.percentage}
+                        </h2>
+                        <h3 className="text-3xl md:text-4xl font-bold uppercase tracking-wide text-neutral-900 mb-8">
+                          {slide.title}
+                        </h3>
+                        <div className="w-24 h-1 bg-emerald-600 mx-auto lg:mx-0 mb-8"></div>
+                        <p className="text-neutral-600 font-sans text-lg leading-relaxed max-w-xl mx-auto lg:mx-0">
+                          {slide.description}
+                        </p>
+                      </motion.div>
+                    </div>
+                  </div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <div className="absolute top-1/2 -translate-y-1/2 w-full flex justify-between px-2 pointer-events-none">
+              <div className="pointer-events-auto">
+                <CarouselPrevious className="relative bg-emerald-600 hover:bg-emerald-700 text-white border-none rounded-none h-14 w-14" />
+              </div>
+              <div className="pointer-events-auto">
+                <CarouselNext className="relative bg-emerald-600 hover:bg-emerald-700 text-white border-none rounded-none h-14 w-14" />
+              </div>
+            </div>
+          </Carousel>
+        </section>
 
-      {/* 4. NUOVI ARRIVI */}
-      <LatestCollectionShowcase />
+        {/* 3. BANNER NERO POTENZIATO */}
+        <SustainabilityBanner />
+
+        {/* 4. NUOVI ARRIVI */}
+        <LatestCollectionShowcase />
+      </div>
     </main>
   );
 };
