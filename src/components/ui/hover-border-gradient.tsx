@@ -1,4 +1,4 @@
-"use client";
+ù"use client";
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -20,9 +20,14 @@ export function HoverBorderGradient({
     className?: string;
     duration?: number;
     clockwise?: boolean;
+    // 👇 QUESTE SONO LE RIGHE FONDAMENTALI AGGIUNTE PER RISOLVERE L'ERRORE 👇
+    type?: "button" | "submit" | "reset";
+    disabled?: boolean;
+    onClick?: (event: React.MouseEvent<HTMLButtonElement | HTMLDivElement>) => void;
+    // 👆 FINE AGGIUNTE 👆
   } & React.HTMLAttributes<HTMLElement>
 >) {
-  const [hovered, setHovered] = useState(false);
+  const [hovered, setHovered] = useState<boolean>(false);
   const [direction, setDirection] = useState<Direction>("TOP");
 
   const rotateDirection = (currentDirection: Direction): Direction => {
