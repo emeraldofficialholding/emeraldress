@@ -4,17 +4,6 @@ import { Link } from "react-router-dom";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 
-// --- CUSTOM ICONS ---
-const Butterfly = ({ className }: { className?: string }) => (
-  <svg viewBox="0 0 24 24" fill="currentColor" className={className} xmlns="http://www.w3.org/2000/svg">
-    <path
-      d="M12 2C12 2 13 5 14 6C16 8 21 8 22 10C23 12 19 16 17 17C15 18 13 17 12 16C11 17 9 18 7 17C5 16 1 12 2 10C3 8 8 8 10 6C11 5 12 2 12 2Z"
-      opacity="0.8"
-    />
-    <path d="M12 16V22" stroke="currentColor" strokeWidth="1" strokeLinecap="round" />
-  </svg>
-);
-
 // --- DATI DEL CAROSELLO ---
 const slides = [
   {
@@ -77,42 +66,6 @@ const latestDrops = [
   },
 ];
 
-// --- BACKGROUND ANIMATO (Smeraldi & Farfalle) ---
-const EnchantedBackground = () => (
-  <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
-    {/* Sfumature di sfondo */}
-    <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-white via-emerald-50/50 to-white" />
-    <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-emerald-200/20 rounded-full blur-[100px] animate-pulse" />
-    <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-teal-200/20 rounded-full blur-[100px] animate-pulse delay-1000" />
-
-    {/* Particelle Fluttuanti (Gemme & Farfalle) */}
-    {[...Array(6)].map((_, i) => (
-      <motion.div
-        key={`gem-${i}`}
-        className="absolute opacity-20 text-emerald-400"
-        initial={{
-          top: `${Math.random() * 100}%`,
-          left: `${Math.random() * 100}%`,
-          scale: Math.random() * 0.5 + 0.5,
-        }}
-        animate={{
-          y: [0, -30, 0],
-          rotate: [0, 10, -10, 0],
-          opacity: [0.1, 0.3, 0.1],
-        }}
-        transition={{
-          duration: Math.random() * 5 + 5,
-          repeat: Infinity,
-          ease: "easeInOut",
-          delay: Math.random() * 5,
-        }}
-      >
-        {i % 2 === 0 ? <Gem className="w-12 h-12" /> : <Butterfly className="w-16 h-16" />}
-      </motion.div>
-    ))}
-  </div>
-);
-
 // --- COMPONENTE HERO ---
 const HeroSustainability = () => (
   <section className="relative h-[85vh] w-full overflow-hidden">
@@ -147,7 +100,7 @@ const HeroSustainability = () => (
   </section>
 );
 
-// --- NUOVO BANNER: DARK LUXURY (Potenziato) ---
+// --- BANNER NERO (DESIGN MIGLIORATO) ---
 const SustainabilityBanner = () => {
   const items = [
     {
@@ -168,52 +121,40 @@ const SustainabilityBanner = () => {
   ];
 
   return (
-    <section className="relative py-24 overflow-hidden">
-      {/* Sfondo Banner: Gradiente Scuro + Noise Texture */}
-      <div className="absolute inset-0 bg-neutral-950 z-0">
-        <div className="absolute inset-0 bg-gradient-to-r from-neutral-950 via-emerald-950/30 to-neutral-950" />
-        <div
-          className="absolute inset-0 opacity-[0.05]"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-          }}
-        ></div>
-      </div>
+    <section className="relative py-28 bg-[#051c14] overflow-hidden border-t border-emerald-900/30">
+      {/* Sfondo Sottile */}
+      <div
+        className="absolute inset-0 opacity-10"
+        style={{ backgroundImage: "radial-gradient(#10b981 1px, transparent 1px)", backgroundSize: "40px 40px" }}
+      ></div>
 
       <div className="container mx-auto px-4 relative z-10">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-16 relative">
           {items.map((item, index) => (
             <motion.div
               key={index}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.2, duration: 0.6 }}
+              transition={{ delay: index * 0.2, duration: 0.8 }}
               viewport={{ once: true }}
-              className="flex flex-col items-center text-center group relative p-6 rounded-2xl hover:bg-white/5 transition-colors duration-500"
+              className="flex flex-col items-center text-center group"
             >
-              {/* Separatore verticale (solo desktop, tra gli elementi) */}
+              {/* Separatore verticale elegante */}
               {index !== 0 && (
-                <div className="hidden md:block absolute left-0 top-1/2 -translate-y-1/2 w-px h-24 bg-gradient-to-b from-transparent via-neutral-800 to-transparent" />
+                <div className="hidden md:block absolute left-0 top-1/2 -translate-y-1/2 w-px h-32 bg-gradient-to-b from-transparent via-emerald-800/50 to-transparent" />
               )}
 
-              {/* Icona con cerchio glow e animazione Butterfly hover */}
-              <div className="relative w-24 h-24 mb-6">
-                <div className="absolute inset-0 bg-emerald-500/20 rounded-full blur-xl group-hover:bg-emerald-400/30 transition-all duration-500" />
-                <div className="relative w-full h-full rounded-full border border-emerald-800/50 bg-black/40 backdrop-blur-sm flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
-                  <item.icon className="w-10 h-10 text-emerald-400 group-hover:text-emerald-300 transition-colors" />
-                </div>
-                {/* Farfalla decorativa sull'icona */}
-                <motion.div
-                  className="absolute -top-2 -right-2 text-emerald-200 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                  animate={{ y: [0, -5, 0] }}
-                  transition={{ repeat: Infinity, duration: 2 }}
-                >
-                  <Butterfly className="w-6 h-6" />
-                </motion.div>
+              {/* Icona Minimalista con Glow */}
+              <div className="relative mb-8">
+                <div className="absolute inset-0 bg-emerald-500/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                <item.icon className="w-12 h-12 text-emerald-400 relative z-10 group-hover:scale-110 transition-transform duration-500" />
               </div>
 
-              <h3 className="font-serif text-2xl mb-3 text-emerald-50 tracking-wide">{item.title}</h3>
-              <p className="text-neutral-400 font-sans max-w-xs leading-relaxed">{item.desc}</p>
+              <h3 className="font-serif text-3xl mb-4 text-white tracking-wide group-hover:text-emerald-200 transition-colors duration-300">
+                {item.title}
+              </h3>
+              <div className="w-12 h-0.5 bg-emerald-700 mb-4 rounded-full group-hover:w-24 transition-all duration-500" />
+              <p className="text-neutral-400 font-sans text-lg leading-relaxed max-w-xs">{item.desc}</p>
             </motion.div>
           ))}
         </div>
@@ -222,33 +163,39 @@ const SustainabilityBanner = () => {
   );
 };
 
-// --- COMPONENTE: LATEST COLLECTION SHOWCASE ---
+// --- COMPONENTE: LATEST COLLECTION SHOWCASE (SENZA FARFALLE) ---
 const LatestCollectionShowcase = () => {
   return (
-    <section className="py-32 relative overflow-hidden">
+    <section className="py-32 relative bg-white overflow-hidden">
+      {/* Sfondo Decorativo Smeraldo */}
+      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-emerald-50/50 rounded-full blur-[150px] -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+
       <div className="container mx-auto px-4 relative z-10">
-        <div className="text-center mb-16">
+        <div className="text-center mb-20">
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             whileInView={{ opacity: 1, scale: 1 }}
-            className="inline-block mb-4"
+            viewport={{ once: true }}
+            className="inline-block mb-6"
           >
-            <Gem className="w-8 h-8 text-emerald-500 mx-auto mb-2" />
+            <div className="w-16 h-16 bg-emerald-100/50 rounded-full flex items-center justify-center mx-auto">
+              <Gem className="w-8 h-8 text-emerald-600" />
+            </div>
           </motion.div>
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="font-serif text-4xl md:text-6xl text-emerald-950 mb-4"
+            className="font-serif text-5xl md:text-7xl text-emerald-950 mb-6"
           >
             Nuovi Arrivi
           </motion.h2>
-          <p className="text-neutral-500 font-sans tracking-wide uppercase text-sm">
+          <p className="text-neutral-500 font-sans tracking-[0.2em] uppercase text-sm md:text-base">
             La Sostenibilità incontra lo Stile
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6 lg:gap-12 items-center justify-center max-w-6xl mx-auto mb-20">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10 lg:gap-16 items-center justify-center max-w-7xl mx-auto mb-24">
           {latestDrops.map((item, index) => (
             <motion.div
               key={item.id}
@@ -256,31 +203,33 @@ const LatestCollectionShowcase = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.2, duration: 0.8 }}
-              whileHover={{ y: -10, scale: 1.02 }}
-              className={`relative group rounded-2xl overflow-hidden shadow-2xl border border-neutral-200/60 bg-white/80 backdrop-blur-md
-                ${index === 0 ? "md:rotate-[-3deg] md:mt-12" : ""}
-                ${index === 1 ? "md:z-10 md:-mt-8 shadow-[0_20px_50px_rgba(5,150,105,0.15)]" : ""} 
-                ${index === 2 ? "md:rotate-[3deg] md:mt-12" : ""}
+              whileHover={{ y: -15 }}
+              className={`relative group cursor-pointer
+                ${index === 1 ? "md:-mt-16" : ""} 
               `}
             >
-              <div className="aspect-[3/4] overflow-hidden relative">
-                <div className="absolute inset-0 bg-gradient-to-t from-emerald-950/90 via-transparent to-transparent opacity-60 z-10" />
-
-                {/* Farfalla sulla card */}
-                <div className="absolute top-4 right-4 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
-                  <Butterfly className="w-6 h-6 text-white drop-shadow-md" />
-                </div>
+              {/* Card Image Wrapper */}
+              <div className="aspect-[3/4] overflow-hidden rounded-[2rem] shadow-2xl relative">
+                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-500 z-10" />
 
                 <img
                   src={item.image}
                   alt={item.name}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  className="w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-110"
                 />
+
+                {/* Price Tag Overlay */}
+                <div className="absolute top-6 right-6 z-20 bg-white/90 backdrop-blur-md px-4 py-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
+                  <span className="font-serif text-emerald-900 font-bold">{item.price}</span>
+                </div>
               </div>
-              <div className="absolute bottom-0 left-0 w-full p-6 z-20 text-white">
-                <div className="w-10 h-1 bg-emerald-400 mb-4 rounded-full" />
-                <h3 className="font-serif text-2xl mb-1">{item.name}</h3>
-                <p className="font-sans text-emerald-200 text-sm tracking-widest">{item.price}</p>
+
+              {/* Card Details Below */}
+              <div className="text-center mt-8">
+                <h3 className="font-serif text-2xl text-emerald-950 mb-2 group-hover:text-emerald-700 transition-colors">
+                  {item.name}
+                </h3>
+                <div className="w-12 h-0.5 bg-emerald-200 mx-auto group-hover:w-24 transition-all duration-300" />
               </div>
             </motion.div>
           ))}
@@ -290,7 +239,7 @@ const LatestCollectionShowcase = () => {
           <Link to="/collezioni">
             <HoverBorderGradient
               containerClassName="rounded-full"
-              className="bg-[#e4ffec] text-emerald-950 flex items-center gap-3 px-8 py-4 font-bold tracking-widest uppercase text-sm"
+              className="bg-[#e4ffec] text-emerald-950 flex items-center gap-3 px-12 py-5 font-bold tracking-widest uppercase text-sm shadow-xl hover:shadow-emerald-200/50 transition-all"
             >
               Vedi Tutte le Collezioni
               <ArrowRight className="w-4 h-4" />
@@ -309,75 +258,76 @@ const Sostenibilita = () => {
       {/* 1. HERO SECTION */}
       <HeroSustainability />
 
-      {/* WRAPPER CON SFONDO ANIMATO per le sezioni successive */}
-      <div className="relative">
-        <EnchantedBackground />
+      {/* 2. IL CAROSELLO (Il Processo) - INVARIATO */}
+      <section className="py-24 bg-white relative z-10">
+        <div className="container mx-auto px-4 mb-16 text-center">
+          <span className="text-emerald-600 tracking-[0.2em] text-sm font-bold uppercase block mb-4">
+            Il Ciclo Virtuoso
+          </span>
+          <h2 className="font-serif text-4xl md:text-6xl text-emerald-950">Dalla Natura alla Natura</h2>
+        </div>
 
-        {/* 2. IL CAROSELLO (Il Processo) */}
-        <section className="py-20 relative z-10">
-          <div className="container mx-auto px-4 mb-12 text-center">
-            <span className="text-emerald-600 tracking-[0.2em] text-sm font-bold uppercase">Il Ciclo Virtuoso</span>
-            <h2 className="font-serif text-3xl md:text-5xl text-emerald-950 mt-4">Dalla Natura alla Natura</h2>
-          </div>
-
-          <Carousel className="w-full max-w-6xl mx-auto">
-            <CarouselContent>
-              {slides.map((slide) => (
-                <CarouselItem key={slide.id}>
-                  <div className="p-1">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 lg:gap-12 items-center min-h-[500px]">
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        whileInView={{ opacity: 1 }}
-                        className="relative h-[400px] lg:h-[600px] w-full overflow-hidden group rounded-xl shadow-lg"
-                      >
-                        <img src={slide.image} alt={slide.title} className="w-full h-full object-cover" />
-                        <div className="absolute top-0 left-0 h-full w-16 bg-white/90 backdrop-blur-sm flex items-center justify-center border-r border-emerald-100">
-                          <span
-                            className="text-emerald-900 font-serif tracking-widest uppercase text-sm whitespace-nowrap"
-                            style={{
-                              writingMode: "vertical-lr",
-                              transform: "rotate(180deg)",
-                            }}
-                          >
-                            {slide.verticalText}
-                          </span>
-                        </div>
-                      </motion.div>
-                      <motion.div className="text-center lg:text-left py-10 px-6">
-                        <h2 className="text-[5rem] md:text-[8rem] leading-none font-serif text-emerald-600 font-medium mb-4">
-                          {slide.percentage}
-                        </h2>
-                        <h3 className="text-3xl md:text-4xl font-bold uppercase tracking-wide text-neutral-900 mb-8">
-                          {slide.title}
-                        </h3>
-                        <div className="w-24 h-1 bg-emerald-600 mx-auto lg:mx-0 mb-8"></div>
-                        <p className="text-neutral-600 font-sans text-lg leading-relaxed max-w-xl mx-auto lg:mx-0">
-                          {slide.description}
-                        </p>
-                      </motion.div>
-                    </div>
+        <Carousel className="w-full max-w-7xl mx-auto">
+          <CarouselContent>
+            {slides.map((slide) => (
+              <CarouselItem key={slide.id}>
+                <div className="p-2">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-20 items-center min-h-[600px]">
+                    <motion.div
+                      initial={{ opacity: 0, x: -20 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      className="relative h-[500px] lg:h-[700px] w-full overflow-hidden group rounded-[2rem] shadow-2xl"
+                    >
+                      <img
+                        src={slide.image}
+                        alt={slide.title}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      />
+                      <div className="absolute top-0 left-0 h-full w-20 bg-white/95 backdrop-blur-md flex items-center justify-center border-r border-emerald-100 hidden md:flex">
+                        <span
+                          className="text-emerald-900 font-serif tracking-[0.3em] uppercase text-sm whitespace-nowrap font-bold"
+                          style={{
+                            writingMode: "vertical-lr",
+                            transform: "rotate(180deg)",
+                          }}
+                        >
+                          {slide.verticalText}
+                        </span>
+                      </div>
+                    </motion.div>
+                    <motion.div className="text-center lg:text-left py-10 px-6">
+                      <h2 className="text-[6rem] md:text-[10rem] leading-none font-serif text-emerald-100 font-medium mb-6 -ml-2 select-none">
+                        {slide.percentage}
+                      </h2>
+                      <h3 className="text-4xl md:text-5xl font-serif text-emerald-950 mb-8 relative z-10 -mt-12 lg:-mt-20">
+                        {slide.title}
+                      </h3>
+                      <div className="w-32 h-1 bg-emerald-500 mx-auto lg:mx-0 mb-10"></div>
+                      <p className="text-neutral-600 font-sans text-xl leading-relaxed max-w-xl mx-auto lg:mx-0">
+                        {slide.description}
+                      </p>
+                    </motion.div>
                   </div>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <div className="absolute top-1/2 -translate-y-1/2 w-full flex justify-between px-2 pointer-events-none">
-              <div className="pointer-events-auto">
-                <CarouselPrevious className="relative bg-emerald-600 hover:bg-emerald-700 text-white border-none rounded-none h-14 w-14" />
-              </div>
-              <div className="pointer-events-auto">
-                <CarouselNext className="relative bg-emerald-600 hover:bg-emerald-700 text-white border-none rounded-none h-14 w-14" />
-              </div>
+                </div>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <div className="absolute top-1/2 -translate-y-1/2 w-full flex justify-between px-4 pointer-events-none">
+            <div className="pointer-events-auto">
+              <CarouselPrevious className="relative bg-white hover:bg-emerald-50 text-emerald-900 border border-emerald-100 rounded-full h-16 w-16 shadow-lg" />
             </div>
-          </Carousel>
-        </section>
+            <div className="pointer-events-auto">
+              <CarouselNext className="relative bg-white hover:bg-emerald-50 text-emerald-900 border border-emerald-100 rounded-full h-16 w-16 shadow-lg" />
+            </div>
+          </div>
+        </Carousel>
+      </section>
 
-        {/* 3. BANNER NERO POTENZIATO */}
-        <SustainabilityBanner />
+      {/* 3. BANNER NERO MIGLIORATO */}
+      <SustainabilityBanner />
 
-        {/* 4. NUOVI ARRIVI */}
-        <LatestCollectionShowcase />
-      </div>
+      {/* 4. NUOVI ARRIVI (CLEAN & LUXURY) */}
+      <LatestCollectionShowcase />
     </main>
   );
 };
