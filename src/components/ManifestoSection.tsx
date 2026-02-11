@@ -58,7 +58,7 @@ const ManifestoSection = () => {
       <section className="relative py-40 overflow-hidden flex items-center justify-center min-h-[85vh]">
         <div className="absolute inset-0 z-0">
           <img
-            src="https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/BACK%20.png"
+            src="https://images.unsplash.com/photo-1532453288672-3a27e9be9efd?q=80&w=2000&auto=format&fit=crop"
             alt="Emeraldress Manifesto"
             className="w-full h-full object-cover brightness-[0.4] scale-105"
           />
@@ -186,7 +186,7 @@ const ManifestoSection = () => {
                 viewport={{ once: true }}
               >
                 <img
-                  src="https://images.unsplash.com/photo-1550614000-4b9519e09eb3?q=80&w=1200&auto=format&fit=crop"
+                  src="https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/dettaglio.jpeg"
                   alt="Fashion Editorial"
                   className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-1000"
                 />
