@@ -82,8 +82,7 @@ function MarqueeBand({ children, direction = "left", baseVelocity = 0.5, classNa
 
 const TrustMarquee = () => {
   return (
-    // MODIFICA QUI: pt-40 aggiunge molto spazio bianco sopra (160px), creando lo stacco desiderato
-    <section className="pt-40 pb-20 overflow-hidden bg-white relative">
+    <section className="py-20 overflow-hidden bg-white relative">
       {/* Prima Banda - Inclinata verso l'alto (Rotazione Negativa) */}
       <div className="relative z-10 rotate-[-2deg] origin-center my-4">
         <MarqueeBand
