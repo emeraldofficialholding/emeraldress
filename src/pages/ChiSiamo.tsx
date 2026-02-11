@@ -70,9 +70,7 @@ const ChiSiamo = () => {
     <main className="pt-0 bg-white">
       <ScrollExpandMedia
         mediaType="video"
-        // Video Hero: Un video più suggestivo (onde scure/seta)
         mediaSrc="https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/HERO.mp4"
-        // Sfondo: Una texture astratta smeraldo scuro, molto elegante
         bgImageSrc="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2000&auto=format&fit=crop"
         title="Emerald Dress"
         scrollToExpand="Scorri per esplorare"
@@ -91,17 +89,29 @@ const ChiSiamo = () => {
             </p>
           </motion.div>
 
-          {/* MANIFESTO SECTION */}
+          {/* MANIFESTO SECTION (AGGIORNATA: Background #e4ffec) */}
           <section className="container mx-auto px-4 mb-32">
-            <div className="bg-neutral-50 p-10 md:p-16 rounded-2xl border border-neutral-100 text-center max-w-4xl mx-auto relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-emerald-400 to-transparent opacity-50"></div>
-              <h3 className="font-serif text-2xl md:text-4xl text-neutral-800 leading-snug mb-8">
-                "Non volevamo creare solo vestiti. Volevamo creare un modo per sentirsi belle facendo la cosa giusta. Il
-                vero lusso oggi è la consapevolezza."
-              </h3>
-              <div className="flex justify-center items-center gap-2 text-emerald-700">
-                <span className="font-serif italic text-3xl md:text-4xl transform -rotate-3">Sofia & Marco</span>
-                <PenTool className="w-4 h-4 opacity-50" />
+            <div className="bg-[#e4ffec] p-10 md:p-20 rounded-[3rem] border border-emerald-100 text-center max-w-5xl mx-auto relative overflow-hidden shadow-sm">
+              {/* Texture Sottile per dare profondità */}
+              <div
+                className="absolute inset-0 opacity-[0.4]"
+                style={{
+                  backgroundImage: "radial-gradient(#10b981 0.5px, transparent 0.5px)",
+                  backgroundSize: "12px 12px",
+                }}
+              ></div>
+
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-emerald-500 to-transparent opacity-30"></div>
+
+              <div className="relative z-10">
+                <h3 className="font-serif text-2xl md:text-5xl text-emerald-950 leading-tight mb-10">
+                  "Non volevamo creare solo vestiti. Volevamo creare un modo per sentirsi belle facendo la cosa giusta.
+                  Il vero lusso oggi è la consapevolezza."
+                </h3>
+                <div className="flex justify-center items-center gap-3 text-emerald-800">
+                  <span className="font-serif italic text-3xl md:text-4xl transform -rotate-3">Sofia & Marco</span>
+                  <PenTool className="w-5 h-5 opacity-70" />
+                </div>
               </div>
             </div>
           </section>
@@ -122,7 +132,7 @@ const ChiSiamo = () => {
             />
           </section>
 
-          {/* SEZIONE SOCIAL DRESS (Migliorata) */}
+          {/* SEZIONE SOCIAL DRESS */}
           <section className="py-32 bg-gradient-to-b from-white to-emerald-50/30 overflow-hidden w-screen relative left-1/2 -translate-x-1/2">
             <div className="container mx-auto px-4 lg:px-8">
               <div className="flex flex-col md:flex-row items-center justify-between gap-12 lg:gap-24">
@@ -175,7 +185,7 @@ const ChiSiamo = () => {
                   </div>
                 </motion.div>
 
-                {/* Phone Mockup (Dettagliato) */}
+                {/* Phone Mockup */}
                 <motion.div
                   initial={{ opacity: 0, x: 50, rotate: 5 }}
                   whileInView={{ opacity: 1, x: 0, rotate: 0 }}
@@ -247,7 +257,7 @@ const ChiSiamo = () => {
             </div>
           </section>
 
-          {/* STATS BANNER NERO (Restyling Totale: Alto, Grandioso, Verde Notte) */}
+          {/* STATS BANNER NERO */}
           <section className="bg-[#051c14] text-white py-24 w-screen relative left-1/2 -translate-x-1/2 border-t border-emerald-900/30">
             <div className="container mx-auto px-4">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-0 items-center justify-center text-center divide-y md:divide-y-0 md:divide-x divide-emerald-900/50">
