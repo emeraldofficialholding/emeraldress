@@ -58,7 +58,7 @@ const ManifestoSection = () => {
       <section className="relative py-40 overflow-hidden flex items-center justify-center min-h-[85vh]">
         <div className="absolute inset-0 z-0">
           <img
-            src="https://images.unsplash.com/photo-1532453288672-3a27e9be9efd?q=80&w=2000&auto=format&fit=crop"
+            src="https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/BACK%20.png"
             alt="Emeraldress Manifesto"
             className="w-full h-full object-cover brightness-[0.4] scale-105"
           />
