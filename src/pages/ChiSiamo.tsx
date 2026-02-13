@@ -71,7 +71,8 @@ const ChiSiamo = () => {
       <ScrollExpandMedia
         mediaType="video"
         mediaSrc="https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/HERO.mp4"
-        bgImageSrc="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2000&auto=format&fit=crop"
+        // 🟢 RIPRISTINATO IL TUO SFONDO ORIGINALE (SFONDO MINT)
+        bgImageSrc="https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/SFONDO%20MINT.png"
         title="Emerald Dress"
         scrollToExpand="Scorri per esplorare"
         textBlend
@@ -129,120 +130,129 @@ const ChiSiamo = () => {
             />
           </section>
 
-          {/* SEZIONE SOCIAL DRESS */}
-          <section className="py-32 bg-gradient-to-b from-white to-emerald-50/30 overflow-hidden w-screen relative left-1/2 -translate-x-1/2">
-            <div className="container mx-auto px-4 lg:px-8">
-              <div className="flex flex-col md:flex-row items-center justify-between gap-12 lg:gap-24">
-                {/* Text Content */}
+          {/* SEZIONE SOCIAL DRESS (RESTYLING COMPLETO - NO ROSA) */}
+          <section className="py-32 w-screen relative left-1/2 -translate-x-1/2 overflow-hidden bg-white">
+            {/* Background Decorativo Elegante */}
+            <div className="absolute inset-0 bg-[#F9FAF9]">
+              <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-white to-transparent" />
+              <div className="absolute right-0 bottom-0 w-2/3 h-full bg-gradient-to-l from-emerald-50/40 to-transparent" />
+            </div>
+
+            <div className="container mx-auto px-4 lg:px-8 relative z-10">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-16 lg:gap-24">
+                {/* Text Content (Sinistra) */}
                 <motion.div
                   initial={{ opacity: 0, x: -50 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.8 }}
                   viewport={{ once: true }}
-                  className="w-full md:w-1/2 relative z-10 text-center md:text-left"
+                  className="w-full md:w-5/12 text-center md:text-left"
                 >
-                  <div className="inline-block relative">
-                    <h2 className="font-serif text-5xl md:text-7xl lg:text-8xl leading-tight text-neutral-900 mb-6">
-                      Social <br />
-                      <span className="text-emerald-700 italic">DRESS</span>
-                    </h2>
+                  <span className="inline-block py-1 px-3 rounded-full bg-emerald-100/50 text-emerald-800 text-[10px] uppercase tracking-widest font-bold mb-6 border border-emerald-100">
+                    Community
+                  </span>
 
-                    <svg
-                      className="absolute -right-12 -top-8 w-24 h-24 text-emerald-500 hidden md:block transform rotate-12 opacity-60"
-                      viewBox="0 0 100 100"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
-                      <path d="M10,50 Q50,10 90,50" strokeDasharray="5,5" />
-                      <path d="M80,40 L90,50 L80,60" />
-                    </svg>
-                  </div>
+                  <h2 className="font-serif text-5xl md:text-7xl text-emerald-950 mb-8 leading-none">
+                    Social <br />
+                    <span className="italic text-emerald-600 font-light">Dress</span>
+                  </h2>
 
-                  <p className="text-lg text-neutral-600 font-sans mb-10 max-w-md mx-auto md:mx-0 leading-relaxed">
-                    Il lusso non è solo un abito, è una community. Segui il nostro viaggio quotidiano, scopri i
-                    backstage e lasciati ispirare dallo stile di vita Emeraldress.
+                  <p className="text-lg text-neutral-600 font-sans mb-10 leading-relaxed">
+                    Il lusso non è solo un abito, è un'esperienza condivisa. Segui il nostro viaggio quotidiano, scopri
+                    i backstage esclusivi e lasciati ispirare dallo stile di vita Emeraldress.
                   </p>
 
-                  <div className="flex flex-col md:flex-row items-center gap-6 justify-center md:justify-start">
-                    <span className="font-serif italic text-emerald-800/60 text-lg hidden lg:block">
-                      Unisciti al club
-                    </span>
+                  <div className="flex flex-col sm:flex-row items-center gap-6 justify-center md:justify-start">
                     <a href="https://instagram.com/emeraldress_" target="_blank" rel="noopener noreferrer">
                       <HoverBorderGradient
                         containerClassName="rounded-full"
                         as="button"
-                        className="bg-[#e4ffec] text-emerald-950 flex items-center gap-3 px-10 py-4 font-bold tracking-widest text-sm shadow-lg hover:shadow-emerald-200/50 transition-shadow"
+                        className="bg-emerald-950 text-[#e4ffec] flex items-center gap-3 px-8 py-4 font-bold tracking-widest text-sm shadow-xl hover:bg-emerald-900 transition-all"
                       >
                         <Instagram className="w-5 h-5" />
                         @emeraldress_
                       </HoverBorderGradient>
                     </a>
+                    <span className="text-sm font-serif italic text-neutral-400 flex items-center gap-2">
+                      Unisciti a 8k+ followers <ArrowRight className="w-4 h-4" />
+                    </span>
                   </div>
                 </motion.div>
 
-                {/* Phone Mockup */}
+                {/* Phone Mockup (Destra) - Minimal & Luxury */}
                 <motion.div
-                  initial={{ opacity: 0, x: 50, rotate: 5 }}
+                  initial={{ opacity: 0, x: 50, rotate: 3 }}
                   whileInView={{ opacity: 1, x: 0, rotate: 0 }}
-                  transition={{ duration: 0.8, delay: 0.2 }}
+                  transition={{ duration: 1, ease: "easeOut" }}
                   viewport={{ once: true }}
-                  className="w-full md:w-1/2 flex justify-center md:justify-end relative"
+                  className="w-full md:w-7/12 flex justify-center md:justify-end relative"
                 >
-                  {/* Floating Notifications */}
+                  {/* Decorazioni di sfondo dietro il telefono */}
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-emerald-100/30 rounded-full blur-3xl -z-10" />
+
+                  {/* Floating Elements (Cards) */}
                   <motion.div
-                    animate={{ y: [0, -15, 0] }}
-                    transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
-                    className="absolute top-20 -left-10 bg-white p-3 rounded-2xl shadow-xl z-30 flex items-center gap-3 border border-emerald-50 hidden md:flex"
+                    animate={{ y: [0, -20, 0] }}
+                    transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
+                    className="absolute top-20 -left-10 z-20 hidden md:block"
                   >
-                    <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
-                      <Heart className="w-4 h-4 fill-current" />
-                    </div>
-                    <span className="text-xs font-bold text-neutral-800">New Collection Drop</span>
+                    <img
+                      src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=200&auto=format&fit=crop"
+                      className="w-32 h-40 object-cover rounded-xl shadow-2xl border-4 border-white rotate-[-6deg]"
+                      alt="Post preview"
+                    />
                   </motion.div>
 
                   <motion.div
-                    animate={{ y: [0, 15, 0] }}
-                    transition={{ repeat: Infinity, duration: 5, ease: "easeInOut", delay: 1 }}
-                    className="absolute bottom-32 -right-4 bg-white p-3 rounded-2xl shadow-xl z-30 flex items-center gap-3 border border-emerald-50 hidden md:flex"
+                    animate={{ y: [0, 20, 0] }}
+                    transition={{ repeat: Infinity, duration: 7, ease: "easeInOut", delay: 1 }}
+                    className="absolute bottom-20 -right-4 z-20 hidden md:block"
                   >
-                    <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
-                      <MessageCircle className="w-4 h-4" />
+                    <div className="bg-white p-4 rounded-xl shadow-2xl border border-emerald-50 max-w-[180px]">
+                      <div className="flex gap-1 text-emerald-500 mb-2">
+                        <Sparkles className="w-4 h-4 fill-current" />
+                      </div>
+                      <p className="text-xs text-neutral-600 font-serif italic">
+                        "Incredibile la qualità della seta rigenerata!"
+                      </p>
                     </div>
-                    <span className="text-xs font-bold text-neutral-800">Backstage Live</span>
                   </motion.div>
 
-                  {/* The Phone */}
-                  <div className="relative w-[320px] h-[640px] bg-[#1a1a1a] rounded-[3.5rem] border-[10px] border-[#2a2a2a] shadow-2xl overflow-hidden ring-1 ring-white/10">
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-36 h-7 bg-black rounded-b-2xl z-20"></div>
-                    <div className="w-full h-full bg-white relative">
-                      {/* Instagram Header Mockup */}
-                      <div className="h-24 bg-white border-b border-neutral-50 flex items-end pb-3 px-6 justify-between z-10 relative">
-                        <span className="font-bold text-sm tracking-wide">emeraldress_</span>
-                        <div className="flex gap-4 text-neutral-800">
-                          <Sparkles className="w-5 h-5" />
-                        </div>
+                  {/* The Phone Device */}
+                  <div className="relative w-[340px] h-[680px] bg-[#121212] rounded-[3.5rem] border-[8px] border-[#2a2a2a] shadow-2xl overflow-hidden ring-1 ring-white/10 z-10">
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-7 bg-black rounded-b-3xl z-30"></div>
+
+                    <div className="w-full h-full bg-white relative flex flex-col">
+                      <div className="h-24 bg-white border-b border-neutral-100 flex items-end pb-3 px-6 justify-between z-20 shrink-0">
+                        <span className="font-bold text-sm tracking-wide text-neutral-900">emeraldress_</span>
+                        <Instagram className="w-5 h-5 text-neutral-900" />
                       </div>
 
-                      {/* Feed Image */}
-                      <div className="w-full h-[calc(100%-96px)] relative overflow-hidden group">
+                      <div className="relative flex-1 overflow-hidden group">
                         <img
-                          src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&auto=format&fit=crop"
-                          alt="Instagram Feed"
-                          className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
+                          src="https://images.unsplash.com/photo-1539008835657-9e8e9680c956?w=800&auto=format&fit=crop"
+                          alt="Instagram Feed Hero"
+                          className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-105"
                         />
 
-                        {/* Overlay Gradient & Text */}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-8 text-white">
-                          <div className="flex gap-3 items-center mb-3">
-                            <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/30 flex items-center justify-center">
-                              <span className="font-serif italic text-xs">E</span>
+                          <div className="flex items-center gap-3 mb-4">
+                            <div className="w-10 h-10 rounded-full border-2 border-white p-0.5">
+                              <img
+                                src="https://images.unsplash.com/photo-1532453288672-3a27e9be9efd?w=100&auto=format&fit=crop"
+                                className="w-full h-full rounded-full object-cover"
+                                alt="Avatar"
+                              />
                             </div>
-                            <span className="text-sm font-bold tracking-wide">emeraldress_</span>
+                            <div>
+                              <p className="text-xs font-bold">emeraldress_</p>
+                              <p className="text-[10px] opacity-80">Milano, Italy</p>
+                            </div>
                           </div>
-                          <p className="text-sm font-light leading-relaxed opacity-90">
-                            Lusso, rinato. La nuova collezione è ora disponibile online. <br />
-                            <span className="text-emerald-400 font-medium">#Emeraldress #SustainableLuxury</span>
+                          <p className="text-sm font-light leading-relaxed opacity-90 line-clamp-3">
+                            L'eleganza non urla, sussurra. Scopri la nuova collezione Seta Rigenerata nel nostro store
+                            online.
+                            <span className="text-emerald-400 font-medium ml-1">#Emeraldress #SustainableLuxury</span>
                           </p>
                         </div>
                       </div>
@@ -254,27 +264,32 @@ const ChiSiamo = () => {
           </section>
 
           {/* STATS BANNER NERO */}
-          {/* MODIFICA: Spostato fuori dal div container per essere davvero full width e toccare il footer */}
-          <section className="bg-[#051c14] text-white py-24 w-screen relative left-1/2 -translate-x-1/2 border-t border-emerald-900/30 mb-0">
+          <section className="bg-[#051c14] text-white py-24 w-screen relative left-1/2 -translate-x-1/2 border-t border-emerald-900/30">
             <div className="container mx-auto px-4">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-0 items-center justify-center text-center divide-y md:divide-y-0 md:divide-x divide-emerald-900/50">
-                <div className="flex flex-col items-center gap-4 py-4 md:py-0">
-                  <span className="font-serif text-5xl md:text-7xl text-emerald-50">8K+</span>
-                  <span className="text-xs md:text-sm font-bold tracking-[0.3em] uppercase text-emerald-400">
+                <div className="flex flex-col items-center gap-4 py-4 md:py-0 group cursor-default">
+                  <span className="font-serif text-5xl md:text-7xl text-emerald-50 group-hover:text-emerald-400 transition-colors duration-500">
+                    8K+
+                  </span>
+                  <span className="text-xs md:text-sm font-bold tracking-[0.3em] uppercase text-emerald-600/80 group-hover:text-emerald-400 transition-colors">
                     Community
                   </span>
                 </div>
 
-                <div className="flex flex-col items-center gap-4 py-4 md:py-0">
-                  <span className="font-serif text-5xl md:text-7xl text-emerald-50">100%</span>
-                  <span className="text-xs md:text-sm font-bold tracking-[0.3em] uppercase text-emerald-400">
+                <div className="flex flex-col items-center gap-4 py-4 md:py-0 group cursor-default">
+                  <span className="font-serif text-5xl md:text-7xl text-emerald-50 group-hover:text-emerald-400 transition-colors duration-500">
+                    100%
+                  </span>
+                  <span className="text-xs md:text-sm font-bold tracking-[0.3em] uppercase text-emerald-600/80 group-hover:text-emerald-400 transition-colors">
                     Made in Italy
                   </span>
                 </div>
 
-                <div className="flex flex-col items-center gap-4 py-4 md:py-0">
-                  <span className="font-serif text-5xl md:text-7xl text-emerald-50">New</span>
-                  <span className="text-xs md:text-sm font-bold tracking-[0.3em] uppercase text-emerald-400">
+                <div className="flex flex-col items-center gap-4 py-4 md:py-0 group cursor-default">
+                  <span className="font-serif text-5xl md:text-7xl text-emerald-50 group-hover:text-emerald-400 transition-colors duration-500">
+                    New
+                  </span>
+                  <span className="text-xs md:text-sm font-bold tracking-[0.3em] uppercase text-emerald-600/80 group-hover:text-emerald-400 transition-colors">
                     Weekly Content
                   </span>
                 </div>
