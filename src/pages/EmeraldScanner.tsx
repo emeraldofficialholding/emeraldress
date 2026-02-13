@@ -495,7 +495,7 @@ const EmeraldScanner = () => {
         {/* Background Image Parallax Effect */}
         <div className="absolute inset-0 overflow-hidden">
           <img
-            src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=2070&auto=format&fit=crop"
+            src="https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/products/Nero%202%20(1).jpeg"
             alt="Fashion Collection"
             className="w-full h-full object-cover brightness-[0.6] transition-transform duration-[3s] group-hover:scale-105"
           />
