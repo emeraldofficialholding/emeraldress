@@ -81,7 +81,6 @@ const ManifestoSection = () => {
               "La moda non deve <br /> costare la Terra."
             </h2>
 
-            {/* BOTTONE CORRETTO: Colore Menta e Testo Scuro */}
             <div className="flex justify-center">
               <Link to="/chisiamo">
                 <HoverBorderGradient
@@ -186,7 +185,7 @@ const ManifestoSection = () => {
                 viewport={{ once: true }}
               >
                 <img
-                  src="https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/dettaglio.jpeg"
+                  src="https://images.unsplash.com/photo-1550614000-4b9519e09eb3?q=80&w=1200&auto=format&fit=crop"
                   alt="Fashion Editorial"
                   className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-1000"
                 />
@@ -215,16 +214,18 @@ const ManifestoSection = () => {
         </div>
       </section>
 
-      {/* --- SEZIONE 3: NEWSLETTER FORM (Dark Luxury) --- */}
-      <section className="py-24 bg-[#051c14] relative overflow-hidden border-t border-emerald-900/30">
+      {/* --- SEZIONE 3: NEWSLETTER FORM (BRAND COLOR BG) --- */}
+      <section className="py-24 bg-[#e4ffec] relative overflow-hidden border-t border-emerald-100">
         {/* Decorative Background Elements */}
-        <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-emerald-900/20 rounded-full blur-[150px] pointer-events-none -translate-y-1/2 translate-x-1/3" />
+        <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-white rounded-full blur-[150px] pointer-events-none -translate-y-1/2 translate-x-1/3 opacity-60" />
 
         <div className="container mx-auto px-4 lg:px-8 relative z-10">
           <div className="max-w-4xl mx-auto text-center mb-16">
-            <Leaf className="w-10 h-10 text-emerald-400 mx-auto mb-6" />
-            <h3 className="font-serif text-4xl md:text-5xl text-white mb-6">Entra nell'Inner Circle</h3>
-            <p className="text-emerald-100/60 font-sans text-lg max-w-xl mx-auto">
+            <div className="w-16 h-16 bg-emerald-900 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl">
+              <Leaf className="w-8 h-8 text-[#e4ffec]" />
+            </div>
+            <h3 className="font-serif text-4xl md:text-5xl text-emerald-950 mb-6">Entra nell'Inner Circle</h3>
+            <p className="text-emerald-800/80 font-sans text-lg max-w-xl mx-auto">
               Ricevi inviti esclusivi per le sfilate, accesso anticipato ai drop limitati e contenuti riservati sulla
               sostenibilità.
             </p>
@@ -241,13 +242,13 @@ const ManifestoSection = () => {
                     id="nome"
                     value={formData.nome}
                     onChange={handleInputChange}
-                    className="block w-full bg-transparent border-b border-emerald-800/50 py-4 text-emerald-50 text-lg placeholder-transparent focus:border-emerald-400 focus:outline-none transition-colors peer"
+                    className="block w-full bg-transparent border-b border-emerald-900/20 py-4 text-emerald-950 text-lg placeholder-transparent focus:border-emerald-600 focus:outline-none transition-colors peer"
                     placeholder="Nome Completo"
                     required
                   />
                   <label
                     htmlFor="nome"
-                    className="absolute left-0 -top-3.5 text-emerald-400 text-xs transition-all peer-placeholder-shown:text-lg peer-placeholder-shown:text-emerald-700 peer-placeholder-shown:top-4 peer-focus:-top-3.5 peer-focus:text-emerald-400 peer-focus:text-xs uppercase tracking-widest"
+                    className="absolute left-0 -top-3.5 text-emerald-700 text-xs transition-all peer-placeholder-shown:text-lg peer-placeholder-shown:text-emerald-800/60 peer-placeholder-shown:top-4 peer-focus:-top-3.5 peer-focus:text-emerald-700 peer-focus:text-xs uppercase tracking-widest"
                   >
                     Nome Completo
                   </label>
@@ -261,13 +262,13 @@ const ManifestoSection = () => {
                     id="email"
                     value={formData.email}
                     onChange={handleInputChange}
-                    className="block w-full bg-transparent border-b border-emerald-800/50 py-4 text-emerald-50 text-lg placeholder-transparent focus:border-emerald-400 focus:outline-none transition-colors peer"
+                    className="block w-full bg-transparent border-b border-emerald-900/20 py-4 text-emerald-950 text-lg placeholder-transparent focus:border-emerald-600 focus:outline-none transition-colors peer"
                     placeholder="Indirizzo Email"
                     required
                   />
                   <label
                     htmlFor="email"
-                    className="absolute left-0 -top-3.5 text-emerald-400 text-xs transition-all peer-placeholder-shown:text-lg peer-placeholder-shown:text-emerald-700 peer-placeholder-shown:top-4 peer-focus:-top-3.5 peer-focus:text-emerald-400 peer-focus:text-xs uppercase tracking-widest"
+                    className="absolute left-0 -top-3.5 text-emerald-700 text-xs transition-all peer-placeholder-shown:text-lg peer-placeholder-shown:text-emerald-800/60 peer-placeholder-shown:top-4 peer-focus:-top-3.5 peer-focus:text-emerald-700 peer-focus:text-xs uppercase tracking-widest"
                   >
                     Indirizzo Email
                   </label>
@@ -281,13 +282,13 @@ const ManifestoSection = () => {
                     id="telefono"
                     value={formData.telefono}
                     onChange={handleInputChange}
-                    className="block w-full bg-transparent border-b border-emerald-800/50 py-4 text-emerald-50 text-lg placeholder-transparent focus:border-emerald-400 focus:outline-none transition-colors peer"
+                    className="block w-full bg-transparent border-b border-emerald-900/20 py-4 text-emerald-950 text-lg placeholder-transparent focus:border-emerald-600 focus:outline-none transition-colors peer"
                     placeholder="Numero di Telefono"
                     required
                   />
                   <label
                     htmlFor="telefono"
-                    className="absolute left-0 -top-3.5 text-emerald-400 text-xs transition-all peer-placeholder-shown:text-lg peer-placeholder-shown:text-emerald-700 peer-placeholder-shown:top-4 peer-focus:-top-3.5 peer-focus:text-emerald-400 peer-focus:text-xs uppercase tracking-widest"
+                    className="absolute left-0 -top-3.5 text-emerald-700 text-xs transition-all peer-placeholder-shown:text-lg peer-placeholder-shown:text-emerald-800/60 peer-placeholder-shown:top-4 peer-focus:-top-3.5 peer-focus:text-emerald-700 peer-focus:text-xs uppercase tracking-widest"
                   >
                     Numero di Telefono
                   </label>
@@ -300,7 +301,8 @@ const ManifestoSection = () => {
                   type="submit"
                   disabled={isSubmitting}
                   containerClassName="rounded-full"
-                  className="bg-[#e4ffec] text-emerald-950 flex items-center gap-3 px-12 py-4 font-bold tracking-widest uppercase text-sm w-full md:w-auto justify-center min-w-[200px]"
+                  // Bottone Invertito: Sfondo Scuro, Testo Chiaro per contrasto su fondo #e4ffec
+                  className="bg-emerald-950 text-[#e4ffec] border-none flex items-center gap-3 px-12 py-4 font-bold tracking-widest uppercase text-sm w-full md:w-auto justify-center min-w-[200px] hover:bg-emerald-900 transition-colors"
                 >
                   {isSubmitting ? (
                     <>
@@ -313,7 +315,7 @@ const ManifestoSection = () => {
                 </HoverBorderGradient>
               </div>
 
-              <p className="text-center text-xs text-emerald-800/60 mt-0">
+              <p className="text-center text-xs text-emerald-900/50 mt-0">
                 I tuoi dati sono al sicuro. Non inviamo spam, solo eccellenza.
               </p>
             </form>
