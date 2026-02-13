@@ -71,7 +71,7 @@ const ChiSiamo = () => {
       <ScrollExpandMedia
         mediaType="video"
         mediaSrc="https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/HERO.mp4"
-        bgImageSrc="https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/products/Nero%202%20(1).jpeg"
+        bgImageSrc="https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/SFONDO%20MINT.png"
         title="Emerald Dress"
         scrollToExpand="Scorri per esplorare"
         textBlend
