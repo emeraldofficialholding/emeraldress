@@ -71,7 +71,7 @@ const ChiSiamo = () => {
       <ScrollExpandMedia
         mediaType="video"
         mediaSrc="https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/HERO.mp4"
-        bgImageSrc="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2000&auto=format&fit=crop"
+        bgImageSrc="https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/products/Nero%202%20(1).jpeg"
         title="Emerald Dress"
         scrollToExpand="Scorri per esplorare"
         textBlend
@@ -123,7 +123,7 @@ const ChiSiamo = () => {
               <h2 className="font-serif text-5xl md:text-6xl">Atelier Italiano</h2>
             </div>
             <img
-              src="https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/products/vestito%20nero%202.png"
+              src="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=2000&auto=format&fit=crop"
               alt="Atelier"
               className="w-full h-full object-cover transform scale-100 group-hover:scale-105 transition-transform duration-[2000ms]"
             />
