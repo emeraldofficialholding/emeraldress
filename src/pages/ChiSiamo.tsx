@@ -11,25 +11,28 @@ const fadeUp = {
   viewport: { once: true },
 };
 
+// --- TIMELINE AGGIORNATA CON LA TUA STORIA ---
 const timelineData = [
   {
     title: "Le Origini",
     content: (
       <div>
-        <p className="text-muted-foreground text-sm md:text-base font-normal mb-8">
-          Tutto inizia nelle acque cristalline della Costa Smeralda. Ispirati dalla bellezza incontaminata della
-          Sardegna, abbiamo deciso di creare un brand che unisse l'estetica del "Lusso Lento" con una missione urgente:
-          proteggere il nostro mare.
+        <p className="text-neutral-600 text-sm md:text-base font-normal mb-8 leading-relaxed">
+          Fin da bambina, osservavo la moda come un mondo affascinante e lontano: le vetrine erano tele di un sogno
+          ancora senza forma. Per anni ho indossato ciò che era disponibile, scontrandomi presto con la realtà del fast
+          fashion: tessuti che non lasciavano respirare la pelle, irritazioni e forme che svanivano dopo pochi lavaggi.
+          Ho capito che non stavo scegliendo cosa indossare: stavo accettando materiali che non rispettavano né il mio
+          corpo né la mia idea di eleganza.
         </p>
         <div className="grid grid-cols-2 gap-4">
           <img
             src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=2070&auto=format&fit=crop"
-            alt="Costa Smeralda"
+            alt="Ispirazione iniziale"
             className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-md"
           />
           <img
             src="https://images.unsplash.com/photo-1516834474-48c0abc2a902?q=80&w=2073&auto=format&fit=crop"
-            alt="Sketching"
+            alt="Primi bozzetti"
             className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-md"
           />
         </div>
@@ -40,13 +43,15 @@ const timelineData = [
     title: "La Svolta",
     content: (
       <div>
-        <p className="text-muted-foreground text-sm md:text-base font-normal mb-8">
-          Non bastava essere belli. Dovevamo essere puliti. Abbiamo introdotto l'uso esclusivo di fibre rigenerate da
-          reti da pesca recuperate, trasformando un rifiuto in seta tecnologica.
+        <p className="text-neutral-600 text-sm md:text-base font-normal mb-8 leading-relaxed">
+          Da quella consapevolezza è nato un punto di svolta. La moda, da semplice passione, è diventata improvvisamente
+          una responsabilità: creare capi che fossero belli, funzionali e sani. Era necessario trasformare quel sogno
+          lontano in un'esperienza autentica. Così è iniziato il percorso di Emeraldress: non più compromessi, ma la
+          ricerca di un benessere che parte dal tessuto e arriva all'anima.
         </p>
         <img
           src="https://images.unsplash.com/photo-1532667449560-72a95c8d381b?q=80&w=2070&auto=format&fit=crop"
-          alt="Textile Process"
+          alt="Ricerca tessuti sani"
           className="rounded-lg object-cover h-40 md:h-64 w-full shadow-md"
         />
       </div>
@@ -56,9 +61,12 @@ const timelineData = [
     title: "Oggi",
     content: (
       <div>
-        <p className="text-muted-foreground text-sm md:text-base font-normal mb-4">
-          Con il lancio dell'Emerald Scanner, portiamo la trasparenza totale nelle mani del cliente. Ogni capo ha una
-          storia digitale, ogni acquisto è un atto di consapevolezza.
+        <p className="text-neutral-600 text-sm md:text-base font-normal mb-4 leading-relaxed">
+          Oggi Emeraldress è un progetto indipendente, costruito con dedizione quotidiana. Disegno personalmente ogni
+          capo studiando le linee per scolpire la silhouette e seleziono solo tessuti premium lavorati in Italia. Non
+          seguiamo le tendenze: offriamo un'alternativa consapevole. È la realizzazione di un desiderio profondo:
+          sentirmi finalmente a mio agio in ciò che indosso e offrire la stessa sensazione di lusso e cura a tutte le
+          donne.
         </p>
       </div>
     ),
@@ -129,7 +137,7 @@ const ChiSiamo = () => {
             />
           </section>
 
-          {/* SEZIONE SOCIAL DRESS (RESTYLING COMPLETO) */}
+          {/* SEZIONE SOCIAL DRESS */}
           <section className="py-32 w-screen relative left-1/2 -translate-x-1/2 overflow-hidden bg-white">
             {/* Background Decorativo Elegante */}
             <div className="absolute inset-0 bg-[#F9FAF9]">
