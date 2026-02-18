@@ -80,7 +80,7 @@ const HeroSustainability = () => (
       >
         <source
           src="https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/Video%20asset.mov"
-          type="video/mov"
+          type="video/mp4"
         />
       </video>
       {/* Overlay più scuro per garantire leggibilità su mobile */}
