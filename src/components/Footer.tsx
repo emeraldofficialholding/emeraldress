@@ -5,14 +5,14 @@ const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-[#051c14] text-emerald-50 pt-20 pb-10 border-t border-emerald-900/30">
+    <footer className="bg-[#e4ffec] text-emerald-950 pt-20 pb-10 border-t border-emerald-200">
       <div className="container mx-auto px-4 lg:px-8">
         {/* Griglia Principale */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 lg:gap-8 mb-16">
           {/* COLONNA 1: Brand & Vision */}
           <div className="md:col-span-1 space-y-6">
-            <h3 className="font-serif text-2xl tracking-[0.1em] text-white">EMERALDRESS</h3>
-            <p className="text-sm text-emerald-100/60 leading-relaxed font-sans max-w-xs">
+            <h3 className="font-serif text-2xl tracking-[0.1em] text-emerald-950">EMERALDRESS</h3>
+            <p className="text-sm text-emerald-800/80 leading-relaxed font-sans max-w-xs">
               Ridefiniamo il lusso attraverso la sostenibilità e l'artigianato italiano. Ogni capo è una promessa al
               pianeta e un omaggio alla bellezza.
             </p>
@@ -25,7 +25,7 @@ const Footer = () => {
 
           {/* COLONNA 2: Esplora */}
           <div>
-            <h4 className="text-xs tracking-[0.2em] uppercase font-bold text-white mb-6">Esplora</h4>
+            <h4 className="text-xs tracking-[0.2em] uppercase font-bold text-emerald-900 mb-6">Esplora</h4>
             <ul className="space-y-4">
               <FooterLink to="/collezioni" label="Collezioni" />
               <FooterLink to="/sostenibilita" label="Sostenibilità" />
@@ -36,7 +36,7 @@ const Footer = () => {
 
           {/* COLONNA 3: Supporto & Legal */}
           <div>
-            <h4 className="text-xs tracking-[0.2em] uppercase font-bold text-white mb-6">Supporto</h4>
+            <h4 className="text-xs tracking-[0.2em] uppercase font-bold text-emerald-900 mb-6">Supporto</h4>
             <ul className="space-y-4">
               <FooterLink to="/faq" label="FAQ & Spedizioni" />
               <FooterLink to="/resi" label="Politica di Reso" />
@@ -47,21 +47,21 @@ const Footer = () => {
 
           {/* COLONNA 4: Contatti Rapidi */}
           <div>
-            <h4 className="text-xs tracking-[0.2em] uppercase font-bold text-white mb-6">Atelier</h4>
+            <h4 className="text-xs tracking-[0.2em] uppercase font-bold text-emerald-900 mb-6">Atelier</h4>
             <div className="space-y-4">
               <div className="flex items-start gap-3 group cursor-pointer">
-                <MapPin className="w-5 h-5 text-emerald-600 mt-0.5 group-hover:text-emerald-400 transition-colors" />
-                <p className="text-sm text-emerald-100/60 font-sans group-hover:text-white transition-colors">
+                <MapPin className="w-5 h-5 text-emerald-700 mt-0.5 group-hover:text-emerald-500 transition-colors" />
+                <p className="text-sm text-emerald-800/80 font-sans group-hover:text-emerald-950 transition-colors">
                   Via della Spiga, 15
                   <br />
                   20121 Milano, Italia
                 </p>
               </div>
               <div className="flex items-center gap-3 group cursor-pointer">
-                <Mail className="w-5 h-5 text-emerald-600 group-hover:text-emerald-400 transition-colors" />
+                <Mail className="w-5 h-5 text-emerald-700 group-hover:text-emerald-500 transition-colors" />
                 <a
                   href="mailto:info@emeraldress.it"
-                  className="text-sm text-emerald-100/60 font-sans group-hover:text-white transition-colors"
+                  className="text-sm text-emerald-800/80 font-sans group-hover:text-emerald-950 transition-colors"
                 >
                   info@emeraldress.it
                 </a>
@@ -71,15 +71,15 @@ const Footer = () => {
         </div>
 
         {/* Bottom Bar */}
-        <div className="border-t border-emerald-900/50 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
-          <p className="text-xs text-emerald-100/40 font-sans tracking-wide">
+        <div className="border-t border-emerald-900/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
+          <p className="text-xs text-emerald-900/50 font-sans tracking-wide">
             © {currentYear} EMERALDRESS. Tutti i diritti riservati.
           </p>
 
           <div className="flex items-center gap-6">
-            <span className="text-xs text-emerald-100/40 font-sans">
+            <span className="text-xs text-emerald-900/50 font-sans">
               Designed by{" "}
-              <span className="text-emerald-400 font-bold hover:text-white transition-colors cursor-pointer">
+              <span className="text-emerald-600 font-bold hover:text-emerald-900 transition-colors cursor-pointer">
                 @KREA
               </span>
             </span>
@@ -95,9 +95,9 @@ const FooterLink = ({ to, label }: { to: string; label: string }) => (
   <li>
     <Link
       to={to}
-      className="group flex items-center gap-2 text-sm text-emerald-100/60 hover:text-white transition-colors font-sans"
+      className="group flex items-center gap-2 text-sm text-emerald-800/70 hover:text-emerald-950 transition-colors font-sans"
     >
-      <span className="w-0 group-hover:w-2 h-px bg-emerald-400 transition-all duration-300"></span>
+      <span className="w-0 group-hover:w-2 h-px bg-emerald-500 transition-all duration-300"></span>
       {label}
     </Link>
   </li>
@@ -109,7 +109,7 @@ const SocialIcon = ({ icon, href }: { icon: React.ReactNode; href: string }) => 
     href={href}
     target="_blank"
     rel="noopener noreferrer"
-    className="w-10 h-10 rounded-full bg-emerald-900/30 border border-emerald-800 flex items-center justify-center text-emerald-400 hover:bg-emerald-400 hover:text-emerald-950 hover:border-emerald-400 transition-all duration-300"
+    className="w-10 h-10 rounded-full bg-white/50 border border-emerald-200 flex items-center justify-center text-emerald-700 hover:bg-emerald-950 hover:text-[#e4ffec] hover:border-emerald-950 transition-all duration-300"
   >
     {icon}
   </a>
