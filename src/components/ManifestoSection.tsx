@@ -60,7 +60,7 @@ const ManifestoSection = () => {
           <img
             src="https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/BACK%20.png"
             alt="Emeraldress Manifesto"
-            className="w-full h-full object-cover brightness-[0.2] scale-105"
+            className="w-full h-full object-cover brightness-[0.4] scale-105"
           />
           <div className="absolute inset-0 bg-emerald-950/40 mix-blend-multiply" />
         </div>
