@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom"; // <--- IMPORT AGGIUNTO
 import { useProducts } from "@/hooks/useProducts";
 import ButterflyLoader from "@/components/ButterflyLoader";
 import { motion } from "framer-motion";
@@ -10,7 +11,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-// import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"; // Rimosso se non utilizzato, altrimenti tienilo
 
 // --- COMPONENTE CARD SPECIFICO (Stile Valentine) ---
 const CollectionCard = ({ product, index }: { product: any; index: number }) => {
@@ -19,71 +19,87 @@ const CollectionCard = ({ product, index }: { product: any; index: number }) => 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: index * 0.05 }}
-      className="group cursor-pointer flex flex-col gap-3"
+      className="group"
     >
-      {/* 1. Immagine (Aspect Ratio Alto 3:4 o più slanciato) */}
-      <div className="relative w-full aspect-[3/4.2] overflow-hidden bg-neutral-100">
-        <img
-          src={product.images[0]}
-          alt={product.name}
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-        />
-
-        {/* Hover: Seconda immagine (se esiste) */}
-        {product.images[1] && (
+      {/* WRAPPER LINK AL PRODOTTO */}
+      <Link to={`/product/${product.id}`} className="flex flex-col gap-3 cursor-pointer">
+        {/* 1. Immagine (Aspect Ratio Alto 3:4 o più slanciato) */}
+        <div className="relative w-full aspect-[3/4.2] overflow-hidden bg-neutral-100">
           <img
-            src={product.images[1]}
+            src={product.images[0]}
             alt={product.name}
-            className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-700"
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           />
-        )}
 
-        {/* Icona Wishlist (Cuore in alto a destra) */}
-        <button className="absolute top-3 right-3 p-2 rounded-full hover:bg-white/80 transition-colors text-neutral-800">
-          <Heart className="w-5 h-5 stroke-[1.5]" />
-        </button>
+          {/* Hover: Seconda immagine (se esiste) */}
+          {product.images[1] && (
+            <img
+              src={product.images[1]}
+              alt={product.name}
+              className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-700"
+            />
+          )}
 
-        {/* Badge "Nuovo" (Opzionale) */}
-        {product.is_new_arrival && (
-          <span className="absolute top-4 left-4 text-[10px] uppercase tracking-widest font-bold text-white bg-emerald-900/80 px-2 py-1 backdrop-blur-sm">
-            Nuovo
-          </span>
-        )}
-      </div>
-
-      {/* 2. Meta Info (Sotto l'immagine) */}
-      <div className="flex flex-col gap-1 px-1">
-        {/* Riga Colori e Label */}
-        <div className="flex justify-between items-center mb-1">
-          {/* Mockup pallini colori (Simuliamo i colori disponibili) */}
-          <div className="flex gap-1.5">
-            <div className="w-3.5 h-3.5 rounded-full border border-neutral-200 bg-black" title="Nero"></div>
-            {/* Se è Emerald Touch, mostriamo anche il verde */}
-            {product.category === "emerald-touch" && (
-              <div className="w-3.5 h-3.5 rounded-full border border-neutral-200 bg-emerald-700" title="Smeraldo"></div>
-            )}
-            {product.category === "classics" && (
-              <div className="w-3.5 h-3.5 rounded-full border border-neutral-200 bg-[#F5F5DC]" title="Crema"></div>
-            )}
+          {/* Icona Wishlist (Cuore in alto a destra) 
+              NOTA: Usiamo div con preventDefault per evitare il click del Link padre
+          */}
+          <div
+            role="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              // Qui andrà la logica wishlist
+            }}
+            className="absolute top-3 right-3 p-2 rounded-full hover:bg-white/80 transition-colors text-neutral-800 z-10"
+          >
+            <Heart className="w-5 h-5 stroke-[1.5]" />
           </div>
-          <span className="text-[10px] text-neutral-400 uppercase tracking-wide">
-            {product.category === "emerald-touch" ? "2 Colori" : "1 Colore"}
-          </span>
+
+          {/* Badge "Nuovo" (Opzionale) */}
+          {product.is_new_arrival && (
+            <span className="absolute top-4 left-4 text-[10px] uppercase tracking-widest font-bold text-white bg-emerald-900/80 px-2 py-1 backdrop-blur-sm">
+              Nuovo
+            </span>
+          )}
         </div>
 
-        {/* Titolo Prodotto */}
-        <h3 className="font-sans text-sm text-neutral-900 font-medium leading-tight group-hover:underline decoration-1 underline-offset-4 decoration-neutral-300">
-          {product.name}
-        </h3>
+        {/* 2. Meta Info (Sotto l'immagine) */}
+        <div className="flex flex-col gap-1 px-1">
+          {/* Riga Colori e Label */}
+          <div className="flex justify-between items-center mb-1">
+            {/* Mockup pallini colori (Simuliamo i colori disponibili) */}
+            <div className="flex gap-1.5">
+              <div className="w-3.5 h-3.5 rounded-full border border-neutral-200 bg-black" title="Nero"></div>
+              {/* Se è Emerald Touch, mostriamo anche il verde */}
+              {product.category === "emerald-touch" && (
+                <div
+                  className="w-3.5 h-3.5 rounded-full border border-neutral-200 bg-emerald-700"
+                  title="Smeraldo"
+                ></div>
+              )}
+              {product.category === "classics" && (
+                <div className="w-3.5 h-3.5 rounded-full border border-neutral-200 bg-[#F5F5DC]" title="Crema"></div>
+              )}
+            </div>
+            <span className="text-[10px] text-neutral-400 uppercase tracking-wide">
+              {product.category === "emerald-touch" ? "2 Colori" : "1 Colore"}
+            </span>
+          </div>
 
-        {/* Prezzo */}
-        <p className="font-sans text-xs text-neutral-500 mt-0.5">
-          {new Intl.NumberFormat("it-IT", {
-            style: "currency",
-            currency: "EUR",
-          }).format(product.price)}
-        </p>
-      </div>
+          {/* Titolo Prodotto */}
+          <h3 className="font-sans text-sm text-neutral-900 font-medium leading-tight group-hover:underline decoration-1 underline-offset-4 decoration-neutral-300">
+            {product.name}
+          </h3>
+
+          {/* Prezzo */}
+          <p className="font-sans text-xs text-neutral-500 mt-0.5">
+            {new Intl.NumberFormat("it-IT", {
+              style: "currency",
+              currency: "EUR",
+            }).format(product.price)}
+          </p>
+        </div>
+      </Link>
     </motion.div>
   );
 };
