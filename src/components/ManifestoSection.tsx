@@ -185,7 +185,7 @@ const ManifestoSection = () => {
                 viewport={{ once: true }}
               >
                 <img
-                  src="https://images.unsplash.com/photo-1550614000-4b9519e09eb3?q=80&w=1200&auto=format&fit=crop"
+                  src="https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/Gemini_Generated_Image_62etyv62etyv62et%20-%20Modificata.png"
                   alt="Fashion Editorial"
                   className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-1000"
                 />
@@ -200,9 +200,9 @@ const ManifestoSection = () => {
                 viewport={{ once: true }}
               >
                 <img
-                  src="https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/products/NERO%20CLASSIC/NERO%20CLASSIC%20(11).png"
+                  src="https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/Gemini_Generated_Image_62etyv62etyv62et%20-%20Modificata.png"
                   alt="Fabric Detail"
-                  className="w-full h-full object-cover scale-110"https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/products/NERO%20CLASSIC/NERO%20CLASSIC%20(11).png
+                  className="w-full h-full object-cover scale-110"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-emerald-900/40 to-transparent" />
                 <div className="absolute bottom-6 left-6 text-white">
