@@ -58,16 +58,16 @@ const ManifestoSection = () => {
       <section className="relative py-40 overflow-hidden flex items-center justify-center min-h-[85vh]">
         <div className="absolute inset-0 z-0">
           <img
-            src="https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/BACK%20.png"
+            src="https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/asset%20manifesto.jpeg"
             alt="Emeraldress Manifesto"
-            className="w-full h-full object-cover brightness-[0.6] scale-105"
+            className="w-full h-full object-cover brightness-[0.2] scale-105"
           />
           <div className="absolute inset-0 bg-emerald-950/40 mix-blend-multiply" />
         </div>
 
         <div className="container mx-auto px-4 lg:px-8 relative z-10 text-center text-white">
           <motion.div
-            initial={{ opacity: 0, y: 40 }}
+            initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 1 }}
             viewport={{ once: true }}
