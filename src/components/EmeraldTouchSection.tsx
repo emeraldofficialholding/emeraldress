@@ -7,7 +7,16 @@ import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 import { Sparkles, ArrowRight } from "lucide-react";
 
 const EmeraldTouchSection = () => {
-  const { data: products, isLoading } = useProducts("emerald-touch");
+  // MODIFICA: Carichiamo tutti i prodotti e filtriamo lato client per maggiore sicurezza
+  const { data: allProducts, isLoading } = useProducts();
+
+  // Logica intelligente:
+  // 1. Cerca prodotti specifici "emerald-touch"
+  const emeraldProducts = allProducts?.filter((p) => p.category === "emerald-touch");
+
+  // 2. Se non ne trova, usa i primi 4 prodotti generici (Fallback) per non lasciare il buco vuoto
+  const displayProducts =
+    emeraldProducts && emeraldProducts.length > 0 ? emeraldProducts.slice(0, 4) : allProducts?.slice(0, 4);
 
   // Varianti per l'animazione a cascata della griglia
   const containerVariants = {
@@ -74,10 +83,16 @@ const EmeraldTouchSection = () => {
             viewport={{ once: true, margin: "-100px" }}
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-10"
           >
-            {products?.slice(0, 4).map((product, i) => (
-              // Passiamo l'index se ProductCard lo gestisce, altrimenti il wrapper motion gestisce l'entrata
+            {displayProducts?.map((product, i) => (
               <ProductCard key={product.id} product={product} index={i} />
             ))}
+
+            {/* Messaggio se non ci sono prodotti nemmeno nel fallback */}
+            {(!displayProducts || displayProducts.length === 0) && (
+              <div className="col-span-full text-center py-10 text-neutral-400 font-serif italic">
+                Nessun prodotto disponibile al momento.
+              </div>
+            )}
           </motion.div>
         )}
 
