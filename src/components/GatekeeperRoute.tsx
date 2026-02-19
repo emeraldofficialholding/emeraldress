@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { supabase } from "@/supabaseCustom";
-import ButterflyLoader from "@/components/ButterflyLoader";
+import GemLoader from "@/components/GemLoader";
 
 // Routes accessible to everyone (no auth required)
 const PUBLIC_ROUTES = ["/coming-soon", "/login", "/admin"];
@@ -75,7 +75,7 @@ export default function GatekeeperRoute({ children }: { children: React.ReactNod
   if (status === "loading") {
     return (
       <div className="min-h-screen bg-[#e4ffec] flex items-center justify-center">
-        <ButterflyLoader />
+        <GemLoader />
       </div>
     );
   }

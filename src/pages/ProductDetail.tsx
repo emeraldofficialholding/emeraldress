@@ -3,7 +3,7 @@ import { useState, useRef, useCallback } from "react";
 import { useProduct } from "@/hooks/useProducts";
 import { useCart } from "@/contexts/CartContext";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import ButterflyLoader from "@/components/ButterflyLoader";
+import GemLoader from "@/components/GemLoader";
 import ImageFallback from "@/components/ImageFallback";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -218,7 +218,7 @@ const ProductDetail = () => {
   if (isLoading)
     return (
       <div className="pt-24">
-        <ButterflyLoader />
+        <GemLoader />
       </div>
     );
   if (!product)
