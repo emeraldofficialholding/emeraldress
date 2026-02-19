@@ -65,26 +65,6 @@ const CollectionCard = ({ product, index }: {product: any;index: number;}) => {
 
         {/* 2. Meta Info (Sotto l'immagine) */}
         <div className="flex flex-col gap-1 px-1">
-          {/* Riga Colori e Label */}
-          <div className="flex justify-between items-center mb-1">
-            {/* Mockup pallini colori (Simuliamo i colori disponibili) */}
-            <div className="flex gap-1.5">
-              <div className="w-3.5 h-3.5 rounded-full border border-neutral-200 bg-black" title="Nero"></div>
-              {/* Se è Emerald Touch, mostriamo anche il verde */}
-              {product.category === "emerald-touch" &&
-              <div
-                className="w-3.5 h-3.5 rounded-full border border-neutral-200 bg-emerald-700"
-                title="Smeraldo">
-              </div>
-              }
-              {product.category === "classics" &&
-              <div className="w-3.5 h-3.5 rounded-full border border-neutral-200 bg-[#F5F5DC]" title="Crema"></div>
-              }
-            </div>
-            <span className="text-[10px] text-neutral-400 uppercase tracking-wide">
-              {product.category === "emerald-touch" ? "2 Colori" : "1 Colore"}
-            </span>
-          </div>
 
           {/* Titolo Prodotto */}
           <h3 className="font-sans text-sm text-neutral-900 font-medium leading-tight group-hover:underline decoration-1 underline-offset-4 decoration-neutral-300">

@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Search, User, ShoppingBag, Menu, X } from "lucide-react";
+import { User, ShoppingBag, Menu, X } from "lucide-react";
+import { useWishlist } from "@/contexts/WishlistContext";
 import { useCart } from "@/contexts/CartContext";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -15,7 +16,10 @@ const links = [
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [bounce, setBounce] = useState(false);
   const { totalItems, setIsOpen } = useCart();
+  const { totalItems: wishlistTotal } = useWishlist();
+  const prevTotal = useRef(totalItems + wishlistTotal);
   const location = useLocation();
   const isHome = location.pathname === "/";
 
@@ -24,6 +28,16 @@ const Navbar = () => {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  // Bounce when cart or wishlist count increases
+  useEffect(() => {
+    const current = totalItems + wishlistTotal;
+    if (current > prevTotal.current) {
+      setBounce(true);
+      setTimeout(() => setBounce(false), 600);
+    }
+    prevTotal.current = current;
+  }, [totalItems, wishlistTotal]);
 
   const transparent = isHome && !scrolled && !mobileOpen;
 
@@ -56,16 +70,20 @@ const Navbar = () => {
           </nav>
 
           <div className="flex items-center gap-4">
-            <button className="hover:opacity-70 transition-opacity"><Search className="w-5 h-5" /></button>
             <Link to="/admin" className="hover:opacity-70 transition-opacity"><User className="w-5 h-5" /></Link>
-            <button className="hover:opacity-70 transition-opacity relative" onClick={() => setIsOpen(true)}>
+            <motion.button
+              className="hover:opacity-70 transition-opacity relative"
+              onClick={() => setIsOpen(true)}
+              animate={bounce ? { scale: [1, 1.3, 0.9, 1.1, 1] } : {}}
+              transition={{ duration: 0.5 }}
+            >
               <ShoppingBag className="w-5 h-5" />
               {totalItems > 0 && (
                 <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-primary text-primary-foreground text-[10px] flex items-center justify-center font-sans">
                   {totalItems}
                 </span>
               )}
-            </button>
+            </motion.button>
             <button className="lg:hidden hover:opacity-70" onClick={() => setMobileOpen(!mobileOpen)}>
               {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>

@@ -231,7 +231,13 @@ const ProductDetail = () => {
       </div>
     );
 
-  const sizes = product.sizes?.length ? product.sizes : ["XS", "S", "M", "L", "XL"];
+  // Clean sizes: strip Postgres curly-brace format e.g. "{S,M,L}" → ["S","M","L"]
+  const rawSizes = product.sizes?.length ? product.sizes : ["XS", "S", "M", "L", "XL"];
+  const sizes = rawSizes.flatMap((s) =>
+    typeof s === "string" && s.startsWith("{")
+      ? s.replace(/[{}]/g, "").split(",").map((x) => x.trim()).filter(Boolean)
+      : [s]
+  );
   const images = product.images?.length ? product.images : ["/placeholder.svg"];
 
   const handleAddToCart = () => {
