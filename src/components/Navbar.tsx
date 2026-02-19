@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { User, ShoppingBag, Menu, X } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { motion, AnimatePresence, useAnimation } from "framer-motion";
+import logoEsteso from "@/assets/logo-esteso.png";
 
 const links = [
   { to: "/", label: "Home" },
@@ -50,8 +51,12 @@ const Navbar = () => {
         }`}
       >
         <div className="container mx-auto flex items-center justify-between h-16 px-4 lg:px-8">
-          <Link to="/" className="font-serif text-xl tracking-[0.2em] font-semibold">
-            EMERALDRESS
+          <Link to="/" className="flex items-center">
+            <img
+              src={logoEsteso}
+              alt="EMERALDRESS"
+              className={`h-10 w-auto transition-all duration-500 ${transparent ? "brightness-0 invert" : "brightness-0"}`}
+            />
           </Link>
 
           <nav className="hidden lg:flex items-center gap-8">
