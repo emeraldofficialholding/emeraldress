@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
-import { ArrowRight, Leaf, Globe, Fingerprint, Scissors, Loader2 } from "lucide-react";
+import { ArrowRight, Globe, Fingerprint, Scissors, Loader2, Gem } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/supabaseCustom";
 
@@ -11,7 +11,7 @@ const ManifestoSection = () => {
   const [formData, setFormData] = useState({
     nome: "",
     email: "",
-    telefono: "",
+    telefono: ""
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -32,13 +32,13 @@ const ManifestoSection = () => {
 
     try {
       const { error } = await supabase.from("newsletter_leads").insert([
-        {
-          full_name: formData.nome,
-          email: formData.email,
-          phone: formData.telefono,
-          source: "manifesto_home",
-        },
-      ]);
+      {
+        full_name: formData.nome,
+        email: formData.email,
+        phone: formData.telefono,
+        source: "manifesto_home"
+      }]
+      );
 
       if (error) throw error;
 
@@ -60,8 +60,8 @@ const ManifestoSection = () => {
           <img
             src="https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/asset%20manifesto.jpeg"
             alt="Emeraldress Manifesto"
-            className="w-full h-full object-cover brightness-[0.6] scale-105"
-          />
+            className="w-full h-full object-cover brightness-[0.6] scale-105" />
+
           <div className="absolute inset-0 bg-emerald-950/40 mix-blend-multiply" />
         </div>
 
@@ -71,8 +71,8 @@ const ManifestoSection = () => {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 1 }}
             viewport={{ once: true }}
-            className="max-w-4xl mx-auto"
-          >
+            className="max-w-4xl mx-auto">
+
             <span className="text-emerald-300 tracking-[0.3em] uppercase text-xs font-bold mb-6 block">
               La nostra Filosofia
             </span>
@@ -85,8 +85,8 @@ const ManifestoSection = () => {
               <Link to="/chisiamo">
                 <HoverBorderGradient
                   containerClassName="rounded-full"
-                  className="bg-[#e4ffec] text-emerald-950 flex items-center gap-3 px-10 py-4 font-bold tracking-widest uppercase text-sm hover:bg-white transition-all duration-500 shadow-[0_0_20px_rgba(228,255,236,0.3)]"
-                >
+                  className="bg-[#e4ffec] text-emerald-950 flex items-center gap-3 px-10 py-4 font-bold tracking-widest uppercase text-sm hover:bg-white transition-all duration-500 shadow-[0_0_20px_rgba(228,255,236,0.3)]">
+
                   Scopri la nostra storia
                   <ArrowRight className="w-4 h-4" />
                 </HoverBorderGradient>
@@ -109,8 +109,8 @@ const ManifestoSection = () => {
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.8 }}
-              >
+                transition={{ duration: 0.8 }}>
+
                 <h3 className="font-serif text-5xl md:text-6xl text-emerald-950 leading-none mb-6">
                   Lusso <br /> <span className="italic text-emerald-600">Rigenerato.</span>
                 </h3>
@@ -129,8 +129,8 @@ const ManifestoSection = () => {
                   initial={{ opacity: 0, x: -20 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
-                  transition={{ delay: 0.2 }}
-                >
+                  transition={{ delay: 0.2 }}>
+
                   <div className="w-12 h-12 rounded-full bg-white border border-emerald-100 flex items-center justify-center shrink-0 shadow-sm">
                     <Globe className="w-6 h-6 text-emerald-600" />
                   </div>
@@ -145,8 +145,8 @@ const ManifestoSection = () => {
                   initial={{ opacity: 0, x: -20 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
-                  transition={{ delay: 0.3 }}
-                >
+                  transition={{ delay: 0.3 }}>
+
                   <div className="w-12 h-12 rounded-full bg-white border border-emerald-100 flex items-center justify-center shrink-0 shadow-sm">
                     <Scissors className="w-6 h-6 text-emerald-600" />
                   </div>
@@ -161,8 +161,8 @@ const ManifestoSection = () => {
                   initial={{ opacity: 0, x: -20 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
-                  transition={{ delay: 0.4 }}
-                >
+                  transition={{ delay: 0.4 }}>
+
                   <div className="w-12 h-12 rounded-full bg-white border border-emerald-100 flex items-center justify-center shrink-0 shadow-sm">
                     <Fingerprint className="w-6 h-6 text-emerald-600" />
                   </div>
@@ -182,13 +182,13 @@ const ManifestoSection = () => {
                 initial={{ opacity: 0, y: 50 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 1 }}
-                viewport={{ once: true }}
-              >
+                viewport={{ once: true }}>
+
                 <img
                   src="https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/products/NERO%20CLASSIC/NERO%20CLASSIC%20(11).png"
                   alt="Fashion Editorial"
-                  className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-1000"
-                />
+                  className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-1000" />
+
               </motion.div>
 
               {/* Immagine Piccola (Sovrapposta) */}
@@ -197,13 +197,13 @@ const ManifestoSection = () => {
                 initial={{ opacity: 0, x: -50 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 transition={{ duration: 1, delay: 0.3 }}
-                viewport={{ once: true }}
-              >
+                viewport={{ once: true }}>
+
                 <img
                   src="https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/Gemini_Generated_Image_62etyv62etyv62et%20-%20Modificata.png"
                   alt="Fabric Detail"
-                  className="w-full h-full object-cover scale-110"
-                />
+                  className="w-full h-full object-cover scale-110" />
+
                 <div className="absolute inset-0 bg-gradient-to-t from-emerald-900/40 to-transparent" />
                 <div className="absolute bottom-6 left-6 text-white">
                   <p className="font-serif text-2xl italic">"Eternal Style"</p>
@@ -222,9 +222,9 @@ const ManifestoSection = () => {
         <div className="container mx-auto px-4 lg:px-8 relative z-10">
           <div className="max-w-4xl mx-auto text-center mb-16">
             <div className="w-16 h-16 bg-emerald-900 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl">
-              <Leaf className="w-8 h-8 text-[#e4ffec]" />
+              <Gem className="w-8 h-8 text-[#e4ffec]" />
             </div>
-            <h3 className="font-serif text-4xl md:text-5xl text-emerald-950 mb-6">Entra nell'Inner Circle</h3>
+            <h3 className="font-serif text-4xl md:text-5xl text-emerald-950 mb-6">Entra nell'Emerald Circle</h3>
             <p className="text-emerald-800/80 font-sans text-lg max-w-xl mx-auto">
               Ricevi inviti esclusivi per le sfilate, accesso anticipato ai drop limitati e contenuti riservati sulla
               sostenibilità.
@@ -244,12 +244,12 @@ const ManifestoSection = () => {
                     onChange={handleInputChange}
                     className="block w-full bg-transparent border-b border-emerald-900/20 py-4 text-emerald-950 text-lg placeholder-transparent focus:border-emerald-600 focus:outline-none transition-colors peer"
                     placeholder="Nome Completo"
-                    required
-                  />
+                    required />
+
                   <label
                     htmlFor="nome"
-                    className="absolute left-0 -top-3.5 text-emerald-700 text-xs transition-all peer-placeholder-shown:text-lg peer-placeholder-shown:text-emerald-800/60 peer-placeholder-shown:top-4 peer-focus:-top-3.5 peer-focus:text-emerald-700 peer-focus:text-xs uppercase tracking-widest"
-                  >
+                    className="absolute left-0 -top-3.5 text-emerald-700 text-xs transition-all peer-placeholder-shown:text-lg peer-placeholder-shown:text-emerald-800/60 peer-placeholder-shown:top-4 peer-focus:-top-3.5 peer-focus:text-emerald-700 peer-focus:text-xs uppercase tracking-widest">
+
                     Nome Completo
                   </label>
                 </div>
@@ -264,12 +264,12 @@ const ManifestoSection = () => {
                     onChange={handleInputChange}
                     className="block w-full bg-transparent border-b border-emerald-900/20 py-4 text-emerald-950 text-lg placeholder-transparent focus:border-emerald-600 focus:outline-none transition-colors peer"
                     placeholder="Indirizzo Email"
-                    required
-                  />
+                    required />
+
                   <label
                     htmlFor="email"
-                    className="absolute left-0 -top-3.5 text-emerald-700 text-xs transition-all peer-placeholder-shown:text-lg peer-placeholder-shown:text-emerald-800/60 peer-placeholder-shown:top-4 peer-focus:-top-3.5 peer-focus:text-emerald-700 peer-focus:text-xs uppercase tracking-widest"
-                  >
+                    className="absolute left-0 -top-3.5 text-emerald-700 text-xs transition-all peer-placeholder-shown:text-lg peer-placeholder-shown:text-emerald-800/60 peer-placeholder-shown:top-4 peer-focus:-top-3.5 peer-focus:text-emerald-700 peer-focus:text-xs uppercase tracking-widest">
+
                     Indirizzo Email
                   </label>
                 </div>
@@ -284,12 +284,12 @@ const ManifestoSection = () => {
                     onChange={handleInputChange}
                     className="block w-full bg-transparent border-b border-emerald-900/20 py-4 text-emerald-950 text-lg placeholder-transparent focus:border-emerald-600 focus:outline-none transition-colors peer"
                     placeholder="Numero di Telefono"
-                    required
-                  />
+                    required />
+
                   <label
                     htmlFor="telefono"
-                    className="absolute left-0 -top-3.5 text-emerald-700 text-xs transition-all peer-placeholder-shown:text-lg peer-placeholder-shown:text-emerald-800/60 peer-placeholder-shown:top-4 peer-focus:-top-3.5 peer-focus:text-emerald-700 peer-focus:text-xs uppercase tracking-widest"
-                  >
+                    className="absolute left-0 -top-3.5 text-emerald-700 text-xs transition-all peer-placeholder-shown:text-lg peer-placeholder-shown:text-emerald-800/60 peer-placeholder-shown:top-4 peer-focus:-top-3.5 peer-focus:text-emerald-700 peer-focus:text-xs uppercase tracking-widest">
+
                     Numero di Telefono
                   </label>
                 </div>
@@ -302,16 +302,16 @@ const ManifestoSection = () => {
                   disabled={isSubmitting}
                   containerClassName="rounded-full"
                   // Bottone Invertito: Sfondo Scuro, Testo Chiaro per contrasto su fondo #e4ffec
-                  className="bg-emerald-950 text-[#e4ffec] border-none flex items-center gap-3 px-12 py-4 font-bold tracking-widest uppercase text-sm w-full md:w-auto justify-center min-w-[200px] hover:bg-emerald-900 transition-colors"
-                >
-                  {isSubmitting ? (
-                    <>
+                  className="bg-emerald-950 text-[#e4ffec] border-none flex items-center gap-3 px-12 py-4 font-bold tracking-widest uppercase text-sm w-full md:w-auto justify-center min-w-[200px] hover:bg-emerald-900 transition-colors">
+
+                  {isSubmitting ?
+                  <>
                       <Loader2 className="w-4 h-4 animate-spin" />
                       Registrazione...
-                    </>
-                  ) : (
-                    "Iscriviti Ora"
-                  )}
+                    </> :
+
+                  "Iscriviti Ora"
+                  }
                 </HoverBorderGradient>
               </div>
 
@@ -322,8 +322,8 @@ const ManifestoSection = () => {
           </div>
         </div>
       </section>
-    </div>
-  );
+    </div>);
+
 };
 
 export default ManifestoSection;
