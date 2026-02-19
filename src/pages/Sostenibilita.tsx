@@ -24,7 +24,7 @@ const slides = [
     verticalText: "Nylon Rigenerato",
     description:
       "Attraverso un processo di depolimerizzazione avanzato, i materiali recuperati vengono trasformati in un nuovo filato puro. Il risultato è un tessuto chimicamente identico al nylon vergine, ma con un'anima pulita.",
-    image: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=80&w=1000",
+    image: "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/DETTAGLIO%201.jpeg",
   },
   {
     id: 3,
@@ -33,8 +33,7 @@ const slides = [
     verticalText: "Manifattura Etica",
     description:
       "La sostenibilità deve essere anche sociale. Rifiutiamo la delocalizzazione: ogni singolo capo Emeraldress è tagliato e cucito in Italia, garantendo qualità sartoriale e rispetto per i lavoratori.",
-    image:
-      "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/products/NERO%20CLASSIC/NERO%20CLASSIC%20(1).JPG",
+    image: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?auto=format&fit=crop&q=80&w=1000",
   },
   {
     id: 4,
@@ -43,8 +42,7 @@ const slides = [
     verticalText: "Design Rigenerabile",
     description:
       "Nulla si crea, nulla si distrugge, tutto si trasforma. I nostri capi sono progettati per essere rigenerati all'infinito. Anche il packaging è pensato per durare: una custodia di design da riutilizzare nei tuoi viaggi.",
-    image:
-      "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/dettaglio%20emerald%20touch.JPG",
+    image: "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?auto=format&fit=crop&q=80&w=1000",
   },
 ];
 
