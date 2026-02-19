@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useProducts } from "@/hooks/useProducts";
-import ButterflyLoader from "@/components/ButterflyLoader";
+import GemLoader from "@/components/GemLoader";
 import { motion, AnimatePresence } from "framer-motion";
 import { Filter, ChevronDown, Sparkles } from "lucide-react";
 import {
@@ -165,7 +165,7 @@ const Collezioni = () => {
       <div className="container mx-auto px-6 lg:px-12">
         {isLoading ? (
           <div className="flex justify-center py-32">
-            <ButterflyLoader />
+            <GemLoader />
           </div>
         ) : (
           <AnimatePresence mode="wait">

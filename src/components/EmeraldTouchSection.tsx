@@ -1,6 +1,6 @@
 import { useProducts } from "@/hooks/useProducts";
 import ProductCard from "./ProductCard";
-import ButterflyLoader from "./ButterflyLoader";
+import GemLoader from "./GemLoader";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
@@ -73,7 +73,7 @@ const EmeraldTouchSection = () => {
         {/* Griglia Prodotti */}
         {isLoading ? (
           <div className="flex justify-center py-20">
-            <ButterflyLoader />
+            <GemLoader />
           </div>
         ) : (
           <motion.div

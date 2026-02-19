@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 import { useProducts } from "@/hooks/useProducts";
-import ButterflyLoader from "@/components/ButterflyLoader";
+import GemLoader from "@/components/GemLoader";
 
 // --- DATI DEL CAROSELLO ---
 const slides = [
@@ -185,7 +185,7 @@ const LatestCollectionShowcase = () => {
 
         {isLoading ? (
           <div className="flex justify-center py-20">
-            <ButterflyLoader />
+            <GemLoader />
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10 lg:gap-16 items-center justify-center max-w-7xl mx-auto mb-24">
