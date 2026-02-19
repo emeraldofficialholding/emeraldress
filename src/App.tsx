@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { CartProvider } from "@/contexts/CartContext";
+import { WishlistProvider } from "@/contexts/WishlistContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CartSheet from "@/components/CartSheet";
@@ -31,6 +32,7 @@ function AppShell() {
   );
 
   return (
+    <WishlistProvider>
     <CartProvider>
       {!isStandalone && <Navbar />}
       {!isStandalone && <CartSheet />}
@@ -51,6 +53,7 @@ function AppShell() {
       </Routes>
       {!isStandalone && <Footer />}
     </CartProvider>
+    </WishlistProvider>
   );
 }
 

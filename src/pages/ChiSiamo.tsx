@@ -170,7 +170,7 @@ const ChiSiamo = () => {
                   </p>
 
                   <div className="flex flex-col sm:flex-row items-center gap-6 justify-center md:justify-start">
-                    <a href="https://instagram.com/emeraldress_" target="_blank" rel="noopener noreferrer">
+                    <a href="https://www.instagram.com/emeraldress_/" target="_blank" rel="noopener noreferrer">
                       <HoverBorderGradient
                         containerClassName="rounded-full"
                         as="button"

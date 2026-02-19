@@ -3,6 +3,8 @@ import { ArrowRight, Recycle, Leaf, ShoppingBag, Gem, Sparkles } from "lucide-re
 import { Link } from "react-router-dom";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
+import { useProducts } from "@/hooks/useProducts";
+import ButterflyLoader from "@/components/ButterflyLoader";
 
 // --- DATI DEL CAROSELLO ---
 const slides = [
@@ -44,29 +46,7 @@ const slides = [
   },
 ];
 
-// --- DATI ULTIMA COLLEZIONE (Emerald Touch) ---
-const latestDrops = [
-  {
-    id: 101,
-    name: "Midnight Silk Dress",
-    price: "€320",
-    image: "https://images.unsplash.com/photo-1539008835657-9e8e9680c956?w=600&auto=format&fit=crop&q=60",
-  },
-  {
-    id: 102,
-    name: "Emerald Corset",
-    price: "€240",
-    image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&auto=format&fit=crop&q=60",
-  },
-  {
-    id: 103,
-    name: "Riviera Linen Set",
-    price: "€280",
-    image: "https://images.unsplash.com/photo-1502716119720-b23a93e5fe1b?w=600&auto=format&fit=crop&q=60",
-  },
-];
-
-// --- COMPONENTE HERO (VIDEO RESTORED) ---
+// --- COMPONENTE HERO ---
 const HeroSustainability = () => (
   <section className="relative h-[85vh] w-full overflow-hidden">
     <div className="absolute inset-0">
@@ -163,8 +143,11 @@ const SustainabilityBanner = () => {
   );
 };
 
-// --- COMPONENTE: COLLEZIONI (AGGIORNATO) ---
+// --- COLLEZIONI: dati dinamici da DB (Emerald Touch) ---
 const LatestCollectionShowcase = () => {
+  const { data: products, isLoading } = useProducts("emerald-touch");
+  const emeraldProducts = (products ?? []).slice(0, 3);
+
   return (
     <section className="py-32 relative bg-white overflow-hidden">
       {/* Sfondo Decorativo */}
@@ -198,43 +181,52 @@ const LatestCollectionShowcase = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10 lg:gap-16 items-center justify-center max-w-7xl mx-auto mb-24">
-          {latestDrops.map((item, index) => (
-            <motion.div
-              key={item.id}
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.2, duration: 0.8 }}
-              whileHover={{ y: -15 }}
-              className={`relative group cursor-pointer ${index === 1 ? "md:-mt-16" : ""}`}
-            >
-              {/* Card Image Wrapper */}
-              <div className="aspect-[3/4] overflow-hidden rounded-[2rem] shadow-2xl relative">
-                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-500 z-10" />
+        {isLoading ? (
+          <div className="flex justify-center py-20">
+            <ButterflyLoader />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10 lg:gap-16 items-center justify-center max-w-7xl mx-auto mb-24">
+            {emeraldProducts.map((product, index) => (
+              <Link to={`/product/${product.id}`} key={product.id}>
+                <motion.div
+                  initial={{ opacity: 0, y: 50 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.2, duration: 0.8 }}
+                  whileHover={{ y: -15 }}
+                  className={`relative group cursor-pointer ${index === 1 ? "md:-mt-16" : ""}`}
+                >
+                  {/* Card Image Wrapper */}
+                  <div className="aspect-[3/4] overflow-hidden rounded-[2rem] shadow-2xl relative">
+                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-500 z-10" />
 
-                <img
-                  src={item.image}
-                  alt={item.name}
-                  className="w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-110"
-                />
+                    <img
+                      src={product.images[0] || "/placeholder.svg"}
+                      alt={product.name}
+                      className="w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-110"
+                    />
 
-                {/* Price Tag Overlay */}
-                <div className="absolute top-6 right-6 z-20 bg-white/90 backdrop-blur-md px-4 py-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
-                  <span className="font-serif text-emerald-900 font-bold">{item.price}</span>
-                </div>
-              </div>
+                    {/* Price Tag Overlay */}
+                    <div className="absolute top-6 right-6 z-20 bg-white/90 backdrop-blur-md px-4 py-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
+                      <span className="font-serif text-emerald-900 font-bold">
+                        {new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR" }).format(product.price)}
+                      </span>
+                    </div>
+                  </div>
 
-              {/* Card Details Below */}
-              <div className="text-center mt-8">
-                <h3 className="font-serif text-2xl text-emerald-950 mb-2 group-hover:text-emerald-700 transition-colors">
-                  {item.name}
-                </h3>
-                <div className="w-12 h-0.5 bg-emerald-200 mx-auto group-hover:w-24 transition-all duration-300" />
-              </div>
-            </motion.div>
-          ))}
-        </div>
+                  {/* Card Details Below */}
+                  <div className="text-center mt-8">
+                    <h3 className="font-serif text-2xl text-emerald-950 mb-2 group-hover:text-emerald-700 transition-colors">
+                      {product.name}
+                    </h3>
+                    <div className="w-12 h-0.5 bg-emerald-200 mx-auto group-hover:w-24 transition-all duration-300" />
+                  </div>
+                </motion.div>
+              </Link>
+            ))}
+          </div>
+        )}
 
         <div className="flex justify-center">
           <Link to="/collezioni">
@@ -252,7 +244,7 @@ const LatestCollectionShowcase = () => {
   );
 };
 
-// --- PAGINA PRINCIPALE (ASSEMBLAGGIO) ---
+// --- PAGINA PRINCIPALE ---
 const Sostenibilita = () => {
   return (
     <main className="bg-white relative overflow-hidden w-full">
@@ -322,7 +314,6 @@ const Sostenibilita = () => {
               ))}
             </CarouselContent>
 
-            {/* Navigazione: Nascosta su Mobile, Piccola ed elegante su Desktop */}
             <div className="hidden md:block">
               <CarouselPrevious className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-emerald-50 text-emerald-900 border-emerald-100 h-12 w-12 rounded-full shadow-lg" />
               <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-emerald-50 text-emerald-900 border-emerald-100 h-12 w-12 rounded-full shadow-lg" />
@@ -331,10 +322,10 @@ const Sostenibilita = () => {
         </div>
       </section>
 
-      {/* 3. BANNER NERO MIGLIORATO */}
+      {/* 3. BANNER NERO */}
       <SustainabilityBanner />
 
-      {/* 4. COLLEZIONI (ex Nuovi Arrivi) */}
+      {/* 4. COLLEZIONI (Emerald Touch dal DB) */}
       <LatestCollectionShowcase />
     </main>
   );
