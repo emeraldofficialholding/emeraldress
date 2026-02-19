@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { User, ShoppingBag, Menu, X } from "lucide-react";
-import { useWishlist } from "@/contexts/WishlistContext";
 import { useCart } from "@/contexts/CartContext";
 import { motion, AnimatePresence, useAnimation } from "framer-motion";
 
@@ -18,8 +17,7 @@ const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const cartControls = useAnimation();
   const { totalItems, setIsOpen } = useCart();
-  const { totalItems: wishlistTotal } = useWishlist();
-  const prevTotal = useRef(totalItems + wishlistTotal);
+  const prevTotal = useRef(totalItems);
   const location = useLocation();
   const isHome = location.pathname === "/";
 
@@ -29,17 +27,16 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Pop/bounce animation when cart or wishlist count increases
+  // Pop/bounce animation when cart count increases
   useEffect(() => {
-    const current = totalItems + wishlistTotal;
-    if (current > prevTotal.current) {
+    if (totalItems > prevTotal.current) {
       cartControls.start({
         scale: [1, 1.35, 0.88, 1.12, 1],
         transition: { duration: 0.45, ease: "easeInOut" },
       });
     }
-    prevTotal.current = current;
-  }, [totalItems, wishlistTotal, cartControls]);
+    prevTotal.current = totalItems;
+  }, [totalItems, cartControls]);
 
   const transparent = isHome && !scrolled && !mobileOpen;
 

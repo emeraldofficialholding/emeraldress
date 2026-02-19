@@ -7,7 +7,7 @@ import ButterflyLoader from "@/components/ButterflyLoader";
 import ImageFallback from "@/components/ImageFallback";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, ChevronLeft, ChevronRight, Ruler, ShoppingBag } from "lucide-react";
+import { ChevronLeft, ChevronRight, Ruler, ShoppingBag } from "lucide-react";
 import { cn } from "@/lib/utils";
 import useEmblaCarousel from "embla-carousel-react";
 
@@ -212,7 +212,6 @@ const ProductDetail = () => {
   const { addItem } = useCart();
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [activeImage, setActiveImage] = useState(0);
-  const [isWishlisted, setIsWishlisted] = useState(false);
   const [sizeGuideOpen, setSizeGuideOpen] = useState(false);
   const infoRef = useRef<HTMLDivElement>(null);
 
@@ -303,26 +302,11 @@ const ProductDetail = () => {
                 Emeraldress
               </p>
 
-              {/* Title + Wishlist */}
-              <div className="flex items-start justify-between gap-4 mb-3">
+              {/* Title */}
+              <div className="mb-3">
                 <h1 className="font-serif text-2xl md:text-3xl leading-tight">
                   {product.name}
                 </h1>
-                <button
-                  onClick={() => setIsWishlisted((v) => !v)}
-                  className="mt-1 shrink-0 w-9 h-9 flex items-center justify-center border border-border transition-all duration-300 hover:bg-accent group"
-                  aria-label="Aggiungi ai preferiti"
-                >
-                  <Heart
-                    size={16}
-                    className={cn(
-                      "transition-all duration-300",
-                      isWishlisted
-                        ? "fill-primary stroke-primary"
-                        : "stroke-foreground group-hover:stroke-primary"
-                    )}
-                  />
-                </button>
               </div>
 
               {/* Price */}

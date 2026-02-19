@@ -3,7 +3,7 @@ import { Link } from "react-router-dom"; // <--- IMPORT AGGIUNTO
 import { useProducts } from "@/hooks/useProducts";
 import ButterflyLoader from "@/components/ButterflyLoader";
 import { motion } from "framer-motion";
-import { Filter, ChevronDown, Heart } from "lucide-react";
+import { Filter, ChevronDown } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -40,20 +40,7 @@ const CollectionCard = ({ product, index }: {product: any;index: number;}) => {
 
           }
 
-          {/* Icona Wishlist (Cuore in alto a destra) 
-                           NOTA: Usiamo div con preventDefault per evitare il click del Link padre
-                        */}
-          <div
-            role="button"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              // Qui andrà la logica wishlist
-            }}
-            className="absolute top-3 right-3 p-2 rounded-full hover:bg-white/80 transition-colors text-neutral-800 z-10">
 
-            <Heart className="w-5 h-5 stroke-[1.5]" />
-          </div>
 
           {/* Badge "Nuovo" (Opzionale) */}
           {product.is_new_arrival &&
