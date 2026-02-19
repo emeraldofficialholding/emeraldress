@@ -15,37 +15,61 @@ export default function GatekeeperRoute({ children }: { children: React.ReactNod
   );
 
   useEffect(() => {
-    // Public routes bypass the check entirely
     if (isPublic) {
       setStatus("allowed");
       return;
     }
 
-    let cancelled = false;
+    let isMounted = true;
 
-    async function check() {
-      // 1. Get session
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) {
-        if (!cancelled) setStatus("blocked");
-        return;
+    const checkAdminRole = async (userId: string) => {
+      try {
+        const { data } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", userId)
+          .eq("role", "admin")
+          .maybeSingle();
+        if (isMounted) setStatus(data ? "allowed" : "blocked");
+      } catch {
+        if (isMounted) setStatus("blocked");
       }
+    };
 
-      // 2. Check admin role in user_roles table
-      const { data } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", session.user.id)
-        .eq("role", "admin")
-        .maybeSingle();
-
-      if (!cancelled) {
-        setStatus(data ? "allowed" : "blocked");
+    // Listen for real-time auth changes (login/logout)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        if (!isMounted) return;
+        if (session?.user) {
+          // Dispatch after callback to avoid deadlock
+          setTimeout(() => checkAdminRole(session.user.id), 0);
+        } else {
+          setStatus("blocked");
+        }
       }
-    }
+    );
 
-    check();
-    return () => { cancelled = true; };
+    // Initial check — controls first load
+    const initializeAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!isMounted) return;
+        if (session?.user) {
+          await checkAdminRole(session.user.id);
+        } else {
+          setStatus("blocked");
+        }
+      } catch {
+        if (isMounted) setStatus("blocked");
+      }
+    };
+
+    initializeAuth();
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, [location.pathname, isPublic]);
 
   if (status === "loading") {

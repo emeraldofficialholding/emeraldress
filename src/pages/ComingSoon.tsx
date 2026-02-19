@@ -226,14 +226,22 @@ export default function ComingSoon() {
         </motion.div>
 
         {/* Footer note */}
-        <motion.p
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 2 }}
-          className="mt-20 text-[10px] tracking-[0.3em] uppercase text-emerald-800/40"
+          className="mt-20 flex flex-col items-center gap-4"
         >
-          Emeraldress · Milano · Lusso Consapevole
-        </motion.p>
+          <p className="text-[10px] tracking-[0.3em] uppercase text-emerald-800/40">
+            Emeraldress · Milano · Lusso Consapevole
+          </p>
+          <a
+            href="/admin"
+            className="text-[9px] tracking-[0.2em] uppercase text-emerald-900/20 hover:text-emerald-900/50 transition-colors duration-300"
+          >
+            Admin Access
+          </a>
+        </motion.div>
       </div>
     </div>
   );
