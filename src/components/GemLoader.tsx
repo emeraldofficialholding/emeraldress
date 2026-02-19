@@ -1,12 +1,18 @@
-import { Gem } from "lucide-react";
+import logoED from "@/assets/logo-ed.png";
 
 const GemLoader = () => (
   <div className="flex flex-col items-center justify-center py-20 gap-4">
     <div className="relative">
-      <Gem className="w-10 h-10 text-emerald-600 animate-pulse" />
+      <img
+        src={logoED}
+        alt="Emeraldress"
+        className="w-14 h-14 object-contain animate-pulse"
+      />
       <span className="absolute inset-0 flex items-center justify-center">
-        <Gem
-          className="w-10 h-10 text-emerald-300 opacity-0"
+        <img
+          src={logoED}
+          alt=""
+          className="w-14 h-14 object-contain opacity-0"
           style={{
             animation: "gem-shimmer 1.8s ease-in-out infinite",
           }}

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Loader2, Sparkles, Gem } from "lucide-react";
+import { Loader2, Sparkles } from "lucide-react";
+import logoED from "@/assets/logo-ed.png";
 import { toast } from "sonner";
 import { supabase } from "@/supabaseCustom";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
@@ -93,8 +94,8 @@ export default function ComingSoon() {
           transition={{ duration: 1 }}
           className="flex flex-col items-center mb-12">
 
-          <div className="w-16 h-16 rounded-full bg-emerald-900 flex items-center justify-center mb-6 shadow-[0_0_40px_rgba(16,185,129,0.3)]">
-            <Gem className="w-8 h-8 text-[#e4ffec]" />
+          <div className="w-20 h-20 rounded-full bg-emerald-900 flex items-center justify-center mb-6 shadow-[0_0_40px_rgba(16,185,129,0.3)] p-2">
+            <img src={logoED} alt="Emeraldress" className="w-full h-full object-contain invert brightness-200" />
           </div>
           <span className="tracking-[0.4em] uppercase text-emerald-800 text-xs font-semibold mb-2">
             Emeraldress
