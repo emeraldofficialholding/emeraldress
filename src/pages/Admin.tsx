@@ -1,11 +1,11 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/supabaseCustom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard, Package, ShoppingBag, LogOut, Plus, X, Upload,
   TrendingUp, DollarSign, Archive, ChevronRight, Edit2, Trash2, Eye, EyeOff,
-  Lock,
+  Lock, GripVertical, ImageIcon,
 } from "lucide-react";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -64,6 +64,14 @@ function buildChartData(orders: Order[]) {
   }));
 }
 
+// ── Image item for multi-upload ────────────────────────────────────────────────
+interface ImageItem {
+  id: string;          // unique key
+  url: string;         // object URL (new) or remote URL (existing)
+  file?: File;         // only for new files
+  isNew: boolean;
+}
+
 // ── Empty product form ─────────────────────────────────────────────────────────
 const emptyForm = {
   name: "",
@@ -76,8 +84,6 @@ const emptyForm = {
   shipping_info: "",
   sizes: "S,M,L",
   status: "active" as "active" | "draft",
-  imageFile: null as File | null,
-  imagePreview: "",
 };
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -101,8 +107,11 @@ export default function Admin() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [form, setForm] = useState({ ...emptyForm });
+  const [imageItems, setImageItems] = useState<ImageItem[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const [isDraggingOver, setIsDraggingOver] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const dragIndexRef = useRef<number | null>(null);
 
   // ── Auth check ───────────────────────────────────────────────────────────────
   async function checkAdmin(userId: string) {
@@ -170,10 +179,40 @@ export default function Admin() {
   const totalRevenue = orders.reduce((s, o) => s + Number(o.total_amount), 0);
   const totalStock = products.reduce((s, p) => s + (p.stock || 0), 0);
 
+  // ── Image helpers ─────────────────────────────────────────────────────────────
+  const addFiles = useCallback((files: FileList | File[]) => {
+    const newItems: ImageItem[] = Array.from(files).map((file) => ({
+      id: `${Date.now()}-${Math.random()}`,
+      url: URL.createObjectURL(file),
+      file,
+      isNew: true,
+    }));
+    setImageItems((prev) => [...prev, ...newItems]);
+  }, []);
+
+  const removeImage = (id: string) => {
+    setImageItems((prev) => prev.filter((img) => img.id !== id));
+  };
+
+  const handleDragStart = (index: number) => { dragIndexRef.current = index; };
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    const from = dragIndexRef.current;
+    if (from === null || from === index) return;
+    setImageItems((prev) => {
+      const arr = [...prev];
+      const [item] = arr.splice(from, 1);
+      arr.splice(index, 0, item);
+      dragIndexRef.current = index;
+      return arr;
+    });
+  };
+
   // ── Product CRUD ─────────────────────────────────────────────────────────────
   function openNewProduct() {
     setEditingProduct(null);
     setForm({ ...emptyForm });
+    setImageItems([]);
     setDrawerOpen(true);
   }
 
@@ -190,9 +229,12 @@ export default function Admin() {
       shipping_info: p.shipping_info || "",
       sizes: (p.sizes || []).join(","),
       status: (p.status === "draft" ? "draft" : "active") as "active" | "draft",
-      imageFile: null,
-      imagePreview: p.images?.[0] || "",
     });
+    setImageItems((p.images || []).map((url) => ({
+      id: url,
+      url,
+      isNew: false,
+    })));
     setDrawerOpen(true);
   }
 
@@ -203,20 +245,22 @@ export default function Admin() {
     }
     setSubmitting(true);
     try {
-      let images: string[] = editingProduct?.images || [];
-
-      // upload image if selected
-      if (form.imageFile) {
-        const ext = form.imageFile.name.split(".").pop();
-        const path = `${Date.now()}.${ext}`;
-        const { error: upErr } = await supabase.storage
-          .from("product-images")
-          .upload(path, form.imageFile, { upsert: true });
-        if (upErr) throw upErr;
-        const { data: { publicUrl } } = supabase.storage
-          .from("product-images")
-          .getPublicUrl(path);
-        images = [publicUrl, ...images.slice(1)];
+      const finalUrls: string[] = [];
+      for (const item of imageItems) {
+        if (item.isNew && item.file) {
+          const ext = item.file.name.split(".").pop();
+          const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+          const { error: upErr } = await supabase.storage
+            .from("product-images")
+            .upload(path, item.file, { upsert: true });
+          if (upErr) throw upErr;
+          const { data: { publicUrl } } = supabase.storage
+            .from("product-images")
+            .getPublicUrl(path);
+          finalUrls.push(publicUrl);
+        } else {
+          finalUrls.push(item.url);
+        }
       }
 
       const payload = {
@@ -230,7 +274,7 @@ export default function Admin() {
         shipping_info: form.shipping_info || null,
         sizes: form.sizes ? form.sizes.split(",").map((s) => s.trim()) : [],
         status: form.status,
-        images,
+        images: finalUrls,
       };
 
       if (editingProduct) {
@@ -580,24 +624,33 @@ export default function Admin() {
                         <tbody className="divide-y divide-neutral-50">
                           {products.map((p) => (
                             <tr key={p.id} className="hover:bg-neutral-50 transition-colors">
-                              {/* Product */}
-                              <td className="px-4 py-3">
-                                <div className="flex items-center gap-3">
-                                  <div className="w-10 h-10 rounded-lg bg-neutral-100 overflow-hidden shrink-0">
-                                    {p.images?.[0] ? (
-                                      <img src={p.images[0]} alt={p.name} className="w-full h-full object-cover" />
-                                    ) : (
-                                      <div className="w-full h-full flex items-center justify-center text-neutral-300">
-                                        <Package className="w-4 h-4" />
-                                      </div>
-                                    )}
-                                  </div>
-                                  <div>
-                                    <p className="text-sm font-medium text-neutral-900 line-clamp-1">{p.name}</p>
-                                    <p className="text-xs text-neutral-400 capitalize">{p.category}</p>
-                                  </div>
-                                </div>
-                              </td>
+                               {/* Product */}
+                               <td className="px-4 py-3">
+                                 <div className="flex items-center gap-3">
+                                   {/* Image stack: show up to 3 thumbnails */}
+                                   <div className="flex gap-1 shrink-0">
+                                     {(p.images?.length ? p.images.slice(0, 3) : []).map((img, i) => (
+                                       <div key={i} className="w-9 h-9 rounded-md bg-neutral-100 overflow-hidden border border-neutral-200">
+                                         <img src={img} alt="" className="w-full h-full object-cover" />
+                                       </div>
+                                     ))}
+                                     {!p.images?.length && (
+                                       <div className="w-9 h-9 rounded-md bg-neutral-100 flex items-center justify-center border border-neutral-200">
+                                         <Package className="w-4 h-4 text-neutral-300" />
+                                       </div>
+                                     )}
+                                     {p.images?.length > 3 && (
+                                       <div className="w-9 h-9 rounded-md bg-neutral-100 flex items-center justify-center border border-neutral-200">
+                                         <span className="text-[10px] text-neutral-400 font-medium">+{p.images.length - 3}</span>
+                                       </div>
+                                     )}
+                                   </div>
+                                   <div>
+                                     <p className="text-sm font-medium text-neutral-900 line-clamp-1">{p.name}</p>
+                                     <p className="text-xs text-neutral-400 capitalize">{p.category}</p>
+                                   </div>
+                                 </div>
+                               </td>
                               {/* Price */}
                               <td className="px-4 py-3">
                                 <div>
@@ -772,37 +825,83 @@ export default function Admin() {
               {/* Drawer body */}
               <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
 
-                {/* Image upload */}
+                {/* ── Multi-image upload ─────────────────────────────────── */}
                 <div>
-                  <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-2 block">Immagine Prodotto</Label>
+                  <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-2 block">
+                    Immagini Prodotto ({imageItems.length})
+                  </Label>
+
+                  {/* Drop zone */}
                   <div
                     onClick={() => fileRef.current?.click()}
-                    className="relative w-full h-40 rounded-xl border-2 border-dashed border-neutral-200 bg-neutral-50 flex flex-col items-center justify-center cursor-pointer hover:border-emerald-300 hover:bg-emerald-50 transition-colors overflow-hidden"
+                    onDragOver={(e) => { e.preventDefault(); setIsDraggingOver(true); }}
+                    onDragLeave={() => setIsDraggingOver(false)}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      setIsDraggingOver(false);
+                      if (e.dataTransfer.files.length) addFiles(e.dataTransfer.files);
+                    }}
+                    className={`relative w-full h-28 rounded-xl border-2 border-dashed flex flex-col items-center justify-center cursor-pointer transition-colors ${
+                      isDraggingOver
+                        ? "border-emerald-400 bg-emerald-50"
+                        : "border-neutral-200 bg-neutral-50 hover:border-emerald-300 hover:bg-emerald-50"
+                    }`}
                   >
-                    {form.imagePreview ? (
-                      <img src={form.imagePreview} alt="preview" className="w-full h-full object-cover" />
-                    ) : (
-                      <>
-                        <Upload className="w-6 h-6 text-neutral-300 mb-2" />
-                        <p className="text-xs text-neutral-400">Clicca per caricare un'immagine</p>
-                      </>
-                    )}
+                    <Upload className="w-5 h-5 text-neutral-300 mb-1.5" />
+                    <p className="text-xs text-neutral-400">Trascina qui le foto o clicca per selezionarle</p>
+                    <p className="text-[10px] text-neutral-300 mt-0.5">Puoi caricare più file contemporaneamente</p>
                   </div>
                   <input
                     ref={fileRef}
                     type="file"
                     accept="image/*"
+                    multiple
                     className="hidden"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (!file) return;
-                      setForm((f) => ({
-                        ...f,
-                        imageFile: file,
-                        imagePreview: URL.createObjectURL(file),
-                      }));
-                    }}
+                    onChange={(e) => { if (e.target.files?.length) addFiles(e.target.files); e.target.value = ""; }}
                   />
+
+                  {/* Mini gallery */}
+                  {imageItems.length > 0 && (
+                    <div className="mt-3 grid grid-cols-4 gap-2">
+                      {imageItems.map((img, index) => (
+                        <div
+                          key={img.id}
+                          draggable
+                          onDragStart={() => handleDragStart(index)}
+                          onDragOver={(e) => handleDragOver(e, index)}
+                          onDragEnd={() => { dragIndexRef.current = null; }}
+                          className="relative group aspect-square rounded-lg overflow-hidden border border-neutral-200 bg-neutral-100 cursor-grab active:cursor-grabbing"
+                        >
+                          <img src={img.url} alt="" className="w-full h-full object-cover" />
+                          {/* Overlay controls */}
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
+                            <button
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); removeImage(img.id); }}
+                              className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center"
+                            >
+                              <X className="w-3 h-3 text-white" />
+                            </button>
+                            <GripVertical className="w-4 h-4 text-white/80" />
+                          </div>
+                          {/* Primary badge */}
+                          {index === 0 && (
+                            <span className="absolute top-1 left-1 text-[9px] bg-emerald-700 text-white px-1.5 py-0.5 rounded font-medium">
+                              Cover
+                            </span>
+                          )}
+                        </div>
+                      ))}
+                      {/* Add more button */}
+                      <button
+                        type="button"
+                        onClick={() => fileRef.current?.click()}
+                        className="aspect-square rounded-lg border-2 border-dashed border-neutral-200 flex items-center justify-center hover:border-emerald-300 hover:bg-emerald-50 transition-colors"
+                      >
+                        <ImageIcon className="w-4 h-4 text-neutral-300" />
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 {/* Name */}
