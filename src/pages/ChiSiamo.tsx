@@ -156,7 +156,7 @@ const ChiSiamo = () => {
                   Community
                 </span>
                 <h2 className="font-serif text-4xl md:text-6xl text-emerald-950 leading-tight mb-5">
-                  Social Dress — <span className="italic font-light text-emerald-700">La nostra Community</span>
+                  Social Dress
                 </h2>
                 <p className="text-neutral-600 font-sans text-lg max-w-2xl mx-auto leading-relaxed">
                   Non è solo una pagina Instagram. È un movimento di stile ed eleganza condivisa. Ogni giorno, donne che
