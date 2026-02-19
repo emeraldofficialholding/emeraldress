@@ -3,11 +3,11 @@ import { supabase } from "@/supabaseCustom";
 
 // Ensures images/sizes are always returned as native JS arrays (never null/string)
 function normalizeProduct(p: Record<string, unknown>) {
-  return {
-    ...p,
-    images: Array.isArray(p.images) ? p.images : [],
-    sizes: Array.isArray(p.sizes) ? p.sizes : (p.sizes ? [p.sizes] : []),
-  };
+  // Flatten nested arrays like [["url"]] → ["url"] that can occur from legacy data
+  const rawImages = Array.isArray(p.images) ? (p.images as unknown[]).flat(Infinity) : [];
+  const images = rawImages.filter((u): u is string => typeof u === "string");
+  const sizes = Array.isArray(p.sizes) ? p.sizes : (p.sizes ? [p.sizes] : []);
+  return { ...p, images, sizes };
 }
 
 export interface Product {
