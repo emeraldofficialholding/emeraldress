@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Loader2, Leaf, Sparkles } from "lucide-react";
+import { Loader2, Sparkles, Gem } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/supabaseCustom";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
@@ -94,7 +94,7 @@ export default function ComingSoon() {
           className="flex flex-col items-center mb-12">
 
           <div className="w-16 h-16 rounded-full bg-emerald-900 flex items-center justify-center mb-6 shadow-[0_0_40px_rgba(16,185,129,0.3)]">
-            <Leaf className="w-8 h-8 text-[#e4ffec]" />
+            <Gem className="w-8 h-8 text-[#e4ffec]" />
           </div>
           <span className="tracking-[0.4em] uppercase text-emerald-800 text-xs font-semibold mb-2">
             Emeraldress
@@ -106,9 +106,9 @@ export default function ComingSoon() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.2, delay: 0.2 }}
-          className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-emerald-950 leading-tight tracking-tight mb-6">
-
-          L'eleganza <br />
+          className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-emerald-950 leading-tight tracking-tight mb-6">EmeralDress
+ha bisogno di tempo
+          <br />
           <span className="italic text-emerald-700 relative inline-block">
             ha bisogno di tempo
             {/* shimmer underline */}
