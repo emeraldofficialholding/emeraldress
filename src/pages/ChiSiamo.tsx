@@ -26,7 +26,7 @@ const timelineData = [
         </p>
         <div className="grid grid-cols-2 gap-4">
           <img
-            src="https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/Gemini_Generated_Image_2zwpfk2zwpfk2zwp%20-%20Modificata.png"
+            src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=2070&auto=format&fit=crop"
             alt="Ispirazione iniziale"
             className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-md"
           />
@@ -51,7 +51,7 @@ const timelineData = [
           ricerca di un benessere che parte dal tessuto e arriva all'anima.
         </p>
         <img
-          src="https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/dettaglio.jpeg"
+          src="https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/Gemini_Generated_Image_bv0czcbv0czcbv0c%20-%20Modificata.png"
           alt="Ricerca tessuti sani"
           className="rounded-lg object-cover h-40 md:h-64 w-full shadow-md"
         />
