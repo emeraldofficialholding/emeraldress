@@ -17,11 +17,12 @@ import Sostenibilita from "./pages/Sostenibilita";
 import NotFound from "./pages/NotFound";
 import Admin from "./pages/Admin";
 import ComingSoon from "./pages/ComingSoon";
+import Login from "./pages/Login";
 
 const queryClient = new QueryClient();
 
 // Routes that should NOT show the Navbar/Footer (standalone pages)
-const STANDALONE_ROUTES = ["/coming-soon"];
+const STANDALONE_ROUTES = ["/coming-soon", "/login"];
 
 function AppShell() {
   const location = useLocation();
@@ -36,6 +37,7 @@ function AppShell() {
       <Routes>
         {/* ── Public / always accessible ─────────────────────────── */}
         <Route path="/coming-soon" element={<ComingSoon />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/admin" element={<Admin />} />
 
         {/* ── Gated routes (admin only while coming soon is active) ── */}

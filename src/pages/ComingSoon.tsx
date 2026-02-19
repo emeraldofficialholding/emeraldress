@@ -236,7 +236,7 @@ export default function ComingSoon() {
             Emeraldress · Milano · Lusso Consapevole
           </p>
           <a
-            href="/admin"
+            href="/login"
             className="text-[9px] tracking-[0.2em] uppercase text-emerald-900/20 hover:text-emerald-900/50 transition-colors duration-300"
           >
             Admin Access
