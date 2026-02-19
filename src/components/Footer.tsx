@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
-import { Instagram, Facebook, Linkedin, Mail, MapPin } from "lucide-react";
-import logoIcon from "@/assets/logo-icon.png";
+import { Instagram, Facebook, Linkedin, ArrowUpRight, Mail, MapPin } from "lucide-react";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -12,7 +11,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 lg:gap-8 mb-16">
           {/* COLONNA 1: Brand & Vision */}
           <div className="md:col-span-1 space-y-6">
-            <img src={logoIcon} alt="EMERALDRESS" className="h-20 w-20 opacity-80" />
+            <h3 className="font-serif text-2xl tracking-[0.1em] text-emerald-950">EMERALDRESS</h3>
             <p className="text-sm text-emerald-800/80 leading-relaxed font-sans max-w-xs">
               Ridefiniamo il lusso attraverso la sostenibilità e l'artigianato italiano. Ogni capo è una promessa al
               pianeta e un omaggio alla bellezza.
