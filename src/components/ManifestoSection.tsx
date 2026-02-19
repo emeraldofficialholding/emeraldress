@@ -2,7 +2,8 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
-import { ArrowRight, Globe, Fingerprint, Scissors, Loader2, Gem } from "lucide-react";
+import { ArrowRight, Globe, Fingerprint, Scissors, Loader2 } from "lucide-react";
+import logoED from "@/assets/logo-ed.png";
 import { toast } from "sonner";
 import { supabase } from "@/supabaseCustom";
 
@@ -221,8 +222,8 @@ const ManifestoSection = () => {
 
         <div className="container mx-auto px-4 lg:px-8 relative z-10">
           <div className="max-w-4xl mx-auto text-center mb-16">
-            <div className="w-16 h-16 bg-emerald-900 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl">
-              <Gem className="w-8 h-8 text-[#e4ffec]" />
+            <div className="w-20 h-20 bg-emerald-900 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl p-2">
+              <img src={logoED} alt="Emeraldress" className="w-full h-full object-contain invert brightness-200" />
             </div>
             <h3 className="font-serif text-4xl md:text-5xl text-emerald-950 mb-6">Entra nell'Emerald Circle</h3>
             <p className="text-emerald-800/80 font-sans text-lg max-w-xl mx-auto">

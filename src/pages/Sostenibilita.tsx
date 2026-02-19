@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
-import { ArrowRight, Recycle, Leaf, ShoppingBag, Gem, Sparkles } from "lucide-react";
+import { ArrowRight, Recycle, Leaf, ShoppingBag, Sparkles } from "lucide-react";
+import logoED from "@/assets/logo-ed.png";
 import { Link } from "react-router-dom";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
@@ -163,8 +164,8 @@ const LatestCollectionShowcase = () => {
             viewport={{ once: true }}
             className="inline-block mb-6"
           >
-            <div className="w-16 h-16 bg-emerald-100/50 rounded-full flex items-center justify-center mx-auto">
-              <Gem className="w-8 h-8 text-emerald-600" />
+            <div className="w-20 h-20 bg-emerald-100/50 rounded-full flex items-center justify-center mx-auto p-2">
+              <img src={logoED} alt="Emeraldress" className="w-full h-full object-contain" />
             </div>
           </motion.div>
           <motion.h2
