@@ -231,13 +231,15 @@ const ProductDetail = () => {
       </div>
     );
 
-  // Clean sizes: strip Postgres curly-brace format e.g. "{S,M,L}" → ["S","M","L"]
+  // Robust size cleaning: handles Postgres {S,M,L} format, stray braces on any element
   const rawSizes = product.sizes?.length ? product.sizes : ["XS", "S", "M", "L", "XL"];
-  const sizes = rawSizes.flatMap((s) =>
-    typeof s === "string" && s.startsWith("{")
-      ? s.replace(/[{}]/g, "").split(",").map((x) => x.trim()).filter(Boolean)
-      : [s]
-  );
+  const sizes = rawSizes
+    .flatMap((s) => {
+      const cleaned = String(s).replace(/[{}]/g, "").trim();
+      return cleaned.includes(",") ? cleaned.split(",") : [cleaned];
+    })
+    .map((s) => s.trim())
+    .filter(Boolean);
   const images = product.images?.length ? product.images : ["/placeholder.svg"];
 
   const handleAddToCart = () => {

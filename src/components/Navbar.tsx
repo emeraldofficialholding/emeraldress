@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { User, ShoppingBag, Menu, X } from "lucide-react";
 import { useWishlist } from "@/contexts/WishlistContext";
 import { useCart } from "@/contexts/CartContext";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useAnimation } from "framer-motion";
 
 const links = [
   { to: "/", label: "Home" },
@@ -16,7 +16,7 @@ const links = [
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [bounce, setBounce] = useState(false);
+  const cartControls = useAnimation();
   const { totalItems, setIsOpen } = useCart();
   const { totalItems: wishlistTotal } = useWishlist();
   const prevTotal = useRef(totalItems + wishlistTotal);
@@ -29,15 +29,17 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Bounce when cart or wishlist count increases
+  // Pop/bounce animation when cart or wishlist count increases
   useEffect(() => {
     const current = totalItems + wishlistTotal;
     if (current > prevTotal.current) {
-      setBounce(true);
-      setTimeout(() => setBounce(false), 600);
+      cartControls.start({
+        scale: [1, 1.35, 0.88, 1.12, 1],
+        transition: { duration: 0.45, ease: "easeInOut" },
+      });
     }
     prevTotal.current = current;
-  }, [totalItems, wishlistTotal]);
+  }, [totalItems, wishlistTotal, cartControls]);
 
   const transparent = isHome && !scrolled && !mobileOpen;
 
@@ -74,8 +76,7 @@ const Navbar = () => {
             <motion.button
               className="hover:opacity-70 transition-opacity relative"
               onClick={() => setIsOpen(true)}
-              animate={bounce ? { scale: [1, 1.3, 0.9, 1.1, 1] } : {}}
-              transition={{ duration: 0.5 }}
+              animate={cartControls}
             >
               <ShoppingBag className="w-5 h-5" />
               {totalItems > 0 && (
