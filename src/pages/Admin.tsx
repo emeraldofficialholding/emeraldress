@@ -263,6 +263,10 @@ export default function Admin() {
         }
       }
 
+      const sizesArray: string[] = form.sizes
+        ? form.sizes.split(",").map((s) => s.trim()).filter(Boolean)
+        : [];
+
       const payload = {
         name: form.name,
         description: form.description || null,
@@ -272,10 +276,14 @@ export default function Admin() {
         category: form.category,
         fabric_details: form.fabric_details || null,
         shipping_info: form.shipping_info || null,
-        sizes: form.sizes ? form.sizes.split(",").map((s) => s.trim()) : [],
+        sizes: sizesArray,       // native JS array, never JSON string
         status: form.status,
-        images: finalUrls,
+        images: finalUrls,       // native JS array, never JSON string
       };
+
+      console.log("[Admin] payload before save:", JSON.stringify(payload, null, 2));
+      console.log("[Admin] images type:", typeof payload.images, Array.isArray(payload.images));
+      console.log("[Admin] sizes type:", typeof payload.sizes, Array.isArray(payload.sizes));
 
       if (editingProduct) {
         const { error } = await supabase
