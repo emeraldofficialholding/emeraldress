@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/supabaseCustom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard, Package, ShoppingBag, LogOut, Plus, X, Upload,
@@ -148,7 +148,8 @@ export default function Admin() {
       password: loginPassword,
     });
     if (error) {
-      setLoginError("Credenziali non valide. Riprova.");
+      console.error("Login error:", error);
+      setLoginError(`Errore: ${error.message}`);
     }
     setLoginLoading(false);
   }
