@@ -8,15 +8,15 @@ const fadeUp = {
   initial: { opacity: 0, y: 30 },
   whileInView: { opacity: 1, y: 0 },
   transition: { duration: 0.8 },
-  viewport: { once: true },
+  viewport: { once: true }
 };
 
 // --- TIMELINE AGGIORNATA CON LA TUA STORIA ---
 const timelineData = [
-  {
-    title: "Le Origini",
-    content: (
-      <div>
+{
+  title: "Le Origini",
+  content:
+  <div>
         <p className="text-neutral-600 text-sm md:text-base font-normal mb-8 leading-relaxed">
           Fin da bambina, osservavo la moda come un mondo affascinante e lontano: le vetrine erano tele di un sogno
           ancora senza forma. Per anni ho indossato ciò che era disponibile, scontrandomi presto con la realtà del fast
@@ -26,23 +26,23 @@ const timelineData = [
         </p>
         <div className="grid grid-cols-2 gap-4">
           <img
-            src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=2070&auto=format&fit=crop"
-            alt="Ispirazione iniziale"
-            className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-md"
-          />
+        src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=2070&auto=format&fit=crop"
+        alt="Ispirazione iniziale"
+        className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-md" />
+
           <img
-            src="https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/asset.jpg"
-            alt="Primi bozzetti"
-            className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-md"
-          />
+        src="https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/asset.jpg"
+        alt="Primi bozzetti"
+        className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-md" />
+
         </div>
       </div>
-    ),
-  },
-  {
-    title: "La Svolta",
-    content: (
-      <div>
+
+},
+{
+  title: "La Svolta",
+  content:
+  <div>
         <p className="text-neutral-600 text-sm md:text-base font-normal mb-8 leading-relaxed">
           Da quella consapevolezza è nato un punto di svolta. La moda, da semplice passione, è diventata improvvisamente
           una responsabilità: creare capi che fossero belli, funzionali e sani. Era necessario trasformare quel sogno
@@ -50,17 +50,17 @@ const timelineData = [
           ricerca di un benessere che parte dal tessuto e arriva all'anima.
         </p>
         <img
-          src="https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/dettaglio.jpeg"
-          alt="Ricerca tessuti sani"
-          className="rounded-lg object-cover h-40 md:h-64 w-full shadow-md"
-        />
+      src="https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/dettaglio.jpeg"
+      alt="Ricerca tessuti sani"
+      className="rounded-lg object-cover h-40 md:h-64 w-full shadow-md" />
+
       </div>
-    ),
-  },
-  {
-    title: "Oggi",
-    content: (
-      <div>
+
+},
+{
+  title: "Oggi",
+  content:
+  <div>
         <p className="text-neutral-600 text-sm md:text-base font-normal mb-4 leading-relaxed">
           Oggi Emeraldress è un progetto indipendente, costruito con dedizione quotidiana. Disegno personalmente ogni
           capo studiando le linee per scolpire la silhouette e seleziono solo tessuti premium lavorati in Italia. Non
@@ -69,9 +69,9 @@ const timelineData = [
           donne.
         </p>
       </div>
-    ),
-  },
-];
+
+}];
+
 
 const ChiSiamo = () => {
   return (
@@ -82,8 +82,8 @@ const ChiSiamo = () => {
         bgImageSrc="https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/SFONDO%20MINT.png"
         title="Emerald Dress"
         scrollToExpand="Scorri per esplorare"
-        textBlend
-      >
+        textBlend>
+
         <div className="pt-16">
           {/* Header Description */}
           <motion.div {...fadeUp} className="container mx-auto px-4 lg:px-8 max-w-2xl mb-24">
@@ -104,9 +104,9 @@ const ChiSiamo = () => {
                 className="absolute inset-0 opacity-[0.4]"
                 style={{
                   backgroundImage: "radial-gradient(#10b981 0.5px, transparent 0.5px)",
-                  backgroundSize: "12px 12px",
-                }}
-              ></div>
+                  backgroundSize: "12px 12px"
+                }}>
+              </div>
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-emerald-500 to-transparent opacity-30"></div>
               <div className="relative z-10">
                 <h3 className="font-serif text-2xl md:text-5xl text-emerald-950 leading-tight mb-10">
@@ -133,8 +133,8 @@ const ChiSiamo = () => {
             <img
               src="https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/products/BIANCO%20FIOCCO/BIANCO%20FIOCCO(1).jpeg"
               alt="Atelier"
-              className="w-full h-full object-cover transform scale-100 group-hover:scale-105 transition-transform duration-[2000ms]"
-            />
+              className="w-full h-full object-cover transform scale-100 group-hover:scale-105 transition-transform duration-[2000ms]" />
+
           </section>
 
           {/* SEZIONE SOCIAL DRESS */}
@@ -153,8 +153,8 @@ const ChiSiamo = () => {
                   whileInView={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.8 }}
                   viewport={{ once: true }}
-                  className="w-full md:w-5/12 text-center md:text-left"
-                >
+                  className="w-full md:w-5/12 text-center md:text-left">
+
                   <span className="inline-block py-1 px-3 rounded-full bg-emerald-100/50 text-emerald-800 text-[10px] uppercase tracking-widest font-bold mb-6 border border-emerald-100">
                     Community
                   </span>
@@ -174,8 +174,8 @@ const ChiSiamo = () => {
                       <HoverBorderGradient
                         containerClassName="rounded-full"
                         as="button"
-                        className="bg-emerald-950 text-[#e4ffec] flex items-center gap-3 px-8 py-4 font-bold tracking-widest text-sm shadow-xl hover:bg-emerald-900 transition-all"
-                      >
+                        className="bg-emerald-950 text-[#e4ffec] flex items-center gap-3 px-8 py-4 font-bold tracking-widest text-sm shadow-xl hover:bg-emerald-900 transition-all">
+
                         <Instagram className="w-5 h-5" />
                         @emeraldress_
                       </HoverBorderGradient>
@@ -192,8 +192,8 @@ const ChiSiamo = () => {
                   whileInView={{ opacity: 1, x: 0, rotate: 0 }}
                   transition={{ duration: 1, ease: "easeOut" }}
                   viewport={{ once: true }}
-                  className="w-full md:w-7/12 flex justify-center md:justify-end relative"
-                >
+                  className="w-full md:w-7/12 flex justify-center md:justify-end relative">
+
                   {/* Decorazioni di sfondo dietro il telefono */}
                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-emerald-100/30 rounded-full blur-3xl -z-10" />
 
@@ -201,20 +201,20 @@ const ChiSiamo = () => {
                   <motion.div
                     animate={{ y: [0, -20, 0] }}
                     transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
-                    className="absolute top-20 -left-10 z-20 hidden md:block"
-                  >
+                    className="absolute top-20 -left-10 z-20 hidden md:block">
+
                     <img
                       src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=200&auto=format&fit=crop"
                       className="w-32 h-40 object-cover rounded-xl shadow-2xl border-4 border-white rotate-[-6deg]"
-                      alt="Post preview"
-                    />
+                      alt="Post preview" />
+
                   </motion.div>
 
                   <motion.div
                     animate={{ y: [0, 20, 0] }}
                     transition={{ repeat: Infinity, duration: 7, ease: "easeInOut", delay: 1 }}
-                    className="absolute bottom-20 -right-4 z-20 hidden md:block"
-                  >
+                    className="absolute bottom-20 -right-4 z-20 hidden md:block">
+
                     <div className="bg-white p-4 rounded-xl shadow-2xl border border-emerald-50 max-w-[180px]">
                       <div className="flex gap-1 text-emerald-500 mb-2">
                         <Sparkles className="w-4 h-4 fill-current" />
@@ -243,8 +243,8 @@ const ChiSiamo = () => {
                         <img
                           src="https://images.unsplash.com/photo-1539008835657-9e8e9680c956?w=800&auto=format&fit=crop"
                           alt="Instagram Feed Hero"
-                          className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-105"
-                        />
+                          className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-105" />
+
 
                         {/* Gradient Overlay Bottom */}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-8 text-white">
@@ -253,8 +253,8 @@ const ChiSiamo = () => {
                               <img
                                 src="https://images.unsplash.com/photo-1532453288672-3a27e9be9efd?w=100&auto=format&fit=crop"
                                 className="w-full h-full rounded-full object-cover"
-                                alt="Avatar"
-                              />
+                                alt="Avatar" />
+
                             </div>
                             <div>
                               <p className="text-xs font-bold">emeraldress_</p>
@@ -284,8 +284,8 @@ const ChiSiamo = () => {
                   <span className="font-serif text-5xl md:text-7xl text-emerald-50 group-hover:text-emerald-400 transition-colors duration-500">
                     8K+
                   </span>
-                  <span className="text-xs md:text-sm font-bold tracking-[0.3em] uppercase text-emerald-600/80 group-hover:text-emerald-400 transition-colors">
-                    Community
+                  <span className="text-xs md:text-sm font-bold tracking-[0.3em] uppercase text-emerald-600/80 group-hover:text-emerald-400 transition-colors">FOLLOWERS
+
                   </span>
                 </div>
 
@@ -313,8 +313,8 @@ const ChiSiamo = () => {
           </section>
         </div>
       </ScrollExpandMedia>
-    </main>
-  );
+    </main>);
+
 };
 
 export default ChiSiamo;

@@ -8,19 +8,19 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  DropdownMenuTrigger } from
+"@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 
 // --- COMPONENTE CARD SPECIFICO (Stile Valentine) ---
-const CollectionCard = ({ product, index }: { product: any; index: number }) => {
+const CollectionCard = ({ product, index }: {product: any;index: number;}) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: index * 0.05 }}
-      className="group"
-    >
+      className="group">
+
       {/* WRAPPER LINK AL PRODOTTO */}
       <Link to={`/product/${product.id}`} className="flex flex-col gap-3 cursor-pointer">
         {/* 1. Immagine (Aspect Ratio Alto 3:4 o più slanciato) */}
@@ -28,21 +28,21 @@ const CollectionCard = ({ product, index }: { product: any; index: number }) => 
           <img
             src={product.images[0]}
             alt={product.name}
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-          />
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+
 
           {/* Hover: Seconda immagine (se esiste) */}
-          {product.images[1] && (
-            <img
-              src={product.images[1]}
-              alt={product.name}
-              className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-700"
-            />
-          )}
+          {product.images[1] &&
+          <img
+            src={product.images[1]}
+            alt={product.name}
+            className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+
+          }
 
           {/* Icona Wishlist (Cuore in alto a destra) 
-              NOTA: Usiamo div con preventDefault per evitare il click del Link padre
-          */}
+                           NOTA: Usiamo div con preventDefault per evitare il click del Link padre
+                        */}
           <div
             role="button"
             onClick={(e) => {
@@ -50,17 +50,17 @@ const CollectionCard = ({ product, index }: { product: any; index: number }) => 
               e.stopPropagation();
               // Qui andrà la logica wishlist
             }}
-            className="absolute top-3 right-3 p-2 rounded-full hover:bg-white/80 transition-colors text-neutral-800 z-10"
-          >
+            className="absolute top-3 right-3 p-2 rounded-full hover:bg-white/80 transition-colors text-neutral-800 z-10">
+
             <Heart className="w-5 h-5 stroke-[1.5]" />
           </div>
 
           {/* Badge "Nuovo" (Opzionale) */}
-          {product.is_new_arrival && (
-            <span className="absolute top-4 left-4 text-[10px] uppercase tracking-widest font-bold text-white bg-emerald-900/80 px-2 py-1 backdrop-blur-sm">
+          {product.is_new_arrival &&
+          <span className="absolute top-4 left-4 text-[10px] uppercase tracking-widest font-bold text-white bg-emerald-900/80 px-2 py-1 backdrop-blur-sm">
               Nuovo
             </span>
-          )}
+          }
         </div>
 
         {/* 2. Meta Info (Sotto l'immagine) */}
@@ -71,15 +71,15 @@ const CollectionCard = ({ product, index }: { product: any; index: number }) => 
             <div className="flex gap-1.5">
               <div className="w-3.5 h-3.5 rounded-full border border-neutral-200 bg-black" title="Nero"></div>
               {/* Se è Emerald Touch, mostriamo anche il verde */}
-              {product.category === "emerald-touch" && (
-                <div
-                  className="w-3.5 h-3.5 rounded-full border border-neutral-200 bg-emerald-700"
-                  title="Smeraldo"
-                ></div>
-              )}
-              {product.category === "classics" && (
-                <div className="w-3.5 h-3.5 rounded-full border border-neutral-200 bg-[#F5F5DC]" title="Crema"></div>
-              )}
+              {product.category === "emerald-touch" &&
+              <div
+                className="w-3.5 h-3.5 rounded-full border border-neutral-200 bg-emerald-700"
+                title="Smeraldo">
+              </div>
+              }
+              {product.category === "classics" &&
+              <div className="w-3.5 h-3.5 rounded-full border border-neutral-200 bg-[#F5F5DC]" title="Crema"></div>
+              }
             </div>
             <span className="text-[10px] text-neutral-400 uppercase tracking-wide">
               {product.category === "emerald-touch" ? "2 Colori" : "1 Colore"}
@@ -95,13 +95,13 @@ const CollectionCard = ({ product, index }: { product: any; index: number }) => 
           <p className="font-sans text-xs text-neutral-500 mt-0.5">
             {new Intl.NumberFormat("it-IT", {
               style: "currency",
-              currency: "EUR",
+              currency: "EUR"
             }).format(product.price)}
           </p>
         </div>
       </Link>
-    </motion.div>
-  );
+    </motion.div>);
+
 };
 
 // --- PAGINA PRINCIPALE ---
@@ -113,18 +113,18 @@ const Collezioni = () => {
   const { data: products, isLoading } = useProducts(activeFilter);
 
   // Titolo dinamico basato sul filtro
-  const pageTitle = !activeFilter
-    ? "TUTTE LE COLLEZIONI"
-    : activeFilter === "emerald-touch"
-      ? "EMERALD TOUCH"
-      : "I CLASSICI";
+  const pageTitle = !activeFilter ?
+  "TUTTE LE COLLEZIONI" :
+  activeFilter === "emerald-touch" ?
+  "EMERALD TOUCH" :
+  "I CLASSICI";
 
   return (
     <main className="pt-24 pb-20 min-h-screen bg-white">
       {/* 1. Header & Title (Centrato come nella foto) */}
       <div className="text-center mb-12 md:mb-16 container mx-auto px-4">
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="space-y-2">
-          <span className="text-xs font-bold tracking-[0.2em] text-emerald-600 uppercase">Autunno / Inverno 2024</span>
+          <span className="text-xs font-bold tracking-[0.2em] text-emerald-600 uppercase">STAGIONE 2026</span>
           <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl text-neutral-950">{pageTitle}</h1>
         </motion.div>
       </div>
@@ -139,39 +139,39 @@ const Collezioni = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="h-9 px-4 rounded-none border-neutral-200 hover:bg-neutral-50 font-sans text-xs uppercase tracking-widest gap-2"
-                >
+                  className="h-9 px-4 rounded-none border-neutral-200 hover:bg-neutral-50 font-sans text-xs uppercase tracking-widest gap-2">
+
                   <Filter className="w-3.5 h-3.5" /> Filtro
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-48 bg-white rounded-none border-neutral-100">
                 <DropdownMenuItem
                   onClick={() => setActiveFilter(undefined)}
-                  className="cursor-pointer font-sans text-xs uppercase py-3"
-                >
+                  className="cursor-pointer font-sans text-xs uppercase py-3">
+
                   Tutto
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => setActiveFilter("emerald-touch")}
-                  className="cursor-pointer font-sans text-xs uppercase py-3"
-                >
+                  className="cursor-pointer font-sans text-xs uppercase py-3">
+
                   Emerald Touch
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => setActiveFilter("classics")}
-                  className="cursor-pointer font-sans text-xs uppercase py-3"
-                >
+                  className="cursor-pointer font-sans text-xs uppercase py-3">
+
                   Classici
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
 
             {/* Counter Prodotti (Visibile solo desktop) */}
-            {!isLoading && (
-              <span className="hidden md:inline-block text-[10px] text-neutral-400 font-sans uppercase tracking-widest">
+            {!isLoading &&
+            <span className="hidden md:inline-block text-[10px] text-neutral-400 font-sans uppercase tracking-widest">
                 {products?.length} Prodotti
               </span>
-            )}
+            }
           </div>
 
           {/* DESTRA: Ordinamento */}
@@ -180,8 +180,8 @@ const Collezioni = () => {
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-9 px-3 hover:bg-transparent font-sans text-xs uppercase tracking-widest gap-1 text-neutral-600 hover:text-black"
-              >
+                className="h-9 px-3 hover:bg-transparent font-sans text-xs uppercase tracking-widest gap-1 text-neutral-600 hover:text-black">
+
                 Ordinare <ChevronDown className="w-3.5 h-3.5" />
               </Button>
             </DropdownMenuTrigger>
@@ -199,30 +199,30 @@ const Collezioni = () => {
 
       {/* 3. Product Grid (4 Colonne Desktop - Stile Foto) */}
       <div className="container mx-auto px-4 lg:px-8">
-        {isLoading ? (
-          <div className="flex justify-center py-20">
+        {isLoading ?
+        <div className="flex justify-center py-20">
             <ButterflyLoader />
+          </div> :
+
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-10 md:gap-x-6 md:gap-y-16">
+            {products?.map((product, i) =>
+          <CollectionCard key={product.id} product={product} index={i} />
+          )}
           </div>
-        ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-10 md:gap-x-6 md:gap-y-16">
-            {products?.map((product, i) => (
-              <CollectionCard key={product.id} product={product} index={i} />
-            ))}
-          </div>
-        )}
+        }
 
         {/* Empty State */}
-        {!isLoading && products?.length === 0 && (
-          <div className="text-center py-32">
+        {!isLoading && products?.length === 0 &&
+        <div className="text-center py-32">
             <p className="font-serif text-xl text-neutral-400">Nessun prodotto trovato in questa collezione.</p>
             <Button variant="link" onClick={() => setActiveFilter(undefined)} className="mt-4 text-emerald-600">
               Vedi tutto
             </Button>
           </div>
-        )}
+        }
       </div>
-    </main>
-  );
+    </main>);
+
 };
 
 export default Collezioni;
