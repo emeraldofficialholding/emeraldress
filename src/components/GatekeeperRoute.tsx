@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/supabaseCustom";
 import GemLoader from "@/components/GemLoader";
 
 // Routes accessible to everyone (no auth required)
@@ -37,9 +37,29 @@ export default function GatekeeperRoute({ children }: { children: React.ReactNod
       }
     };
 
-    // Use onAuthStateChange as the single source of truth.
-    // It fires immediately with INITIAL_SESSION, so no separate getSession() needed.
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    // Phase 1: initial session check controls the loading state
+    const initialize = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!isMounted) return;
+
+        if (!session?.user) {
+          setStatus("blocked");
+          return;
+        }
+
+        const isAdmin = await checkAdminRole(session.user.id);
+        if (isMounted) setStatus(isAdmin ? "allowed" : "blocked");
+      } catch {
+        if (isMounted) setStatus("blocked");
+      }
+    };
+
+    initialize();
+
+    // Phase 2: react to subsequent auth changes (login/logout)
+    // Use setTimeout to avoid deadlocking the Supabase SDK with async calls inside the callback
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!isMounted) return;
 
       if (!session?.user) {
@@ -47,8 +67,12 @@ export default function GatekeeperRoute({ children }: { children: React.ReactNod
         return;
       }
 
-      const isAdmin = await checkAdminRole(session.user.id);
-      if (isMounted) setStatus(isAdmin ? "allowed" : "blocked");
+      // Dispatch async role check AFTER the callback returns
+      setTimeout(async () => {
+        if (!isMounted) return;
+        const isAdmin = await checkAdminRole(session.user.id);
+        if (isMounted) setStatus(isAdmin ? "allowed" : "blocked");
+      }, 0);
     });
 
     return () => {
@@ -71,4 +95,3 @@ export default function GatekeeperRoute({ children }: { children: React.ReactNod
 
   return <>{children}</>;
 }
-
