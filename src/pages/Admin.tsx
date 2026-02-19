@@ -230,7 +230,11 @@ export default function Admin() {
       sizes: (p.sizes || []).join(","),
       status: (p.status === "draft" ? "draft" : "active") as "active" | "draft",
     });
-    setImageItems((p.images || []).map((url) => ({
+    // Flatten in case DB has nested arrays like [["url"]] instead of ["url"]
+    const flatImages: string[] = (p.images || [])
+      .flat(Infinity)
+      .filter((u): u is string => typeof u === "string");
+    setImageItems(flatImages.map((url) => ({
       id: url,
       url,
       isNew: false,
