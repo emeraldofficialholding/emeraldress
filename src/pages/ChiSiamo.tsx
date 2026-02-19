@@ -126,7 +126,7 @@ const ChiSiamo = () => {
           <Timeline data={timelineData} />
 
           {/* ATELIER PARALLAX STRIP */}
-          <section className="w-screen relative left-1/2 -translate-x-1/2 h-[400px] mb-24 overflow-hidden mt-20 group">
+          <section className="w-screen relative left-1/2 -translate-x-1/2 h-[400px] overflow-hidden mt-16 group">
             <div className="absolute inset-0 bg-black/40 z-10 flex flex-col items-center justify-center text-white">
               <span className="tracking-[0.5em] uppercase text-sm mb-4">L'Arte del fare</span>
               <h2 className="font-serif text-5xl md:text-6xl">Atelier Italiano</h2>
