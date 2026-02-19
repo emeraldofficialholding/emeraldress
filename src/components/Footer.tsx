@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Instagram, Youtube, Mail, MapPin } from "lucide-react";
+import { Instagram, Youtube, Mail } from "lucide-react";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -17,9 +17,7 @@ const Footer = () => {
               pianeta e un omaggio alla bellezza.
             </p>
             <div className="flex items-center gap-4">
-              {/* INSTAGRAM */}
               <SocialIcon icon={<Instagram className="w-5 h-5" />} href="https://www.instagram.com/emeraldress_/" />
-              {/* TIKTOK */}
               <SocialIcon
                 icon={
                   <svg
@@ -36,7 +34,6 @@ const Footer = () => {
                 }
                 href="https://www.tiktok.com/@emeraldress"
               />
-              {/* YOUTUBE */}
               <SocialIcon icon={<Youtube className="w-5 h-5" />} href="https://www.youtube.com/@emeraldress" />
             </div>
           </div>
@@ -52,7 +49,7 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* COLONNA 3: Supporto & Legal */}
+          {/* COLONNA 3: Supporto */}
           <div>
             <h4 className="text-xs tracking-[0.2em] uppercase font-bold text-emerald-900 mb-6">Supporto</h4>
             <ul className="space-y-4">
@@ -63,18 +60,10 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* COLONNA 4: Contatti Rapidi (Atelier) */}
+          {/* COLONNA 4: Contatti */}
           <div>
-            <h4 className="text-xs tracking-[0.2em] uppercase font-bold text-emerald-900 mb-6">Atelier</h4>
+            <h4 className="text-xs tracking-[0.2em] uppercase font-bold text-emerald-900 mb-6">Contatti</h4>
             <div className="space-y-4">
-              <div className="flex items-start gap-3 group cursor-pointer">
-                <MapPin className="w-5 h-5 text-emerald-700 mt-0.5 group-hover:text-emerald-500 transition-colors" />
-                <p className="text-sm text-emerald-800/80 font-sans group-hover:text-emerald-950 transition-colors">
-                  Via della Spiga, 15
-                  <br />
-                  20121 Milano, Italia
-                </p>
-              </div>
               <div className="flex items-center gap-3 group cursor-pointer">
                 <Mail className="w-5 h-5 text-emerald-700 group-hover:text-emerald-500 transition-colors" />
                 <a
@@ -84,6 +73,9 @@ const Footer = () => {
                   emeraldress@gmail.com
                 </a>
               </div>
+              <p className="text-[10px] text-emerald-700/60 font-sans italic">
+                Disponibili per consulenze online e assistenza esclusiva.
+              </p>
             </div>
           </div>
         </div>
@@ -108,7 +100,6 @@ const Footer = () => {
   );
 };
 
-// Componente Helper per i Link
 const FooterLink = ({ to, label }: { to: string; label: string }) => (
   <li>
     <Link
@@ -121,7 +112,6 @@ const FooterLink = ({ to, label }: { to: string; label: string }) => (
   </li>
 );
 
-// Componente Helper per le Icone Social
 const SocialIcon = ({ icon, href }: { icon: React.ReactNode; href: string }) => (
   <a
     href={href}
