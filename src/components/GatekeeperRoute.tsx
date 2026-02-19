@@ -15,63 +15,76 @@ export default function GatekeeperRoute({ children }: { children: React.ReactNod
   );
 
   useEffect(() => {
+    // Public routes always allowed — no check needed
     if (isPublic) {
       setStatus("allowed");
       return;
     }
 
     let isMounted = true;
+    let subscription: { unsubscribe: () => void } | null = null;
 
-    const checkAdminRole = async (userId: string) => {
+    const checkAdminRole = async (userId: string): Promise<boolean> => {
       try {
-        const { data } = await supabase
+        const { data, error } = await supabase
           .from("user_roles")
           .select("role")
           .eq("user_id", userId)
           .eq("role", "admin")
           .maybeSingle();
-        if (isMounted) setStatus(data ? "allowed" : "blocked");
+        if (error) return false;
+        return !!data;
       } catch {
-        if (isMounted) setStatus("blocked");
+        return false;
       }
     };
 
-    // Listen for real-time auth changes (login/logout)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        if (!isMounted) return;
-        if (session?.user) {
-          // Dispatch after callback to avoid deadlock
-          setTimeout(() => checkAdminRole(session.user.id), 0);
-        } else {
-          setStatus("blocked");
-        }
-      }
-    );
-
-    // Initial check — controls first load
-    const initializeAuth = async () => {
+    const initialize = async () => {
       try {
+        // 1. Get current session first
         const { data: { session } } = await supabase.auth.getSession();
+
         if (!isMounted) return;
-        if (session?.user) {
-          await checkAdminRole(session.user.id);
-        } else {
+
+        if (!session?.user) {
           setStatus("blocked");
+          return;
         }
+
+        // 2. Verify admin role server-side
+        const isAdmin = await checkAdminRole(session.user.id);
+        if (isMounted) setStatus(isAdmin ? "allowed" : "blocked");
       } catch {
         if (isMounted) setStatus("blocked");
       }
     };
 
-    initializeAuth();
+    // 3. Listen for real-time auth changes (login/logout while on page)
+    const { data: authData } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (!isMounted) return;
+
+      if (!session?.user) {
+        setStatus("blocked");
+        return;
+      }
+
+      // Re-check role on every auth state change
+      const isAdmin = await checkAdminRole(session.user.id);
+      if (isMounted) setStatus(isAdmin ? "allowed" : "blocked");
+    });
+
+    subscription = authData.subscription;
+
+    // Run initial check
+    initialize();
 
     return () => {
       isMounted = false;
-      subscription.unsubscribe();
+      subscription?.unsubscribe();
     };
   }, [location.pathname, isPublic]);
 
+  // Always block while loading (never flash content)
   if (status === "loading") {
     return (
       <div className="min-h-screen bg-[#e4ffec] flex items-center justify-center">
