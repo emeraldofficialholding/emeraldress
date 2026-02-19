@@ -15,14 +15,12 @@ export default function GatekeeperRoute({ children }: { children: React.ReactNod
   );
 
   useEffect(() => {
-    // Public routes always allowed — no check needed
     if (isPublic) {
       setStatus("allowed");
       return;
     }
 
     let isMounted = true;
-    let subscription: { unsubscribe: () => void } | null = null;
 
     const checkAdminRole = async (userId: string): Promise<boolean> => {
       try {
@@ -39,28 +37,9 @@ export default function GatekeeperRoute({ children }: { children: React.ReactNod
       }
     };
 
-    const initialize = async () => {
-      try {
-        // 1. Get current session first
-        const { data: { session } } = await supabase.auth.getSession();
-
-        if (!isMounted) return;
-
-        if (!session?.user) {
-          setStatus("blocked");
-          return;
-        }
-
-        // 2. Verify admin role server-side
-        const isAdmin = await checkAdminRole(session.user.id);
-        if (isMounted) setStatus(isAdmin ? "allowed" : "blocked");
-      } catch {
-        if (isMounted) setStatus("blocked");
-      }
-    };
-
-    // 3. Listen for real-time auth changes (login/logout while on page)
-    const { data: authData } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    // Use onAuthStateChange as the single source of truth.
+    // It fires immediately with INITIAL_SESSION, so no separate getSession() needed.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (!isMounted) return;
 
       if (!session?.user) {
@@ -68,23 +47,16 @@ export default function GatekeeperRoute({ children }: { children: React.ReactNod
         return;
       }
 
-      // Re-check role on every auth state change
       const isAdmin = await checkAdminRole(session.user.id);
       if (isMounted) setStatus(isAdmin ? "allowed" : "blocked");
     });
 
-    subscription = authData.subscription;
-
-    // Run initial check
-    initialize();
-
     return () => {
       isMounted = false;
-      subscription?.unsubscribe();
+      subscription.unsubscribe();
     };
   }, [location.pathname, isPublic]);
 
-  // Always block while loading (never flash content)
   if (status === "loading") {
     return (
       <div className="min-h-screen bg-[#e4ffec] flex items-center justify-center">
@@ -99,3 +71,4 @@ export default function GatekeeperRoute({ children }: { children: React.ReactNod
 
   return <>{children}</>;
 }
+
