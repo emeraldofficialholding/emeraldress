@@ -5,22 +5,22 @@ import heroVideo from "@/assets/hero-video.mp4";
 const FadeUp = ({
   children,
   delay = 0,
-  className = ""
-
-
-
-
-}: {children: React.ReactNode;delay?: number;className?: string;}) =>
-<motion.div
-  initial={{ opacity: 0, y: 36 }}
-  whileInView={{ opacity: 1, y: 0 }}
-  viewport={{ once: true }}
-  transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1], delay }}
-  className={className}>
-
+  className = "",
+}: {
+  children: React.ReactNode;
+  delay?: number;
+  className?: string;
+}) => (
+  <motion.div
+    initial={{ opacity: 0, y: 36 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true }}
+    transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1], delay }}
+    className={className}
+  >
     {children}
-  </motion.div>;
-
+  </motion.div>
+);
 
 const ClassicsSection = () => {
   return (
@@ -29,12 +29,13 @@ const ClassicsSection = () => {
         {/* ── LEFT: Video ─────────────────────────────────── */}
         <div className="relative overflow-hidden h-[70vw] sm:h-[55vw] lg:h-auto">
           <video
-            src={heroVideo}
+            src="https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/hf_20260219_151213_1d627184-125b-46a5-a620-25d188f39862.mp4"
             autoPlay
             muted
             loop
             playsInline
-            className="absolute inset-0 w-full h-full object-cover" />
+            className="absolute inset-0 w-full h-full object-cover"
+          />
 
           {/* Fade-right to blend into the right column on desktop */}
           <div className="absolute inset-0 hidden lg:block bg-gradient-to-r from-transparent via-transparent to-[#f5fef8]/40 pointer-events-none" />
@@ -66,10 +67,9 @@ const ClassicsSection = () => {
           {/* Description */}
           <FadeUp delay={0.3}>
             <p className="font-sans text-neutral-500 text-base md:text-lg leading-relaxed mb-10 max-w-md">
-              Seta pura, tagli sartoriali e un'anima vibrante. Ogni pezzo è
-              numerato e parte di una tiratura limitata per garantire
-              l'unicità del tuo stile. Concepita per chi non cerca
-              semplicemente un abito, ma un'esperienza indimenticabile.
+              Seta pura, tagli sartoriali e un'anima vibrante. Ogni pezzo è numerato e parte di una tiratura limitata
+              per garantire l'unicità del tuo stile. Concepita per chi non cerca semplicemente un abito, ma
+              un'esperienza indimenticabile.
             </p>
           </FadeUp>
 
@@ -77,8 +77,8 @@ const ClassicsSection = () => {
           <FadeUp delay={0.4}>
             <Link
               to="/collezioni?category=emerald-touch"
-              className="group inline-flex items-center gap-4 border border-neutral-900 text-neutral-900 px-8 py-4 text-xs tracking-[0.25em] uppercase font-sans hover:bg-neutral-900 hover:text-[#f5fef8] transition-all duration-500 w-fit">
-
+              className="group inline-flex items-center gap-4 border border-neutral-900 text-neutral-900 px-8 py-4 text-xs tracking-[0.25em] uppercase font-sans hover:bg-neutral-900 hover:text-[#f5fef8] transition-all duration-500 w-fit"
+            >
               Scopri la Collezione
               <span className="block w-5 h-px bg-current transition-all duration-300 group-hover:w-8" />
             </Link>
@@ -92,8 +92,8 @@ const ClassicsSection = () => {
           </FadeUp>
         </div>
       </div>
-    </section>);
-
+    </section>
+  );
 };
 
 export default ClassicsSection;
