@@ -79,43 +79,17 @@ function MarqueeBand({ children, direction = "left", baseVelocity = 0.5, classNa
 
 const TrustMarquee = () => {
   return (
-    // MODIFICA: py-10 riduce lo spazio verticale (era py-20 o pt-40).
-    // bg-neutral-50 uniforma lo sfondo alla sezione successiva.
-    <section className="py-10 overflow-hidden bg-neutral-50 relative border-b border-emerald-100/50">
-      {/* Prima Banda - Inclinata verso l'alto */}
-      <div className="relative z-10 rotate-[-2deg] origin-center my-2">
-        <MarqueeBand
-          baseVelocity={0.8}
-          direction="left"
-          className="bg-[#e4ffec] border-y border-emerald-100/50 shadow-sm"
-        >
-          <span className="text-emerald-950 font-serif text-xl md:text-3xl tracking-[0.15em] mx-4 flex items-center gap-8">
-            EMERALDRESS <span className="text-emerald-400 text-sm">●</span>
-            MADE IN ITALY <span className="text-emerald-400 text-sm">●</span>
-            LUSSO CONSAPEVOLE <span className="text-emerald-400 text-sm">●</span>
-            FIBRA RIGENERATA <span className="text-emerald-400 text-sm">●</span>
-            SARTORIA DIGITALE <span className="text-emerald-400 text-sm">●</span>
-            ZERO WASTE <span className="text-emerald-400 text-sm">●</span>
-            ARTIGIANATO SARDO <span className="text-emerald-400 text-sm">●</span>
-          </span>
-        </MarqueeBand>
-      </div>
-
-      {/* Seconda Banda - Inclinata verso il basso */}
-      <div className="relative z-10 rotate-[2deg] origin-center -mt-6">
-        <MarqueeBand
-          baseVelocity={0.8}
-          direction="right"
-          className="bg-[#e4ffec] border-y border-emerald-100/50 shadow-sm"
-        >
-          <span className="text-emerald-950 font-serif text-xl md:text-3xl tracking-[0.15em] mx-4 flex items-center gap-8">
-            SOSTENIBILITÀ CERTIFICATA <span className="text-emerald-400 text-sm">●</span>
-            ECONYL® TECHNOLOGY <span className="text-emerald-400 text-sm">●</span>
-            SPEDIZIONI GREEN <span className="text-emerald-400 text-sm">●</span>
-            OCEAN CLEANUP <span className="text-emerald-400 text-sm">●</span>
-            ECONOMIA CIRCOLARE <span className="text-emerald-400 text-sm">●</span>
-            ETHICAL FASHION <span className="text-emerald-400 text-sm">●</span>
-            TRASPARENZA TOTALE <span className="text-emerald-400 text-sm">●</span>
+    <section className="py-6 overflow-hidden bg-white relative border-b border-emerald-100/30">
+      <div className="relative z-10">
+        <MarqueeBand baseVelocity={0.8} direction="left" className="bg-[#e4ffec] border-y border-emerald-100/50">
+          <span className="text-emerald-950 font-serif text-lg md:text-2xl tracking-[0.15em] mx-4 flex items-center gap-8">
+            SustainableFashion <span className="text-emerald-400 text-sm">●</span>
+            EcoLuxury <span className="text-emerald-400 text-sm">●</span>
+            MadeInItaly <span className="text-emerald-400 text-sm">●</span>
+            Ecological fabrics <span className="text-emerald-400 text-sm">●</span>
+            Lusso Sostenibile <span className="text-emerald-400 text-sm">●</span>
+            Costa Smeralda Style <span className="text-emerald-400 text-sm">●</span>
+            ecofriendly <span className="text-emerald-400 text-sm">●</span>
           </span>
         </MarqueeBand>
       </div>
