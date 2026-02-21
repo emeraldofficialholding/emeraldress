@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { ArrowRight, Recycle, Leaf, ShoppingBag, Sparkles } from "lucide-react";
 import logoED from "@/assets/logo-ed.png";
+import logoET from "@/assets/logo-emeraldtouch.png";
 import { Link } from "react-router-dom";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
@@ -176,7 +177,7 @@ const LatestCollectionShowcase = () => {
           <div className="flex items-center justify-center gap-2 text-neutral-500 font-sans tracking-[0.2em] uppercase text-sm md:text-base">
             <Sparkles className="w-4 h-4 text-emerald-500" />
             <span>
-              Ultima Uscita: <span className="font-bold text-emerald-500">Emerald Touch</span>
+              Ultima Uscita: <img src={logoET} alt="Emerald Touch" className="inline h-5 object-contain align-middle ml-1" />
             </span>
           </div>
         </div>
