@@ -74,9 +74,9 @@ const HeroSustainability = () =>
         </span>
         <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl leading-[1.1] mb-8 drop-shadow-lg">Lusso Responsabile</h1>
         <p className="text-base md:text-xl font-sans text-white/90 leading-relaxed max-w-lg mx-auto md:mx-0 md:border-l-2 md:border-emerald-400 md:pl-6">
-          "La nostra ambizione è esportare nel mondo la bellezza della Costa Smeralda: la sua luce, la sua calma, la sua
-          eleganza discreta."
-        </p>
+          "La nostra è una sostenibilità responsabile: materiali rigenerati, processi etici e packaging riutilizzabile. Per noi la coerenza non è una moda, ma l'essenza di un lusso contemporaneo che rispetta il mondo"
+        
+      </p>
       </motion.div>
     </div>
   </section>;
