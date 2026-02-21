@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import heroVideo from "@/assets/hero-video.mp4";
+import logoET from "@/assets/logo-emeraldtouch.png";
 
 const FadeUp = ({
   children,
@@ -52,11 +53,10 @@ const ClassicsSection = () => {
 
           {/* Title */}
           <FadeUp delay={0.15}>
-            <h2 className="font-serif text-4xl md:text-5xl xl:text-[3.5rem] text-neutral-900 leading-[1.1] mb-6">
-              Emerald Touch
-              <br />
-              <span className="italic text-emerald-700">L'Essenza del Lusso</span>
-            </h2>
+            <div className="mb-6">
+              <img src={logoET} alt="Emerald Touch" className="h-10 md:h-14 object-contain mb-3" />
+              <span className="block italic text-emerald-700 font-serif text-2xl md:text-3xl">L'Essenza del Lusso</span>
+            </div>
           </FadeUp>
 
           {/* Divider */}
