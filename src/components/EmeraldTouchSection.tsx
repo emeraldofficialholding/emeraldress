@@ -16,7 +16,7 @@ const EmeraldTouchSection = () => {
 
   // 2. Se non ne trova, usa i primi 4 prodotti generici (Fallback) per non lasciare il buco vuoto
   const displayProducts =
-    emeraldProducts && emeraldProducts.length > 0 ? emeraldProducts.slice(0, 4) : allProducts?.slice(0, 4);
+  emeraldProducts && emeraldProducts.length > 0 ? emeraldProducts.slice(0, 4) : allProducts?.slice(0, 4);
 
   // Varianti per l'animazione a cascata della griglia
   const containerVariants = {
@@ -24,9 +24,9 @@ const EmeraldTouchSection = () => {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.15,
-      },
-    },
+        staggerChildren: 0.15
+      }
+    }
   };
 
   return (
@@ -37,9 +37,9 @@ const EmeraldTouchSection = () => {
         <div
           className="absolute inset-0 opacity-[0.03]"
           style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-          }}
-        ></div>
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`
+          }}>
+        </div>
       </div>
 
       {/* Blob sfocato laterale */}
@@ -52,11 +52,11 @@ const EmeraldTouchSection = () => {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-          >
+            viewport={{ once: true }}>
+
             <div className="flex items-center justify-center gap-2 mb-4">
               <Sparkles className="w-5 h-5 text-emerald-500" />
-              <p className="text-xs tracking-[0.3em] uppercase text-emerald-800 font-bold font-sans">
+              <p className="text-xs tracking-[0.3em] uppercase font-bold font-sans text-emerald-500">
                 Collezione Esclusiva
               </p>
             </div>
@@ -71,30 +71,30 @@ const EmeraldTouchSection = () => {
         </div>
 
         {/* Griglia Prodotti */}
-        {isLoading ? (
-          <div className="flex justify-center py-20">
+        {isLoading ?
+        <div className="flex justify-center py-20">
             <GemLoader />
-          </div>
-        ) : (
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-10"
-          >
-            {displayProducts?.map((product, i) => (
-              <ProductCard key={product.id} product={product} index={i} />
-            ))}
+          </div> :
+
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px" }}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-10">
+
+            {displayProducts?.map((product, i) =>
+          <ProductCard key={product.id} product={product} index={i} />
+          )}
 
             {/* Messaggio se non ci sono prodotti nemmeno nel fallback */}
-            {(!displayProducts || displayProducts.length === 0) && (
-              <div className="col-span-full text-center py-10 text-neutral-400 font-serif italic">
+            {(!displayProducts || displayProducts.length === 0) &&
+          <div className="col-span-full text-center py-10 text-neutral-400 font-serif italic">
                 Nessun prodotto disponibile al momento.
               </div>
-            )}
+          }
           </motion.div>
-        )}
+        }
 
         {/* Bottone "Vedi Tutto" in fondo */}
         <motion.div
@@ -102,21 +102,21 @@ const EmeraldTouchSection = () => {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4, duration: 0.8 }}
           viewport={{ once: true }}
-          className="flex justify-center mt-16"
-        >
+          className="flex justify-center mt-16">
+
           <Link to="/collezioni?category=emerald-touch">
             <HoverBorderGradient
               containerClassName="rounded-full"
-              className="bg-white text-emerald-950 flex items-center gap-3 px-10 py-4 font-bold tracking-widest uppercase text-sm shadow-xl shadow-emerald-100/50 hover:shadow-emerald-200/50 transition-all"
-            >
+              className="bg-white text-emerald-950 flex items-center gap-3 px-10 py-4 font-bold tracking-widest uppercase text-sm shadow-xl shadow-emerald-100/50 hover:shadow-emerald-200/50 transition-all">
+
               Esplora la Collezione
               <ArrowRight className="w-4 h-4" />
             </HoverBorderGradient>
           </Link>
         </motion.div>
       </div>
-    </section>
-  );
+    </section>);
+
 };
 
 export default EmeraldTouchSection;
