@@ -179,7 +179,7 @@ const LatestCollectionShowcase = () => {
           <div className="flex items-center justify-center gap-2 text-neutral-500 font-sans tracking-[0.2em] uppercase text-sm md:text-base">
             <Sparkles className="w-4 h-4 text-emerald-500" />
             <span>
-              Ultima Uscita: <span className="text-emerald-800 font-bold">Emerald Touch</span>
+              Ultima Uscita: <span className="font-bold text-emerald-500">Emerald Touch</span>
             </span>
           </div>
         </div>
