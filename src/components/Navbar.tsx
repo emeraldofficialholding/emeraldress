@@ -77,13 +77,13 @@ const Navbar = () => {
               link.hasSubmenu ? (
                 <div
                   key={link.to}
-                  className="relative"
+                  className="relative group"
                   onMouseEnter={handleDropdownEnter}
                   onMouseLeave={handleDropdownLeave}
                 >
                   <Link
                     to={link.to}
-                    className={`text-xs tracking-[0.15em] uppercase font-sans font-medium transition-opacity hover:opacity-70 flex items-center gap-1 ${
+                    className={`text-xs tracking-[0.15em] uppercase font-sans font-medium transition-opacity hover:opacity-70 flex items-center gap-1 py-2 ${
                       location.pathname === link.to || location.pathname.startsWith("/collezioni") ? "opacity-100" : "opacity-80"
                     }`}
                   >
@@ -91,24 +91,33 @@ const Navbar = () => {
                     <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${desktopDropdown ? "rotate-180" : ""}`} />
                   </Link>
 
+                  {/* Invisible bridge to prevent hover gap */}
+                  {desktopDropdown && (
+                    <div className="absolute top-full left-0 right-0 h-3" />
+                  )}
+
                   <AnimatePresence>
                     {desktopDropdown && (
                       <motion.div
-                        initial={{ opacity: 0, y: 8 }}
+                        initial={{ opacity: 0, y: 6 }}
                         animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 8 }}
+                        exit={{ opacity: 0, y: 6 }}
                         transition={{ duration: 0.2, ease: "easeOut" }}
-                        className="absolute top-full left-1/2 -translate-x-1/2 mt-3 bg-white rounded-xl shadow-xl border border-emerald-100/50 p-5 min-w-[220px] z-50"
+                        className="absolute top-[calc(100%+0.5rem)] left-0 bg-white rounded-lg shadow-lg border border-emerald-100/60 p-4 min-w-[200px] z-[60]"
                       >
                         <Link
-                          to="/collezioni?category=emerald-touch"
-                          className="flex items-center gap-3 group"
+                          to="/collezioni"
+                          className="block text-xs tracking-[0.1em] uppercase font-sans font-medium text-emerald-900 hover:text-emerald-600 transition-colors mb-3 pb-3 border-b border-emerald-50"
                           onClick={() => setDesktopDropdown(false)}
                         >
-                          <img src={logoET} alt="Emerald Touch" className="h-6 w-auto object-contain" />
-                          <span className="text-xs tracking-[0.1em] uppercase font-sans text-emerald-800 group-hover:text-emerald-600 transition-colors">
-                            Collezione
-                          </span>
+                          Tutte le Collezioni
+                        </Link>
+                        <Link
+                          to="/collezioni?category=emerald-touch"
+                          className="flex items-center gap-3 group/item py-1"
+                          onClick={() => setDesktopDropdown(false)}
+                        >
+                          <img src={logoET} alt="Emerald Touch" className="h-5 w-auto object-contain group-hover/item:opacity-80 transition-opacity" />
                         </Link>
                       </motion.div>
                     )}
