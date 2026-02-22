@@ -98,14 +98,14 @@ const ManifestoSection = () => {
         </div>
       </section>
 
-      {/* --- SEZIONE 2: VISION (Redesign Editoriale) --- */}
+      {/* --- SEZIONE 2: VISION (Focus Sostenibilità) --- */}
       <section className="py-32 bg-[#F9FAF9] relative overflow-hidden">
         {/* Decorazione Sfondo */}
         <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-emerald-50 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3 pointer-events-none" />
 
         <div className="container mx-auto px-4 lg:px-8 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-center">
-            {/* COLONNA SX: Testo & Features */}
+            {/* COLONNA SX: Testo & Call to Action */}
             <div className="lg:col-span-5 space-y-12">
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
@@ -117,15 +117,26 @@ const ManifestoSection = () => {
                   Lusso <br /> <span className="italic text-emerald-600">Rigenerato.</span>
                 </h3>
                 <div className="h-1 w-20 bg-emerald-400 mb-8" />
-                <p className="text-neutral-600 text-lg leading-relaxed font-sans">
-                  Non creiamo solo abiti, progettiamo il futuro. Ogni capo Emeraldress nasce da reti da pesca recuperate
-                  dai fondali marini, trasformate in <strong>Nylon rigenerato ECONYL®</strong>. Bellezza pura, senza
-                  compromessi.
+                <p className="text-neutral-600 text-lg leading-relaxed font-sans mb-8">
+                  Non creiamo solo abiti, progettiamo il futuro. Ogni capo Emeraldress nasce dal recupero di reti da
+                  pesca abbandonate nei mari, trasformate in prezioso <strong>Nylon ECONYL®</strong>. Scopri come un
+                  problema ambientale diventa bellezza pura, senza compromessi per il pianeta.
                 </p>
+
+                {/* NUOVO BOTTONE VERSO /SOSTENIBILITA */}
+                <Link to="/sostenibilita" className="inline-block">
+                  <HoverBorderGradient
+                    containerClassName="rounded-full"
+                    className="bg-emerald-950 text-[#e4ffec] flex items-center gap-3 px-8 py-3.5 font-bold tracking-widest uppercase text-xs hover:bg-emerald-900 transition-colors shadow-lg"
+                  >
+                    Scopri i Benefici del Processo
+                    <ArrowRight className="w-4 h-4" />
+                  </HoverBorderGradient>
+                </Link>
               </motion.div>
 
               {/* Griglia Icone Features */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 pt-4 border-t border-emerald-100/50">
                 <motion.div
                   className="flex gap-4 items-start"
                   initial={{ opacity: 0, x: -20 }}
@@ -249,7 +260,6 @@ const ManifestoSection = () => {
                     placeholder="Nome Completo"
                     required
                   />
-
                   <label
                     htmlFor="nome"
                     className="absolute left-0 -top-3.5 text-emerald-700 text-xs transition-all peer-placeholder-shown:text-lg peer-placeholder-shown:text-emerald-800/60 peer-placeholder-shown:top-4 peer-focus:-top-3.5 peer-focus:text-emerald-700 peer-focus:text-xs uppercase tracking-widest"
@@ -270,7 +280,6 @@ const ManifestoSection = () => {
                     placeholder="Indirizzo Email"
                     required
                   />
-
                   <label
                     htmlFor="email"
                     className="absolute left-0 -top-3.5 text-emerald-700 text-xs transition-all peer-placeholder-shown:text-lg peer-placeholder-shown:text-emerald-800/60 peer-placeholder-shown:top-4 peer-focus:-top-3.5 peer-focus:text-emerald-700 peer-focus:text-xs uppercase tracking-widest"
@@ -291,7 +300,6 @@ const ManifestoSection = () => {
                     placeholder="Numero di Telefono"
                     required
                   />
-
                   <label
                     htmlFor="telefono"
                     className="absolute left-0 -top-3.5 text-emerald-700 text-xs transition-all peer-placeholder-shown:text-lg peer-placeholder-shown:text-emerald-800/60 peer-placeholder-shown:top-4 peer-focus:-top-3.5 peer-focus:text-emerald-700 peer-focus:text-xs uppercase tracking-widest"
@@ -307,7 +315,6 @@ const ManifestoSection = () => {
                   type="submit"
                   disabled={isSubmitting}
                   containerClassName="rounded-full"
-                  // Bottone Invertito: Sfondo Scuro, Testo Chiaro per contrasto su fondo #e4ffec
                   className="bg-emerald-950 text-[#e4ffec] border-none flex items-center gap-3 px-12 py-4 font-bold tracking-widest uppercase text-sm w-full md:w-auto justify-center min-w-[200px] hover:bg-emerald-900 transition-colors"
                 >
                   {isSubmitting ? (
