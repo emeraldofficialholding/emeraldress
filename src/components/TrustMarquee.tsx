@@ -12,6 +12,7 @@ import {
 } from "framer-motion";
 import { wrap } from "@motionone/utils";
 import { cn } from "@/lib/utils";
+import logoED from "@/assets/logo-ed.png";
 
 type MarqueeBandProps = {
   children: React.ReactNode;
@@ -84,13 +85,13 @@ const TrustMarquee = () => {
         <MarqueeBand baseVelocity={0.8} direction="left" className="bg-[#e4ffec] border-y border-emerald-100/50">
           {/* Sostituito font-serif con font-sans e font-medium per una leggibilità perfetta in movimento */}
           <span className="text-emerald-950 font-sans font-medium text-base md:text-lg tracking-[0.15em] mx-4 flex items-center gap-8">
-            SUSTAINABLE FASHION <span className="text-emerald-400 text-sm">●</span>
-            ECO LUXURY <span className="text-emerald-400 text-sm">●</span>
-            MADE IN ITALY <span className="text-emerald-400 text-sm">●</span>
-            ECOLOGICAL FABRICS <span className="text-emerald-400 text-sm">●</span>
-            LUSSO SOSTENIBILE <span className="text-emerald-400 text-sm">●</span>
-            COSTA SMERALDA STYLE <span className="text-emerald-400 text-sm">●</span>
-            ECO FRIENDLY <span className="text-emerald-400 text-sm">●</span>
+            SUSTAINABLE FASHION <img src={logoED} alt="" className="h-4 w-auto object-contain" />
+            ECO LUXURY <img src={logoED} alt="" className="h-4 w-auto object-contain" />
+            MADE IN ITALY <img src={logoED} alt="" className="h-4 w-auto object-contain" />
+            ECOLOGICAL FABRICS <img src={logoED} alt="" className="h-4 w-auto object-contain" />
+            LUSSO SOSTENIBILE <img src={logoED} alt="" className="h-4 w-auto object-contain" />
+            COSTA SMERALDA STYLE <img src={logoED} alt="" className="h-4 w-auto object-contain" />
+            ECO FRIENDLY <img src={logoED} alt="" className="h-4 w-auto object-contain" />
           </span>
         </MarqueeBand>
       </div>

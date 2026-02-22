@@ -188,10 +188,10 @@ const ManifestoSection = () => {
             </div>
 
             {/* COLONNA DX: Immagini Sovrapposte (Editorial Look) */}
-            <div className="lg:col-span-7 relative h-[600px] hidden lg:block">
+            <div className="lg:col-span-7 relative h-[400px] lg:h-[600px] mt-12 lg:mt-0">
               {/* Immagine Grande (Sfondo) */}
               <motion.div
-                className="absolute right-0 top-0 w-3/4 h-[550px] overflow-hidden rounded-sm shadow-xl"
+                className="absolute right-0 top-0 w-full lg:w-3/4 h-[350px] lg:h-[550px] overflow-hidden rounded-sm shadow-xl"
                 initial={{ opacity: 0, y: 50 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 1 }}
@@ -206,7 +206,7 @@ const ManifestoSection = () => {
 
               {/* Immagine Piccola (Sovrapposta) */}
               <motion.div
-                className="absolute left-10 bottom-0 w-1/2 h-[350px] overflow-hidden rounded-sm shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] border-4 border-white"
+                className="absolute left-0 lg:left-10 bottom-0 w-2/3 lg:w-1/2 h-[200px] lg:h-[350px] overflow-hidden rounded-sm shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] border-4 border-white hidden lg:block"
                 initial={{ opacity: 0, x: -50 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 transition={{ duration: 1, delay: 0.3 }}

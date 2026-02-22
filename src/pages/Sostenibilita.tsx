@@ -178,9 +178,9 @@ const LatestCollectionShowcase = () => {
           </motion.h2>
           <div className="flex items-center justify-center gap-2 text-neutral-500 font-sans tracking-[0.2em] uppercase text-sm md:text-base">
             <Sparkles className="w-4 h-4 text-emerald-500" />
-            <span>
-              Ultima Uscita:{" "}
-              <img src={logoET} alt="Emerald Touch" className="inline h-5 object-contain align-middle ml-1" />
+            <span className="flex items-center gap-1">
+              Ultima Uscita:
+              <img src={logoET} alt="Emerald Touch" className="h-5 w-auto object-contain" />
             </span>
           </div>
         </div>
