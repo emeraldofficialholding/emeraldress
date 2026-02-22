@@ -1,13 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { User, ShoppingBag, Menu, X, ChevronDown } from "lucide-react";
+import { User, ShoppingBag, Menu, X } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { motion, AnimatePresence, useAnimation } from "framer-motion";
-import logoET from "@/assets/logo-emeraldtouch.png";
 
 const links = [
   { to: "/", label: "Home" },
-  { to: "/collezioni", label: "Collezioni", hasSubmenu: true },
+  { to: "/collezioni", label: "Collezioni" },
   { to: "/chisiamo", label: "Chi Siamo" },
   { to: "/sostenibilita", label: "Sostenibilità" },
   { to: "/emeraldscanner", label: "Emerald Scanner" },
@@ -16,9 +15,6 @@ const links = [
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [collezioniOpen, setCollezioniOpen] = useState(false);
-  const [desktopDropdown, setDesktopDropdown] = useState(false);
-  const dropdownTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const cartControls = useAnimation();
   const { totalItems, setIsOpen } = useCart();
   const prevTotal = useRef(totalItems);
@@ -41,22 +37,11 @@ const Navbar = () => {
     prevTotal.current = totalItems;
   }, [totalItems, cartControls]);
 
-  // Close mobile menu on route change
   useEffect(() => {
     setMobileOpen(false);
-    setCollezioniOpen(false);
   }, [location.pathname]);
 
   const transparent = isHome && !scrolled && !mobileOpen;
-
-  const handleDropdownEnter = () => {
-    if (dropdownTimeout.current) clearTimeout(dropdownTimeout.current);
-    setDesktopDropdown(true);
-  };
-
-  const handleDropdownLeave = () => {
-    dropdownTimeout.current = setTimeout(() => setDesktopDropdown(false), 150);
-  };
 
   return (
     <>
@@ -73,68 +58,17 @@ const Navbar = () => {
           </Link>
 
           <nav className="hidden lg:flex items-center gap-8">
-            {links.map((link) =>
-              link.hasSubmenu ? (
-                <div
-                  key={link.to}
-                  className="relative group"
-                  onMouseEnter={handleDropdownEnter}
-                  onMouseLeave={handleDropdownLeave}
-                >
-                  <Link
-                    to={link.to}
-                    className={`text-xs tracking-[0.15em] uppercase font-sans font-medium transition-opacity hover:opacity-70 flex items-center gap-1 py-2 ${
-                      location.pathname === link.to || location.pathname.startsWith("/collezioni") ? "opacity-100" : "opacity-80"
-                    }`}
-                  >
-                    {link.label}
-                    <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${desktopDropdown ? "rotate-180" : ""}`} />
-                  </Link>
-
-                  {/* Invisible bridge to prevent hover gap */}
-                  {desktopDropdown && (
-                    <div className="absolute top-full left-0 right-0 h-3" />
-                  )}
-
-                  <AnimatePresence>
-                    {desktopDropdown && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 6 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 6 }}
-                        transition={{ duration: 0.2, ease: "easeOut" }}
-                        className="absolute top-[calc(100%+0.5rem)] left-0 bg-white rounded-lg shadow-lg border border-emerald-100/60 p-4 min-w-[200px] z-[60]"
-                      >
-                        <Link
-                          to="/collezioni"
-                          className="block text-xs tracking-[0.1em] uppercase font-sans font-medium text-emerald-900 hover:text-emerald-600 transition-colors mb-3 pb-3 border-b border-emerald-50"
-                          onClick={() => setDesktopDropdown(false)}
-                        >
-                          Tutte le Collezioni
-                        </Link>
-                        <Link
-                          to="/collezioni?category=emerald-touch"
-                          className="flex items-center gap-3 group/item py-1"
-                          onClick={() => setDesktopDropdown(false)}
-                        >
-                          <img src={logoET} alt="Emerald Touch" className="h-5 w-auto object-contain group-hover/item:opacity-80 transition-opacity" />
-                        </Link>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              ) : (
-                <Link
-                  key={link.to}
-                  to={link.to}
-                  className={`text-xs tracking-[0.15em] uppercase font-sans font-medium transition-opacity hover:opacity-70 ${
-                    location.pathname === link.to ? "opacity-100" : "opacity-80"
-                  }`}
-                >
-                  {link.label}
-                </Link>
-              )
-            )}
+            {links.map((link) => (
+              <Link
+                key={link.to}
+                to={link.to}
+                className={`text-xs tracking-[0.15em] uppercase font-sans font-medium transition-opacity hover:opacity-70 ${
+                  location.pathname === link.to ? "opacity-100" : "opacity-80"
+                }`}
+              >
+                {link.label}
+              </Link>
+            ))}
           </nav>
 
           <div className="flex items-center gap-4">
@@ -167,56 +101,16 @@ const Navbar = () => {
             className="fixed inset-0 z-40 bg-background pt-20 px-8 lg:hidden"
           >
             <nav className="flex flex-col gap-6">
-              {links.map((link) =>
-                link.hasSubmenu ? (
-                  <div key={link.to}>
-                    <button
-                      onClick={() => setCollezioniOpen(!collezioniOpen)}
-                      className="font-serif text-2xl flex items-center gap-2 w-full text-left"
-                    >
-                      {link.label}
-                      <ChevronDown className={`w-5 h-5 transition-transform duration-200 ${collezioniOpen ? "rotate-180" : ""}`} />
-                    </button>
-                    <AnimatePresence>
-                      {collezioniOpen && (
-                        <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: "auto", opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.25 }}
-                          className="overflow-hidden"
-                        >
-                          <div className="pl-4 pt-4 pb-2 flex flex-col gap-3">
-                            <Link
-                              to="/collezioni"
-                              onClick={() => setMobileOpen(false)}
-                              className="text-lg font-sans text-foreground/70"
-                            >
-                              Tutte le Collezioni
-                            </Link>
-                            <Link
-                              to="/collezioni?category=emerald-touch"
-                              onClick={() => setMobileOpen(false)}
-                              className="flex items-center gap-3"
-                            >
-                              <img src={logoET} alt="Emerald Touch" className="h-5 w-auto object-contain" />
-                            </Link>
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                ) : (
-                  <Link
-                    key={link.to}
-                    to={link.to}
-                    onClick={() => setMobileOpen(false)}
-                    className="font-serif text-2xl"
-                  >
-                    {link.label}
-                  </Link>
-                )
-              )}
+              {links.map((link) => (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  onClick={() => setMobileOpen(false)}
+                  className="font-serif text-2xl"
+                >
+                  {link.label}
+                </Link>
+              ))}
             </nav>
           </motion.div>
         )}

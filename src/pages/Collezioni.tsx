@@ -1,9 +1,9 @@
 import { useState, useMemo } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useProducts } from "@/hooks/useProducts";
 import GemLoader from "@/components/GemLoader";
 import { motion, AnimatePresence } from "framer-motion";
-import { Filter, ChevronDown, Sparkles } from "lucide-react";
+import { ChevronDown, Sparkles } from "lucide-react";
 import logoET from "@/assets/logo-emeraldtouch.png";
 import {
   DropdownMenu,
@@ -11,7 +11,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
 
 // --- CARD PRODOTTO (Stile Atelier) ---
 const CollectionCard = ({ product, index }: { product: any; index: number }) => {
@@ -23,7 +22,6 @@ const CollectionCard = ({ product, index }: { product: any; index: number }) => 
       className="group relative"
     >
       <Link to={`/product/${product.id}`} className="flex flex-col gap-4 cursor-pointer">
-        {/* Immagine con Aspect Ratio Slanciato */}
         <div className="relative w-full aspect-[3/4.5] overflow-hidden bg-[#fdfdfd]">
           <img
             src={product.images[0]}
@@ -39,7 +37,6 @@ const CollectionCard = ({ product, index }: { product: any; index: number }) => 
             />
           )}
 
-          {/* Badge Nuovo - Più elegante */}
           {product.is_new_arrival && (
             <div className="absolute top-4 left-4 flex items-center gap-1 bg-white/90 backdrop-blur-md px-2.5 py-1 shadow-sm">
               <Sparkles className="w-3 h-3 text-emerald-600" />
@@ -48,7 +45,6 @@ const CollectionCard = ({ product, index }: { product: any; index: number }) => 
           )}
         </div>
 
-        {/* Info Prodotto - Pulizia estrema (Niente cuori/preferiti) */}
         <div className="flex flex-col items-center text-center gap-1.5 px-2">
           <h3 className="font-serif text-sm tracking-wide text-neutral-800 group-hover:text-emerald-900 transition-colors">
             {product.name}
@@ -67,14 +63,11 @@ const CollectionCard = ({ product, index }: { product: any; index: number }) => 
 
 // --- PAGINA COLLEZIONI ---
 const Collezioni = () => {
-  const [searchParams] = useSearchParams();
-  const initialCategory = searchParams.get("category") || undefined;
-  const [activeFilter, setActiveFilter] = useState<string | undefined>(initialCategory);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc" | "none">("none");
 
-  const { data: products, isLoading } = useProducts(activeFilter);
+  // Carica solo prodotti Emerald Touch
+  const { data: products, isLoading } = useProducts("emerald-touch");
 
-  // LOGICA DI ORDINAMENTO ATTIVATA
   const sortedProducts = useMemo(() => {
     if (!products) return [];
     let items = [...products];
@@ -83,83 +76,46 @@ const Collezioni = () => {
     return items;
   }, [products, sortOrder]);
 
-  const pageTitle = !activeFilter
-    ? "TUTTE LE COLLEZIONI"
-    : activeFilter === "emerald-touch"
-      ? "EMERALD TOUCH"
-      : "I CLASSICI";
-
   return (
     <main className="pt-28 pb-20 min-h-screen bg-[#e4ffec]/20 transition-colors duration-500">
       {/* Header */}
       <div className="text-center mb-16 container mx-auto px-4">
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-3">
-          <span className="text-[10px] font-bold tracking-[0.4em] text-emerald-700/70 uppercase">Atelier 2026</span>
-          {activeFilter === "emerald-touch" ? (
-            <img src={logoET} alt="Emerald Touch" className="h-10 md:h-14 object-contain mx-auto" />
-          ) : (
-            <h1 className="font-serif text-5xl md:text-6xl text-neutral-900 tracking-tight italic">{pageTitle}</h1>
-          )}
+          <span className="text-[10px] font-bold tracking-[0.4em] text-emerald-700/70 uppercase font-sans">Atelier 2026</span>
+          <img src={logoET} alt="Emerald Touch" className="h-10 md:h-14 object-contain mx-auto" />
           <div className="w-12 h-[1px] bg-emerald-200 mx-auto mt-6"></div>
         </motion.div>
       </div>
 
-      {/* Control Bar Sticky */}
+      {/* Control Bar Sticky — solo ordinamento */}
       <div className="sticky top-[70px] z-30 bg-white/70 backdrop-blur-xl border-y border-emerald-100/50 mb-12 py-4">
         <div className="container mx-auto px-6 lg:px-12 flex justify-between items-center">
-          {/* FILTRO */}
-          <div className="flex items-center gap-6">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] font-medium text-neutral-600 hover:text-emerald-700 transition-colors">
-                  <Filter className="w-3.5 h-3.5" />
-                  Filtro {activeFilter && <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />}
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="rounded-none border-emerald-50 w-56 bg-white/95 p-2">
-                <DropdownMenuItem
-                  onClick={() => setActiveFilter(undefined)}
-                  className="text-[10px] uppercase tracking-widest py-3 cursor-pointer"
-                >
-                  Tutto
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => setActiveFilter("emerald-touch")}
-                  className="text-[10px] uppercase tracking-widest py-3 cursor-pointer"
-                >
-                  Emerald Touch
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => setActiveFilter("classics")}
-                  className="text-[10px] uppercase tracking-widest py-3 cursor-pointer"
-                >
-                  I Classici
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+          <span className="text-[9px] text-neutral-400 tracking-[0.2em] uppercase font-sans">
+            {sortedProducts.length} Pezzi Unici
+          </span>
 
-            <span className="hidden md:block text-[9px] text-neutral-400 tracking-[0.2em] uppercase">
-              {sortedProducts.length} Pezzi Unici
-            </span>
-          </div>
-
-          {/* ORDINAMENTO */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] font-medium text-neutral-600 hover:text-emerald-700 transition-colors">
+              <button className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] font-medium font-sans text-neutral-600 hover:text-emerald-700 transition-colors">
                 Ordina <ChevronDown className="w-3 h-3" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="rounded-none border-emerald-50 w-56 bg-white/95 p-2">
               <DropdownMenuItem
+                onClick={() => setSortOrder("none")}
+                className="text-[10px] uppercase tracking-widest py-3 cursor-pointer font-sans"
+              >
+                Default
+              </DropdownMenuItem>
+              <DropdownMenuItem
                 onClick={() => setSortOrder("asc")}
-                className="text-[10px] uppercase tracking-widest py-3 cursor-pointer"
+                className="text-[10px] uppercase tracking-widest py-3 cursor-pointer font-sans"
               >
                 Prezzo: Crescente
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => setSortOrder("desc")}
-                className="text-[10px] uppercase tracking-widest py-3 cursor-pointer"
+                className="text-[10px] uppercase tracking-widest py-3 cursor-pointer font-sans"
               >
                 Prezzo: Decrescente
               </DropdownMenuItem>
@@ -177,7 +133,7 @@ const Collezioni = () => {
         ) : (
           <AnimatePresence mode="wait">
             <motion.div
-              key={activeFilter + sortOrder}
+              key={sortOrder}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -190,17 +146,9 @@ const Collezioni = () => {
           </AnimatePresence>
         )}
 
-        {/* Empty State */}
         {!isLoading && sortedProducts.length === 0 && (
           <div className="text-center py-40">
             <p className="font-serif text-2xl text-neutral-300 italic">La selezione è attualmente in preparazione.</p>
-            <Button
-              variant="link"
-              onClick={() => setActiveFilter(undefined)}
-              className="mt-6 text-emerald-700 tracking-widest text-[10px] uppercase"
-            >
-              Scopri l'intera collezione
-            </Button>
           </div>
         )}
       </div>
