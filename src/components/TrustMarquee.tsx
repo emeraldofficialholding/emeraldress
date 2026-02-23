@@ -69,9 +69,10 @@ function MarqueeBand({ children, direction = "left", baseVelocity = 0.5, classNa
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
       >
         {Array.from({ length: 6 }).map((_, i) => (
-          <span key={i} className="block">
+          // MODIFICA QUI: shrink-0 previene l'accavallamento bloccando il restringimento
+          <div key={i} className="flex items-center shrink-0">
             {children}
-          </span>
+          </div>
         ))}
       </motion.div>
     </div>
@@ -83,16 +84,20 @@ const TrustMarquee = () => {
     <section className="overflow-hidden bg-white relative border-b border-emerald-100/30 py-0">
       <div className="relative z-10">
         <MarqueeBand baseVelocity={0.8} direction="left" className="bg-[#e4ffec] border-y border-emerald-100/50">
-          {/* Sostituito font-serif con font-sans e font-medium per una leggibilità perfetta in movimento */}
-          <span className="text-emerald-950 font-sans font-medium text-base md:text-lg tracking-[0.15em] mx-4 flex items-center gap-8">
-            SUSTAINABLE FASHION <img src={logoED} alt="" className="h-4 w-auto object-contain" />
-            ECO LUXURY <img src={logoED} alt="" className="h-4 w-auto object-contain" />
-            MADE IN ITALY <img src={logoED} alt="" className="h-4 w-auto object-contain" />
-            ECOLOGICAL FABRICS <img src={logoED} alt="" className="h-4 w-auto object-contain" />
-            LUSSO SOSTENIBILE <img src={logoED} alt="" className="h-4 w-auto object-contain" />
-            COSTA SMERALDA STYLE <img src={logoED} alt="" className="h-4 w-auto object-contain" />
-            ECO FRIENDLY <img src={logoED} alt="" className="h-4 w-auto object-contain" />
-          </span>
+          {/* MODIFICA QUI: Aggiunto shrink-0, pr-8 e i tag <span> per mantenere la struttura intatta */}
+          <div className="text-emerald-950 font-sans font-medium text-base md:text-lg tracking-[0.15em] flex items-center shrink-0 gap-8 pr-8">
+            <span>SUSTAINABLE FASHION</span>{" "}
+            <img src={logoED} alt="logo" className="h-4 w-auto object-contain shrink-0" />
+            <span>ECO LUXURY</span> <img src={logoED} alt="logo" className="h-4 w-auto object-contain shrink-0" />
+            <span>MADE IN ITALY</span> <img src={logoED} alt="logo" className="h-4 w-auto object-contain shrink-0" />
+            <span>ECOLOGICAL FABRICS</span>{" "}
+            <img src={logoED} alt="logo" className="h-4 w-auto object-contain shrink-0" />
+            <span>LUSSO SOSTENIBILE</span>{" "}
+            <img src={logoED} alt="logo" className="h-4 w-auto object-contain shrink-0" />
+            <span>COSTA SMERALDA STYLE</span>{" "}
+            <img src={logoED} alt="logo" className="h-4 w-auto object-contain shrink-0" />
+            <span>ECO FRIENDLY</span> <img src={logoED} alt="logo" className="h-4 w-auto object-contain shrink-0" />
+          </div>
         </MarqueeBand>
       </div>
     </section>
