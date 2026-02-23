@@ -118,7 +118,7 @@ const ManifestoSection = () => {
                 </h3>
                 <div className="h-1 w-20 bg-emerald-400 mb-8" />
                 <p className="text-neutral-600 text-lg leading-relaxed font-sans mb-8">
-                  Progettiamo il futuro trasformando reti da pesca abbandonate in pregiato <strong>Nylon ECONYL®</strong>. Con Emeraldress, il problema ambientale diventa bellezza pura e sostenibile, senza compromessi per il pianeta.
+                  Progettiamo il futuro trasformando <strong>reti da pesca abbandonate</strong> in pregiato <strong>Nylon ECONYL®</strong>. Con Emeraldress, il problema ambientale diventa <strong>bellezza pura e sostenibile</strong>, senza compromessi per il pianeta.
                 </p>
 
                 {/* NUOVO BOTTONE VERSO /SOSTENIBILITA */}
@@ -238,8 +238,8 @@ const ManifestoSection = () => {
             </div>
             <h3 className="font-serif text-4xl md:text-5xl text-emerald-950 mb-6">Entra nell'Emerald Circle</h3>
             <p className="text-emerald-800/80 font-sans text-lg max-w-xl mx-auto">
-              Ricevi inviti esclusivi per le sfilate, accesso anticipato ai drop limitati e contenuti riservati sulla
-              sostenibilità.
+              Ricevi <strong>inviti esclusivi</strong> per le sfilate, <strong>accesso anticipato</strong> ai drop limitati e contenuti riservati sulla
+              <strong>sostenibilità</strong>.
             </p>
           </div>
 

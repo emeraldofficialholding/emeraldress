@@ -67,9 +67,9 @@ const ClassicsSection = () => {
           {/* Description */}
           <FadeUp delay={0.3}>
             <p className="font-sans text-neutral-500 text-base md:text-lg leading-relaxed mb-10 max-w-md">
-              Emerald Touch accompagna la donna dall'aperitivo al tramonto con linee pulite e scollature iconiche.
-              Realizzata con materiali premium e sostenibili, la collezione unisce silhouette scolpite e comfort
-              assoluto. Capi senza tempo, nati per valorizzare la figura con discrezione e superare le tendenze.
+              Emerald Touch accompagna la donna dall'aperitivo al tramonto con <strong>linee pulite</strong> e <strong>scollature iconiche</strong>.
+              Realizzata con <strong>materiali premium e sostenibili</strong>, la collezione unisce <strong>silhouette scolpite</strong> e <strong>comfort
+              assoluto</strong>. Capi <strong>senza tempo</strong>, nati per valorizzare la figura con discrezione e superare le tendenze.
             </p>
           </FadeUp>
 

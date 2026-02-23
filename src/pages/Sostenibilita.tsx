@@ -28,7 +28,7 @@ const slides = [
     title: "LA FIBRA",
     verticalText: "Nuova Generazione",
     description:
-      "Il cuore di Emeraldress è un tessuto tecnico di nuova generazione: una fibra rigenerata creata a partire da materiali di scarto pre e post-consumo - come reti da pesca e scarti tessili.",
+      "Il cuore di Emeraldress è un <strong>tessuto tecnico di nuova generazione</strong>: una <strong>fibra rigenerata</strong> creata a partire da materiali di scarto pre e post-consumo - come <strong>reti da pesca</strong> e <strong>scarti tessili</strong>.",
     image: "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/2.jpg",
   },
   {
@@ -37,7 +37,7 @@ const slides = [
     title: "IL PROCESSO",
     verticalText: "Scomposizione Molecolare",
     description:
-      "I materiali di scarto vengono scomposti a livello molecolare e trasformati in nuovo filato. Questo processo di rigenerazione consente di ottenere un materiale chimicamente identico al nylon vergine.",
+      "I materiali di scarto vengono <strong>scomposti a livello molecolare</strong> e trasformati in nuovo filato. Questo <strong>processo di rigenerazione</strong> consente di ottenere un materiale <strong>chimicamente identico</strong> al nylon vergine.",
     image: "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/DETT%201.jpeg",
   },
   {
@@ -46,7 +46,7 @@ const slides = [
     title: "CIRCOLARITÀ",
     verticalText: "Impatto Ridotto",
     description:
-      "Tutto è prodotto in modo circolare e responsabile, riducendo drasticamente l'impatto ambientale rispetto alla produzione tradizionale, dando nuova vita a ciò che andrebbe distrutto.",
+      "Tutto è prodotto in modo <strong>circolare e responsabile</strong>, riducendo drasticamente l'<strong>impatto ambientale</strong> rispetto alla produzione tradizionale, dando <strong>nuova vita</strong> a ciò che andrebbe distrutto.",
     image: "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/emeraldress%20acqua.PNG",
   },
   {
@@ -55,7 +55,7 @@ const slides = [
     title: "SECONDA PELLE",
     verticalText: "Fitting Impeccabile",
     description:
-      "Una volta rigenerato, il filo crea un tessuto ad alta densità, straordinariamente morbido, traspirante e modellante, perfetto per dare vita a capi dal fitting impeccabile che si adattano come una seconda pelle.",
+      "Una volta rigenerato, il filo crea un tessuto ad <strong>alta densità</strong>, straordinariamente <strong>morbido, traspirante e modellante</strong>, perfetto per dare vita a capi dal <strong>fitting impeccabile</strong> che si adattano come una <strong>seconda pelle</strong>.",
     image: "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/TESSUTO.jpeg",
   },
 ];
@@ -86,8 +86,8 @@ const HeroSustainability = () => (
           Lusso Responsabile
         </h1>
         <p className="text-base md:text-xl font-sans text-white/90 leading-relaxed max-w-lg mx-auto md:mx-0 md:border-l-2 md:border-emerald-400 md:pl-6">
-          "La nostra è una sostenibilità responsabile: materiali rigenerati, processi etici e packaging riutilizzabile.
-          Per noi la coerenza non è una moda, ma l'essenza di un lusso contemporaneo che rispetta il mondo"
+          "La nostra è una <strong>sostenibilità responsabile</strong>: <strong>materiali rigenerati</strong>, <strong>processi etici</strong> e <strong>packaging riutilizzabile</strong>.
+          Per noi la coerenza non è una moda, ma l'essenza di un <strong>lusso contemporaneo</strong> che rispetta il mondo"
         </p>
       </motion.div>
     </div>
@@ -300,8 +300,7 @@ const Sostenibilita = () => {
                           {slide.title}
                         </h3>
                         <div className="w-24 md:w-32 h-1 bg-emerald-500 mx-auto lg:mx-0 mb-6 md:mb-10"></div>
-                        <p className="text-neutral-600 font-sans text-lg md:text-xl leading-relaxed max-w-xl mx-auto lg:mx-0">
-                          {slide.description}
+                        <p className="text-neutral-600 font-sans text-lg md:text-xl leading-relaxed max-w-xl mx-auto lg:mx-0" dangerouslySetInnerHTML={{ __html: slide.description }}>
                         </p>
                       </motion.div>
                     </div>

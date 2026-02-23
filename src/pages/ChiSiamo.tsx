@@ -19,9 +19,9 @@ const timelineData = [
     content: (
       <div>
         <p className="text-neutral-600 text-sm md:text-base font-normal mb-8 leading-relaxed">
-          Celebriamo la femminilità con silhouette scultoree e materiali premium sostenibili, esaltando la figura senza
-          eccessi. Offriamo un'eleganza senza tempo che unisce il lusso mediterraneo alla perfezione artigianale
-          italiana.
+          Celebriamo la <strong>femminilità</strong> con <strong>silhouette scultoree</strong> e <strong>materiali premium sostenibili</strong>, esaltando la figura senza
+          eccessi. Offriamo un'<strong>eleganza senza tempo</strong> che unisce il <strong>lusso mediterraneo</strong> alla <strong>perfezione artigianale
+          italiana</strong>.
         </p>
         <div className="grid grid-cols-2 gap-4">
           <img
@@ -44,8 +44,8 @@ const timelineData = [
     content: (
       <div>
         <p className="text-neutral-600 text-sm md:text-base font-normal mb-8 leading-relaxed">
-          Ridefiniamo l'eleganza estiva creando un guardaroba iconico che valorizza ogni corpo nel totale rispetto del
-          pianeta. Intrecciamo estetica, responsabilità ambientale e Made in Italy attraverso tessuti ecosostenibili
+          Ridefiniamo l'<strong>eleganza estiva</strong> creando un <strong>guardaroba iconico</strong> che valorizza ogni corpo nel totale rispetto del
+          pianeta. Intrecciamo <strong>estetica</strong>, <strong>responsabilità ambientale</strong> e <strong>Made in Italy</strong> attraverso <strong>tessuti ecosostenibili</strong>
           d'eccellenza.
         </p>
         <img
@@ -61,9 +61,9 @@ const timelineData = [
     content: (
       <div>
         <p className="text-neutral-600 text-sm md:text-base font-normal mb-4 leading-relaxed">
-          Una capsule essenziale di cinque capi iconici dall'estetica minimalista e sensuale, definita dai contrasti
-          netti tra bianco e nero. Un immaginario visivo che trasmette il lusso discreto della sofisticata estate
-          mediterranea.
+          Una <strong>capsule essenziale</strong> di cinque capi iconici dall'<strong>estetica minimalista e sensuale</strong>, definita dai contrasti
+          netti tra bianco e nero. Un immaginario visivo che trasmette il <strong>lusso discreto</strong> della sofisticata <strong>estate
+          mediterranea</strong>.
         </p>
       </div>
     ),
@@ -89,8 +89,8 @@ const ChiSiamo = () => {
             </p>
             <h1 className="font-serif text-5xl mb-6 text-center md:text-7xl text-neutral-900">Chi Siamo</h1>
             <p className="text-neutral-600 font-sans leading-relaxed text-center text-lg">
-              Dalla Costa Smeralda al mondo. EMERALDRESS nasce dalla visione di unire l'artigianato sardo con
-              l'innovazione tessile sostenibile, creando capi che rispettano la Terra senza compromessi sull'eleganza.
+              Dalla <strong>Costa Smeralda</strong> al mondo. EMERALDRESS nasce dalla visione di unire l'<strong>artigianato sardo</strong> con
+              l'<strong>innovazione tessile sostenibile</strong>, creando capi che rispettano la Terra senza compromessi sull'eleganza.
             </p>
           </motion.div>
 
@@ -154,8 +154,8 @@ const ChiSiamo = () => {
                 </span>
                 <h2 className="font-serif text-4xl md:text-6xl text-emerald-950 leading-tight mb-5">Social Dress</h2>
                 <p className="text-neutral-600 font-sans text-lg max-w-2xl mx-auto leading-relaxed">
-                  Non è solo una pagina Instagram. È un movimento di stile ed eleganza condivisa. Ogni giorno, donne che
-                  scelgono la qualità, la consapevolezza e la bellezza autentica si riconoscono nell'universo
+                  Non è solo una pagina Instagram. È un <strong>movimento di stile</strong> ed <strong>eleganza condivisa</strong>. Ogni giorno, donne che
+                  scelgono la <strong>qualità</strong>, la <strong>consapevolezza</strong> e la <strong>bellezza autentica</strong> si riconoscono nell'universo
                   Emeraldress.
                 </p>
               </motion.div>

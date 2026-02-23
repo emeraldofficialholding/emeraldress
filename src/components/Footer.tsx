@@ -13,8 +13,8 @@ const Footer = () => {
           <div className="md:col-span-1 space-y-6">
             <h3 className="font-serif text-2xl tracking-[0.1em] text-emerald-950">EMERALDRESS</h3>
             <p className="text-sm text-emerald-800/80 leading-relaxed font-sans max-w-xs">
-              Ridefiniamo il lusso attraverso la sostenibilità e l'artigianato italiano. Ogni capo è una promessa al
-              pianeta e un omaggio alla bellezza.
+              Ridefiniamo il lusso attraverso la <strong>sostenibilità</strong> e l'<strong>artigianato italiano</strong>. Ogni capo è una promessa al
+              pianeta e un omaggio alla <strong>bellezza</strong>.
             </p>
             <div className="flex items-center gap-4">
               <SocialIcon icon={<Instagram className="w-5 h-5" />} href="https://www.instagram.com/emeraldress_/" />
