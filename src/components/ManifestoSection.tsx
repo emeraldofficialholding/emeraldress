@@ -114,7 +114,7 @@ const ManifestoSection = () => {
                 transition={{ duration: 0.8 }}
               >
                 <h3 className="font-serif text-5xl md:text-6xl text-emerald-950 leading-none mb-6">
-                  Lusso <br /> <span className="italic text-emerald-600">Rigenerato.</span>
+                  Lusso <br /> <span className="italic text-emerald-600">Sostenibile</span>
                 </h3>
                 <div className="h-1 w-20 bg-emerald-400 mb-8" />
                 <p className="text-neutral-600 text-lg leading-relaxed font-sans mb-8">
