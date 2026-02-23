@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { User, ShoppingBag, Menu, X } from "lucide-react";
+import { User, ShoppingBag, Menu, X, ChevronDown } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import logoET from "@/assets/logo-emeraldtouch.png";
@@ -16,6 +16,7 @@ const links = [
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [collezioniOpen, setCollezioniOpen] = useState(false);
   const cartControls = useAnimation();
   const { totalItems, setIsOpen } = useCart();
   const prevTotal = useRef(totalItems);
@@ -124,21 +125,35 @@ const Navbar = () => {
             <nav className="flex flex-col gap-6">
               {links.map((link) =>
                 link.to === "/collezioni" ? (
-                  <div key={link.to} className="flex flex-col gap-3">
-                    <Link
-                      to={link.to}
-                      onClick={() => setMobileOpen(false)}
-                      className="font-serif text-2xl"
+                  <div key={link.to} className="flex flex-col">
+                    <button
+                      onClick={() => setCollezioniOpen((v) => !v)}
+                      className="font-serif text-2xl flex items-center gap-2"
                     >
                       {link.label}
-                    </Link>
-                    <Link
-                      to="/collezioni"
-                      onClick={() => setMobileOpen(false)}
-                      className="ml-4 hover:opacity-70 transition-opacity"
-                    >
-                      <img src={logoET} alt="Emerald Touch" className="h-7 object-contain" />
-                    </Link>
+                      <ChevronDown
+                        className={`w-5 h-5 transition-transform duration-300 ${collezioniOpen ? "rotate-180" : ""}`}
+                      />
+                    </button>
+                    <AnimatePresence>
+                      {collezioniOpen && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.25 }}
+                          className="overflow-hidden"
+                        >
+                          <Link
+                            to="/collezioni"
+                            onClick={() => setMobileOpen(false)}
+                            className="ml-4 mt-3 block hover:opacity-70 transition-opacity"
+                          >
+                            <img src={logoET} alt="Emerald Touch" className="h-7 object-contain" />
+                          </Link>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 ) : (
                   <Link
