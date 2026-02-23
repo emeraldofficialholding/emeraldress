@@ -90,7 +90,7 @@ const ChiSiamo = () => {
             <h1 className="font-serif text-5xl mb-6 text-center md:text-7xl text-neutral-900">Chi Siamo</h1>
             <p className="text-neutral-600 font-sans leading-relaxed text-center text-lg">
               Dalla <strong>Costa Smeralda</strong> al mondo. EMERALDRESS nasce dalla visione di unire l'<strong>artigianato sardo</strong> con
-              l'<strong>innovazione tessile sostenibile</strong>, creando capi che rispettano la Terra senza compromessi sull'eleganza.
+              l'<strong>innovazione tessile sostenibile</strong>, creando capi che rispettano la Terra senza compromessi sullo stile.
             </p>
           </motion.div>
 
