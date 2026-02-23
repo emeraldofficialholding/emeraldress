@@ -20,7 +20,7 @@ const timelineData = [
       <div>
         <p className="text-neutral-600 text-sm md:text-base font-normal mb-8 leading-relaxed">
           <strong>EmeralDress</strong> aspira a diventare un punto di riferimento <strong>internazionale</strong> nel
-          panorama del luxury wear, un marchio sinonimo di stile senza tempo.
+          panorama del <strong>luxury wear</strong>, un marchio sinonimo di stile senza tempo.
         </p>
         <div className="grid grid-cols-2 gap-4">
           <img
@@ -43,9 +43,9 @@ const timelineData = [
     content: (
       <div>
         <p className="text-neutral-600 text-sm md:text-base font-normal mb-8 leading-relaxed">
-          La nostra missione è creare capi pensati per valorizzare e rispettare il corpo. Scegliendo esclusivamente
-          tessuti ecosostenibili crediamo che nel nostro piccolo possiamo contribuire a rende il mondo un posto più
-          pulito.
+          <strong>La nostra missione</strong> è creare capi pensati per valorizzare e{" "}
+          <strong>rispettare il corpo</strong>. Scegliendo esclusivamente tessuti <strong>ecosostenibili</strong>{" "}
+          crediamo che nel nostro piccolo <strong>possiamo contribuire a rende il mondo un posto più pulito.</strong>
         </p>
         <img
           src="https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/DETTAGLIO%202.jpeg"
