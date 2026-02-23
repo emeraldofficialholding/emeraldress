@@ -67,12 +67,9 @@ const ClassicsSection = () => {
           {/* Description */}
           <FadeUp delay={0.3}>
             <p className="font-sans text-neutral-500 text-base md:text-lg leading-relaxed mb-10 max-w-md">
-              Emerald Touch nasce per accompagnare la donna nei suoi momenti più luminosi: da un aperitivo vista mare a
-              una serata elegante, fino a un tramonto in terrazza o una passeggiata al porto. La nostra filosofia si
-              esprime attraverso linee pulite e scollature iconiche, dove tagli sensoriali incontrano materiali premium
-              e sostenibili. Il risultato sono silhouette scolpite ma incredibilmente comode, arricchite da dettagli che
-              esaltano la figura con discrezione e raffinatezza. I nostri capi non si limitano a vestire, ma
-              valorizzano; non seguono la moda, ma la superano nel tempo.
+              Emerald Touch accompagna la donna dall'aperitivo al tramonto con linee pulite e scollature iconiche.
+              Realizzata con materiali premium e sostenibili, la collezione unisce silhouette scolpite e comfort
+              assoluto. Capi senza tempo, nati per valorizzare la figura con discrezione e superare le tendenze.
             </p>
           </FadeUp>
 
