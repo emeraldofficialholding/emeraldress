@@ -20,43 +20,43 @@ import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 import { useProducts } from "@/hooks/useProducts";
 import GemLoader from "@/components/GemLoader";
 
-// --- DATI DEL CAROSELLO ---
+// --- DATI DEL CAROSELLO (Il testo diviso in 4 fasi) ---
 const slides = [
   {
     id: 1,
-    percentage: "ZERO",
-    title: "INQUINAMENTO",
-    verticalText: "Petrolio Vergine",
+    percentage: "01",
+    title: "LA FIBRA",
+    verticalText: "Nuova Generazione",
     description:
-      "Il nostro impatto sulle risorse fossili è nullo. Invece di estrarre nuovo petrolio, recuperiamo reti da pesca abbandonate e scarti plastici, trasformando un problema ambientale in una risorsa preziosa.",
+      "Il cuore di Emeraldress è un tessuto tecnico di nuova generazione: una fibra rigenerata creata a partire da materiali di scarto pre e post-consumo - come reti da pesca e scarti tessili.",
     image: "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/2.jpg",
   },
   {
     id: 2,
-    percentage: "100%",
-    title: "RIGENERAZIONE",
-    verticalText: "Nylon Rigenerato",
+    percentage: "02",
+    title: "IL PROCESSO",
+    verticalText: "Scomposizione Molecolare",
     description:
-      "Attraverso un processo di depolimerizzazione avanzato, i materiali recuperati vengono trasformati in un nuovo filato puro. Il risultato è un tessuto chimicamente identico al nylon vergine, ma con un'anima pulita.",
+      "I materiali di scarto vengono scomposti a livello molecolare e trasformati in nuovo filato. Questo processo di rigenerazione consente di ottenere un materiale chimicamente identico al nylon vergine.",
     image: "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/1.png",
   },
   {
     id: 3,
-    percentage: "ITALY",
-    title: "CREAZIONE",
-    verticalText: "Manifattura Etica",
+    percentage: "03",
+    title: "CIRCOLARITÀ",
+    verticalText: "Impatto Ridotto",
     description:
-      "La sostenibilità deve essere anche sociale. Rifiutiamo la delocalizzazione: ogni singolo capo Emeraldress è tagliato e cucito in Italia, garantendo qualità sartoriale e rispetto per i lavoratori.",
-    image: "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/DETTAGLIO%201.jpeg",
+      "Tutto è prodotto in modo circolare e responsabile, riducendo drasticamente l'impatto ambientale rispetto alla produzione tradizionale, dando nuova vita a ciò che andrebbe distrutto.",
+    image: "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/emeraldress%20acqua.PNG",
   },
   {
     id: 4,
-    percentage: "∞",
-    title: "CIRCOLARITÀ",
-    verticalText: "Design Rigenerabile",
+    percentage: "04",
+    title: "SECONDA PELLE",
+    verticalText: "Fitting Impeccabile",
     description:
-      "Nulla si crea, nulla si distrugge, tutto si trasforma. I nostri capi sono progettati per essere rigenerati all'infinito. Anche il packaging è pensato per durare: una custodia di design da riutilizzare nei tuoi viaggi.",
-    image: "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/emeraldress%20acqua.PNG",
+      "Una volta rigenerato, il filo crea un tessuto ad alta densità, straordinariamente morbido, traspirante e modellante, perfetto per dare vita a capi dal fitting impeccabile che si adattano come una seconda pelle.",
+    image: "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/DETTAGLIO%201.jpeg",
   },
 ];
 
@@ -94,7 +94,7 @@ const HeroSustainability = () => (
   </section>
 );
 
-// --- NUOVO BANNER: CARATTERISTICHE TESSUTO ---
+// --- BANNER: CARATTERISTICHE TESSUTO ---
 const FabricFeatures = () => {
   const features = [
     { icon: Expand, title: "BIELASTICO" },
@@ -250,36 +250,13 @@ const Sostenibilita = () => {
       {/* 1. HERO SECTION */}
       <HeroSustainability />
 
-      {/* 2. IL CAROSELLO E L'INTRODUZIONE AL PROCESSO */}
+      {/* 2. IL CAROSELLO (Il Processo) */}
       <section className="py-24 bg-white relative z-10 overflow-hidden">
-        <div className="container mx-auto px-4 mb-20 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-          >
-            <span className="text-emerald-600 tracking-[0.2em] text-sm font-bold uppercase block mb-4">
-              Il Ciclo Virtuoso
-            </span>
-            <h2 className="font-serif text-4xl md:text-6xl text-emerald-950 mb-8">Dalla Natura alla Natura</h2>
-
-            {/* NUOVO TESTO INTRODUTTIVO */}
-            <div className="max-w-4xl mx-auto space-y-6 text-neutral-600 font-sans text-base md:text-lg leading-relaxed text-justify md:text-center">
-              <p>
-                Il cuore di Emeraldress è un tessuto tecnico di nuova generazione: una fibra rigenerata creata a partire
-                da materiali di scarto pre e post-consumo - come reti da pesca e scarti tessili - che vengono scomposti
-                a livello molecolare e trasformati in nuovo filato. Questo processo di rigenerazione consente di
-                ottenere un materiale chimicamente identico al nylon vergine, ma prodotto in modo circolare e
-                responsabile, riducendo drasticamente l'impatto ambientale.
-              </p>
-              <p>
-                Una volta rigenerato, il filo viene lavorato per creare un tessuto ad alta densità, straordinariamente
-                morbido, traspirante e modellante, perfetto per dare vita a capi dal fitting impeccabile che si adattano
-                come una seconda pelle.
-              </p>
-            </div>
-          </motion.div>
+        <div className="container mx-auto px-4 mb-16 text-center">
+          <span className="text-emerald-600 tracking-[0.2em] text-sm font-bold uppercase block mb-4">
+            Il Ciclo Virtuoso
+          </span>
+          <h2 className="font-serif text-4xl md:text-6xl text-emerald-950">Dalla Natura alla Natura</h2>
         </div>
 
         <div className="container mx-auto px-0 md:px-4">
@@ -333,14 +310,14 @@ const Sostenibilita = () => {
               ))}
             </CarouselContent>
 
-            {/* FRECCE CAROSELLO - Visibili anche su Mobile */}
+            {/* FRECCE CAROSELLO */}
             <CarouselPrevious className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-emerald-50 text-emerald-900 border-emerald-100 h-10 w-10 md:h-12 md:w-12 rounded-full shadow-lg z-10" />
             <CarouselNext className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-emerald-50 text-emerald-900 border-emerald-100 h-10 w-10 md:h-12 md:w-12 rounded-full shadow-lg z-10" />
           </Carousel>
         </div>
       </section>
 
-      {/* 3. NUOVO BANNER: CARATTERISTICHE TESSUTO */}
+      {/* 3. BANNER: CARATTERISTICHE TESSUTO */}
       <FabricFeatures />
 
       {/* 4. COLLEZIONI */}
