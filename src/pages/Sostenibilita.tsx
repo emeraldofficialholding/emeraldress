@@ -164,7 +164,7 @@ const LatestCollectionShowcase = () => {
             viewport={{ once: true }}
             className="inline-block mb-6">
 
-            <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto p-2 bg-inherit">
+            <div className="w-32 h-32 rounded-full flex items-center justify-center mx-auto p-2 bg-inherit">
               <img src={logoED} alt="Emeraldress" className="w-full h-full object-contain" />
             </div>
           </motion.div>
