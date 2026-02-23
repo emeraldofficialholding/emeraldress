@@ -64,7 +64,7 @@ const EmeraldTouchSection = () => {
 
             <img src={logoET} alt="Emerald Touch" className="h-12 md:h-16 object-contain mx-auto mb-2" />
 
-            <p className="text-neutral-500 font-sans text-lg leading-relaxed">
+            <p className="text-neutral-500 font-sans text-lg leading-relaxed normal-case">
               Emerald Touch è la capsule collection di debutto di Emeraldress: cinque capi iconici che fondono
               sensualità, comfort e raffinatezza mediterranea. Ispirata ai contrasti cromatici e alla luce della Costa
               Smeralda, la collezione celebra un’eleganza senza tempo e un fit impeccabile, pensata per valorizzare ogni
