@@ -3,6 +3,7 @@ import { Timeline } from "@/components/ui/timeline";
 import ScrollExpandMedia from "@/components/ui/scroll-expansion-hero";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 import { Instagram, PenTool, Heart, MessageCircle, Sparkles, ArrowRight } from "lucide-react";
+import logoET from "@/assets/logo-emeraldtouch.png";
 
 const fadeUp = {
   initial: { opacity: 0, y: 30 },
@@ -56,7 +57,7 @@ const timelineData = [
     ),
   },
   {
-    title: "Emerald Touch",
+    title: <img src={logoET} alt="Emerald Touch" className="h-8 md:h-12 object-contain" />,
     content: (
       <div>
         <p className="text-neutral-600 text-sm md:text-base font-normal mb-4 leading-relaxed">
