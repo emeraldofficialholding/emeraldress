@@ -48,7 +48,7 @@ const timelineData = [
           pulito.
         </p>
         <img
-          src="https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/Gemini_Generated_Image_bv0czcbv0czcbv0c%20-%20Modificata.png"
+          src="https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/DETTAGLIO%202.jpeg"
           alt="Ricerca tessuti sani"
           className="rounded-lg object-cover h-40 md:h-64 w-full shadow-md"
         />
@@ -56,7 +56,7 @@ const timelineData = [
     ),
   },
   {
-    title: "Filiera",
+    title: <img src={logoET} alt="Emerald Touch" className="h-8 md:h-12 object-contain" />,
     content: (
       <div>
         <p className="text-neutral-600 text-sm md:text-base font-normal mb-4 leading-relaxed">
