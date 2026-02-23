@@ -61,10 +61,10 @@ const Navbar = () => {
           <nav className="hidden lg:flex items-center gap-8">
             {links.map((link) =>
               link.to === "/collezioni" ? (
-                <div key={link.to} className="relative group">
+                <div key={link.to} className="relative group flex items-center">
                   <Link
                     to={link.to}
-                    className={`text-xs tracking-[0.15em] uppercase font-sans font-medium transition-opacity hover:opacity-70 ${
+                    className={`text-xs tracking-[0.15em] uppercase font-sans font-medium transition-opacity hover:opacity-70 leading-none ${
                       location.pathname === link.to ? "opacity-100" : "opacity-80"
                     }`}
                   >
