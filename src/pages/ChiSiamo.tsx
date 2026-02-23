@@ -19,8 +19,8 @@ const timelineData = [
     content: (
       <div>
         <p className="text-neutral-600 text-sm md:text-base font-normal mb-8 leading-relaxed">
-          EmeralDress aspira a diventare un punto di riferimento internazionale nel panorama del luxury wear, un marchio
-          sinonimo di stile senza tempo.
+          <strong>EmeralDress</strong> aspira a diventare un punto di riferimento <strong>internazionale</strong> nel
+          panorama del luxury wear, un marchio sinonimo di stile senza tempo.
         </p>
         <div className="grid grid-cols-2 gap-4">
           <img
