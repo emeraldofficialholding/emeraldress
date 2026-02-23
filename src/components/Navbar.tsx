@@ -122,16 +122,35 @@ const Navbar = () => {
             className="fixed inset-0 z-40 bg-background pt-20 px-8 lg:hidden"
           >
             <nav className="flex flex-col gap-6">
-              {links.map((link) => (
-                <Link
-                  key={link.to}
-                  to={link.to}
-                  onClick={() => setMobileOpen(false)}
-                  className="font-serif text-2xl"
-                >
-                  {link.label}
-                </Link>
-              ))}
+              {links.map((link) =>
+                link.to === "/collezioni" ? (
+                  <div key={link.to} className="flex flex-col gap-3">
+                    <Link
+                      to={link.to}
+                      onClick={() => setMobileOpen(false)}
+                      className="font-serif text-2xl"
+                    >
+                      {link.label}
+                    </Link>
+                    <Link
+                      to="/collezioni"
+                      onClick={() => setMobileOpen(false)}
+                      className="ml-4 hover:opacity-70 transition-opacity"
+                    >
+                      <img src={logoET} alt="Emerald Touch" className="h-7 object-contain" />
+                    </Link>
+                  </div>
+                ) : (
+                  <Link
+                    key={link.to}
+                    to={link.to}
+                    onClick={() => setMobileOpen(false)}
+                    className="font-serif text-2xl"
+                  >
+                    {link.label}
+                  </Link>
+                )
+              )}
             </nav>
           </motion.div>
         )}
