@@ -56,7 +56,7 @@ const slides = [
     verticalText: "Fitting Impeccabile",
     description:
       "Una volta rigenerato, il filo crea un tessuto ad alta densità, straordinariamente morbido, traspirante e modellante, perfetto per dare vita a capi dal fitting impeccabile che si adattano come una seconda pelle.",
-    image: "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/DETTAGLIO%201.jpeg",
+    image: "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/TESSUTO.jpeg",
   },
 ];
 
