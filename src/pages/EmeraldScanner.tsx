@@ -94,18 +94,21 @@ const EmeraldScanner = () => {
     await runAnalysisSimulation();
 
     const filePath = `${Date.now()}-${file.name}`;
-    const { error: uploadError } = await supabase.storage.from("scanner_uploads").upload(filePath, file);
-
-    if (uploadError) {
-      toast.error("Errore caricamento.");
-      setAnalyzing(false);
-      return;
-    }
-
-    const { data: urlData } = supabase.storage.from("scanner_uploads").getPublicUrl(filePath);
-    const imageUrl = urlData.publicUrl;
 
     try {
+      // Upload file
+      const { error: uploadError } = await supabase.storage.from("scanner_uploads").upload(filePath, file);
+
+      if (uploadError) {
+        console.error("Errore Supabase (upload):", uploadError);
+        toast.error(`Upload fallito: ${uploadError.message}`);
+        setAnalyzing(false);
+        return;
+      }
+
+      const { data: urlData } = supabase.storage.from("scanner_uploads").getPublicUrl(filePath);
+      const imageUrl = urlData.publicUrl;
+
       // 1. Insert into scanner_requests and retrieve the full record
       const { data: record, error } = await supabase
         .from("scanner_requests")
@@ -114,11 +117,17 @@ const EmeraldScanner = () => {
           input_type: "image",
         })
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) {
-        console.error(error);
-        toast.error(error.message, { style: { background: '#dc2626', color: '#fff' } });
+        console.error("Errore Supabase:", error);
+        toast.error(`DB Error: ${error.message} — ${error.details || ""} — ${error.hint || ""}`, { duration: 10000 });
+        return;
+      }
+
+      if (!record) {
+        console.error("Errore Supabase: nessun record restituito dopo l'insert");
+        toast.error("Errore: il record non è stato creato. Controlla le policy RLS.", { duration: 10000 });
         return;
       }
 
@@ -134,12 +143,17 @@ const EmeraldScanner = () => {
         }),
       });
 
-      if (!webhookRes.ok) throw new Error("Webhook failed");
+      if (!webhookRes.ok) {
+        const text = await webhookRes.text();
+        console.error("Webhook error:", webhookRes.status, text);
+        toast.error(`Webhook fallito (${webhookRes.status}): ${text}`, { duration: 10000 });
+        return;
+      }
 
       toast.success("Foto inviata allo scanner!");
-    } catch (err) {
-      console.error(err);
-      toast.error("Errore nell'avvio dell'analisi.");
+    } catch (err: any) {
+      console.error("Errore Supabase:", err);
+      toast.error(`Errore imprevisto: ${err?.message || String(err)}`, { duration: 10000 });
     } finally {
       setAnalyzing(false);
     }
