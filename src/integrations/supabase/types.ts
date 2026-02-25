@@ -96,6 +96,7 @@ export type Database = {
         Row: {
           brand: string | null
           created_at: string
+          diagnosis_result: string | null
           garment_type: string | null
           id: string
           image_url: string | null
@@ -106,6 +107,7 @@ export type Database = {
         Insert: {
           brand?: string | null
           created_at?: string
+          diagnosis_result?: string | null
           garment_type?: string | null
           id?: string
           image_url?: string | null
@@ -116,6 +118,7 @@ export type Database = {
         Update: {
           brand?: string | null
           created_at?: string
+          diagnosis_result?: string | null
           garment_type?: string | null
           id?: string
           image_url?: string | null
