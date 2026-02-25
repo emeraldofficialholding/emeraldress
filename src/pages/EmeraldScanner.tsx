@@ -44,6 +44,7 @@ const EmeraldScanner = () => {
   useEffect(() => {
     return () => {
       if (pollingRef.current) clearInterval(pollingRef.current);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
   }, []);
 
@@ -54,9 +55,23 @@ const EmeraldScanner = () => {
     };
   }, [previewUrl]);
 
-  // Polling logic
+  // Polling logic with 60s timeout
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const stopPolling = useCallback(() => {
+    if (pollingRef.current) { clearInterval(pollingRef.current); pollingRef.current = null; }
+    if (timeoutRef.current) { clearTimeout(timeoutRef.current); timeoutRef.current = null; }
+  }, []);
+
   const startPolling = useCallback((id: string) => {
-    if (pollingRef.current) clearInterval(pollingRef.current);
+    stopPolling();
+
+    // 60s timeout
+    timeoutRef.current = setTimeout(() => {
+      stopPolling();
+      toast.error("L'analisi sta richiedendo più tempo del previsto. Riprova tra poco.");
+      setPhase("input");
+    }, 60000);
 
     pollingRef.current = setInterval(async () => {
       try {
@@ -72,8 +87,7 @@ const EmeraldScanner = () => {
         }
 
         if (data && data.sustainability_score !== null && data.diagnosis_result !== null) {
-          clearInterval(pollingRef.current!);
-          pollingRef.current = null;
+          stopPolling();
           setResultScore(data.sustainability_score);
           setResultDiagnosis(data.diagnosis_result);
           setPhase("result");
@@ -82,11 +96,10 @@ const EmeraldScanner = () => {
         console.error("Polling exception:", err);
       }
     }, 3000);
-  }, []);
+  }, [stopPolling]);
 
   const resetScanner = () => {
-    if (pollingRef.current) clearInterval(pollingRef.current);
-    pollingRef.current = null;
+    stopPolling();
     setPhase("input");
     setRecordId(null);
     setResultScore(null);
