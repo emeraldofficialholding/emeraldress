@@ -30,6 +30,7 @@ const EmeraldScanner = () => {
   const [material, setMaterial] = useState("");
   const [garmentType, setGarmentType] = useState("");
   const [qualitySlider, setQualitySlider] = useState([50]);
+  const [urlDellaFotoCaricata, setUrlDellaFotoCaricata] = useState("");
   const [analyzing, setAnalyzing] = useState(false);
   const [score, setScore] = useState<number | null>(null);
   const [scanStatus, setScanStatus] = useState("Inizializzazione...");
@@ -42,6 +43,7 @@ const EmeraldScanner = () => {
     setMaterial("");
     setGarmentType("");
     setQualitySlider([50]);
+    setUrlDellaFotoCaricata("");
   };
 
   // Funzione per simulare messaggi di analisi dinamici
@@ -64,26 +66,38 @@ const EmeraldScanner = () => {
   };
 
   const handleManualSubmit = async () => {
-    await runAnalysisSimulation();
-
-    const mockScore = Math.min(100, Math.floor(qualitySlider[0] * 0.6 + Math.random() * 40));
-
-    const { error } = await supabase.from("scanner_requests").insert({
-      brand,
-      material,
-      garment_type: garmentType,
-      input_type: "manual",
-      sustainability_score: mockScore
-    });
-
-    setAnalyzing(false);
-
-    if (error) {
-      toast.error("Errore durante l'analisi.");
+    if (!urlDellaFotoCaricata) {
+      toast.error("Per favore, carica un'immagine prima di analizzare");
       return;
     }
-    setScore(mockScore);
-    toast.success(`Analisi completata`);
+
+    await runAnalysisSimulation();
+
+    try {
+      const { data: record, error } = await supabase
+        .from("scanner_requests")
+        .insert({ image_url: urlDellaFotoCaricata, input_type: "image" })
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Errore Supabase:", error);
+        toast.error(error.details || error.message);
+        return;
+      }
+
+      if (!record) {
+        toast.error("Errore: record non creato");
+        return;
+      }
+
+      toast.success("Foto inviata allo scanner!");
+    } catch (error) {
+      console.error("Errore Supabase:", error);
+      toast.error("Errore durante l'analisi.");
+    } finally {
+      setAnalyzing(false);
+    }
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -108,6 +122,13 @@ const EmeraldScanner = () => {
 
       const { data: urlData } = supabase.storage.from("scanner_uploads").getPublicUrl(filePath);
       const imageUrl = urlData.publicUrl;
+
+      if (!imageUrl) {
+        toast.error("Per favore, carica un'immagine prima di analizzare");
+        return;
+      }
+
+      setUrlDellaFotoCaricata(imageUrl);
 
       // 1. Insert into scanner_requests and retrieve the full record
       const { data: record, error } = await supabase
