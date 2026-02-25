@@ -105,42 +105,43 @@ const EmeraldScanner = () => {
     const { data: urlData } = supabase.storage.from("scanner_uploads").getPublicUrl(filePath);
     const imageUrl = urlData.publicUrl;
 
-    // 1. Insert into scanner_requests and retrieve the new record ID
-    const { data: insertData, error: insertError } = await supabase
-      .from("scanner_requests")
-      .insert({
-        image_url: imageUrl,
-        input_type: "image",
-      })
-      .select("id")
-      .single();
-
-    if (insertError || !insertData) {
-      toast.error("Errore durante il salvataggio della richiesta.");
-      setAnalyzing(false);
-      return;
-    }
-
-    // 2. Call n8n webhook with the record
     try {
+      // 1. Insert into scanner_requests and retrieve the full record
+      const { data: record, error } = await supabase
+        .from("scanner_requests")
+        .insert({
+          image_url: imageUrl,
+          input_type: "image",
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error(error);
+        toast.error(error.message, { style: { background: '#dc2626', color: '#fff' } });
+        return;
+      }
+
+      // 2. Call n8n webhook with the record
       const webhookRes = await fetch("https://n8n.kreareweb.com/webhook/krea-brain", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           record: {
-            id: insertData.id,
-            image_url: imageUrl,
+            id: record.id,
+            image_url: record.image_url,
           },
         }),
       });
 
       if (!webhookRes.ok) throw new Error("Webhook failed");
 
-      setAnalyzing(false);
-      toast.success("Analisi avviata!");
-    } catch {
-      setAnalyzing(false);
+      toast.success("Foto inviata allo scanner!");
+    } catch (err) {
+      console.error(err);
       toast.error("Errore nell'avvio dell'analisi.");
+    } finally {
+      setAnalyzing(false);
     }
   };
 
