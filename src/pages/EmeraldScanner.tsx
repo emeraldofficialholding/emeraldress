@@ -304,7 +304,7 @@ const EmeraldScanner = () => {
   ];
 
   return (
-    <main className="bg-neutral-50 min-h-screen relative overflow-hidden font-sans">
+    <main className="bg-neutral-50 min-h-screen relative overflow-x-hidden font-sans" style={{ scrollBehavior: 'smooth' }}>
       {/* TEXTURE BACKGROUND */}
       <div
         className="absolute inset-0 opacity-[0.03] pointer-events-none z-0"
@@ -354,7 +354,7 @@ const EmeraldScanner = () => {
           }
         >
           {/* INTERFACCIA IPAD */}
-          <div className="h-full w-full bg-neutral-50 relative flex flex-col overflow-hidden">
+          <div className="h-full w-full bg-neutral-50 relative flex flex-col overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
             {/* Header iPad */}
             <div className="h-12 shrink-0 bg-white/80 backdrop-blur-md border-b border-neutral-100 px-4 flex justify-between items-center z-20">
               <div className="flex items-center gap-2">
@@ -371,7 +371,7 @@ const EmeraldScanner = () => {
             </div>
 
             {/* Content Area */}
-            <div className="flex-1 relative w-full h-full p-6 md:p-8 flex flex-col items-center justify-center">
+            <div className="flex-1 relative w-full p-6 md:p-8 flex flex-col items-center justify-start overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
               <AnimatePresence mode="wait">
                 {/* ─── STATE: INPUT ─── */}
                 {phase === "input" && (
@@ -538,8 +538,7 @@ const EmeraldScanner = () => {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.6, ease: "easeOut" }}
-                      className="w-full max-w-lg flex flex-col items-center justify-start overflow-y-auto py-4"
-                      style={{ maxHeight: '100%' }}
+                      className="w-full max-w-lg flex flex-col items-center justify-start py-4 pb-20"
                     >
                       <div className="bg-white w-full rounded-[2rem] p-8 md:p-10 text-center shadow-[0_8px_60px_-12px_rgba(0,0,0,0.08)] border border-neutral-100 relative overflow-hidden">
                         {/* Subtle top accent */}
