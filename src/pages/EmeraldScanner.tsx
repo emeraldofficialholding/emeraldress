@@ -200,6 +200,7 @@ const EmeraldScanner = () => {
       const inputType = hasImage && hasText ? "both" : hasImage ? "image" : "text";
 
       // Step 3: Insert with .select().single()
+      console.log("Verifica Connessione: puntando a", import.meta.env.VITE_SUPABASE_URL);
       const { data, error } = await supabase
         .from("scanner_requests")
         .insert([
@@ -216,8 +217,8 @@ const EmeraldScanner = () => {
         .single();
 
       if (error) {
-        console.error("DB error:", error);
-        toast.error("Errore nel salvataggio dei dati. Riprova.");
+        console.error("Errore Supabase Insert:", error);
+        toast.error("Errore DB: " + error.message);
         setPhase("input");
         return;
       }
