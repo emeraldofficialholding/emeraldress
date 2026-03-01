@@ -255,11 +255,26 @@ const EmeraldScanner = () => {
     }
   };
 
+  // ─── Safe diagnosis parser ───
+  const parseDiagnosis = (result: any): string | null => {
+    if (!result) return null;
+    if (typeof result === 'string') {
+      try {
+        const parsed = JSON.parse(result);
+        return parsed.diagnosis || parsed.text || parsed.diagnosis_result || result;
+      } catch (e) { return result; }
+    }
+    if (typeof result === 'object') {
+      return result.diagnosis || result.text || result.diagnosis_result || "Analisi completata.";
+    }
+    return null;
+  };
+
   // Score visual helpers
-  const getScoreColor = (s: number) => {
-    if (s >= 80) return { ring: "stroke-emerald-500", text: "text-emerald-600", label: "ECCELLENTE" };
-    if (s >= 60) return { ring: "stroke-emerald-400", text: "text-emerald-500", label: "BUONO" };
-    return { ring: "stroke-amber-500", text: "text-amber-600", label: "MIGLIORABILE" };
+  const getScoreLabel = (s: number) => {
+    if (s >= 75) return { ring: "stroke-emerald-600", text: "text-emerald-700", label: "ECCELLENZA SOSTENIBILE", labelColor: "text-emerald-700" };
+    if (s >= 50) return { ring: "stroke-emerald-400", text: "text-emerald-600", label: "SCELTA CONSAPEVOLE", labelColor: "text-emerald-500/80" };
+    return { ring: "stroke-stone-400", text: "text-stone-700", label: "DA RIVALUTARE", labelColor: "text-stone-600" };
   };
 
   const pillars = [
@@ -465,88 +480,152 @@ const EmeraldScanner = () => {
                 )}
 
                 {/* ─── STATE: RESULT (Luxury Card) ─── */}
-                {phase === "result" && resultScore !== null && (
-                  <motion.div
-                    key="result-state"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, ease: "easeOut" }}
-                    className="w-full max-w-lg h-full flex flex-col items-center justify-center"
-                  >
-                    <div className="bg-white w-full rounded-[2rem] p-8 md:p-10 text-center shadow-[0_8px_60px_-12px_rgba(0,0,0,0.08)] border border-neutral-100 relative overflow-hidden">
-                      {/* Subtle top accent line */}
-                      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-[2px] bg-gradient-to-r from-transparent via-emerald-400 to-transparent" />
+                {phase === "result" && (() => {
+                  const score = resultScore;
+                  const diagnosisText = parseDiagnosis(resultDiagnosis);
+                  const isValid = score !== null && score > 0 && diagnosisText && diagnosisText.trim().length > 0;
 
-                      {/* Score circle */}
-                      <div className="relative w-36 h-36 mx-auto mb-6 mt-2">
-                        <svg className="w-full h-full -rotate-90" viewBox="0 0 144 144">
-                          {/* Background circle */}
-                          <circle cx="72" cy="72" r="64" fill="none" strokeWidth="2" className="stroke-neutral-100" />
-                          {/* Score arc */}
-                          <motion.circle
-                            cx="72"
-                            cy="72"
-                            r="64"
-                            fill="none"
-                            strokeWidth="2.5"
-                            strokeLinecap="round"
-                            className={getScoreColor(resultScore).ring}
-                            strokeDasharray={`${2 * Math.PI * 64}`}
-                            initial={{ strokeDashoffset: 2 * Math.PI * 64 }}
-                            animate={{ strokeDashoffset: 2 * Math.PI * 64 * (1 - resultScore / 100) }}
-                            transition={{ duration: 1.5, ease: "easeOut", delay: 0.3 }}
-                          />
-                        </svg>
-                        {/* Number in center */}
-                        <div className="absolute inset-0 flex flex-col items-center justify-center">
-                          <motion.span
-                            initial={{ opacity: 0, scale: 0.5 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ duration: 0.5, delay: 0.5 }}
-                            className={cn("font-serif text-5xl md:text-6xl leading-none", getScoreColor(resultScore).text)}
+                  if (!isValid) {
+                    return (
+                      <motion.div
+                        key="result-fallback"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6 }}
+                        className="w-full max-w-md h-full flex flex-col items-center justify-center text-center px-6"
+                      >
+                        <div className="bg-white rounded-[2rem] p-10 md:p-14 border border-neutral-100 shadow-[0_8px_60px_-12px_rgba(0,0,0,0.06)]">
+                          <Gem className="w-10 h-10 text-emerald-300 mx-auto mb-6" />
+                          <p className="font-serif text-lg md:text-xl text-stone-700 leading-relaxed italic max-w-sm mx-auto">
+                            L'analisi di questo capo richiede un livello di dettaglio superiore. Ti invitiamo a ricaricare l'immagine o a scansionare un nuovo articolo.
+                          </p>
+                          <div className="w-10 h-px bg-stone-200 mx-auto my-8" />
+                          <button
+                            onClick={resetScanner}
+                            className="bg-neutral-900 text-white rounded-md px-8 py-3 font-serif uppercase text-sm tracking-wider transition-all hover:bg-stone-800"
                           >
-                            {resultScore}
-                          </motion.span>
+                            Scansiona un nuovo capo
+                          </button>
                         </div>
-                      </div>
+                      </motion.div>
+                    );
+                  }
 
-                      {/* Label */}
-                      <p className="text-[9px] uppercase tracking-[0.3em] text-neutral-400 font-sans mb-1">
-                        Sustainability Score
-                      </p>
-                      <p className={cn("text-xs font-bold uppercase tracking-[0.2em] mb-6", getScoreColor(resultScore).text)}>
-                        {getScoreColor(resultScore).label}
-                      </p>
+                  const sc = getScoreLabel(score!);
 
-                      {/* Diagnosis text */}
-                      {resultDiagnosis && (
+                  return (
+                    <motion.div
+                      key="result-state"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.6, ease: "easeOut" }}
+                      className="w-full max-w-lg flex flex-col items-center justify-start overflow-y-auto py-4"
+                      style={{ maxHeight: '100%' }}
+                    >
+                      <div className="bg-white w-full rounded-[2rem] p-8 md:p-10 text-center shadow-[0_8px_60px_-12px_rgba(0,0,0,0.08)] border border-neutral-100 relative overflow-hidden">
+                        {/* Subtle top accent */}
+                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-[2px] bg-gradient-to-r from-transparent via-emerald-400 to-transparent" />
+
+                        {/* Score circle */}
+                        <div className="relative w-36 h-36 mx-auto mb-4 mt-2">
+                          <svg className="w-full h-full -rotate-90" viewBox="0 0 144 144">
+                            <circle cx="72" cy="72" r="64" fill="none" strokeWidth="1" className="stroke-neutral-100" />
+                            <motion.circle
+                              cx="72" cy="72" r="64" fill="none" strokeWidth="1.5" strokeLinecap="round"
+                              className={sc.ring}
+                              strokeDasharray={`${2 * Math.PI * 64}`}
+                              initial={{ strokeDashoffset: 2 * Math.PI * 64 }}
+                              animate={{ strokeDashoffset: 2 * Math.PI * 64 * (1 - score! / 100) }}
+                              transition={{ duration: 1.5, ease: "easeOut", delay: 0.3 }}
+                            />
+                          </svg>
+                          <div className="absolute inset-0 flex flex-col items-center justify-center">
+                            <motion.span
+                              initial={{ opacity: 0, scale: 0.5 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              transition={{ duration: 0.5, delay: 0.5 }}
+                              className={cn("font-serif text-5xl font-light leading-none", sc.text)}
+                            >
+                              {score}
+                            </motion.span>
+                          </div>
+                        </div>
+
+                        {/* Dynamic label */}
+                        <p className="text-[9px] uppercase tracking-[0.3em] text-neutral-400 font-sans mb-1">
+                          Sustainability Score
+                        </p>
+                        <p className={cn("text-xs uppercase tracking-[0.3em] font-sans mb-6", sc.labelColor)}>
+                          {sc.label}
+                        </p>
+
+                        {/* Diagnosis text */}
                         <motion.div
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.8 }}
-                          className="mb-8"
+                          className="mb-6"
                         >
-                          <div className="w-8 h-px bg-neutral-200 mx-auto mb-5" />
-                          <p className="font-serif text-sm md:text-base text-neutral-600 leading-relaxed max-w-sm mx-auto italic">
-                            {resultDiagnosis}
+                          <div className="w-8 h-px bg-stone-200 mx-auto mb-5" />
+                          <p className="font-serif text-sm md:text-base text-stone-800 leading-loose text-center max-w-sm mx-auto">
+                            {diagnosisText}
                           </p>
                         </motion.div>
-                      )}
 
-                      {/* Separator */}
-                      <div className="w-8 h-px bg-neutral-200 mx-auto mb-6" />
+                        {/* ─── Emeraldress Comparison ─── */}
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 1.1 }}
+                          className="bg-emerald-50/30 rounded-2xl p-6 border border-emerald-100/50 mb-6"
+                        >
+                          <p className="font-serif italic text-base text-stone-700 mb-5">Lo Standard Emeraldress</p>
+                          
+                          <div className="space-y-4">
+                            {/* User score bar */}
+                            <div className="flex items-center gap-3">
+                              <span className="text-[10px] uppercase tracking-wider text-stone-500 font-sans w-24 text-right shrink-0">Il tuo capo</span>
+                              <div className="flex-1 h-2 bg-stone-100 rounded-full overflow-hidden">
+                                <motion.div
+                                  className="h-full bg-stone-400 rounded-full"
+                                  initial={{ width: 0 }}
+                                  animate={{ width: `${score}%` }}
+                                  transition={{ duration: 1.2, delay: 1.3, ease: "easeOut" }}
+                                />
+                              </div>
+                              <span className="text-xs font-serif text-stone-600 w-12 text-left">{score}/100</span>
+                            </div>
+                            {/* Emeraldress bar */}
+                            <div className="flex items-center gap-3">
+                              <span className="text-[10px] uppercase tracking-wider text-emerald-700 font-sans w-24 text-right shrink-0">Emeraldress</span>
+                              <div className="flex-1 h-2 bg-emerald-100 rounded-full overflow-hidden">
+                                <motion.div
+                                  className="h-full bg-emerald-600 rounded-full"
+                                  initial={{ width: 0 }}
+                                  animate={{ width: '100%' }}
+                                  transition={{ duration: 1.2, delay: 1.5, ease: "easeOut" }}
+                                />
+                              </div>
+                              <span className="text-xs font-serif text-emerald-700 w-12 text-left">100/100</span>
+                            </div>
+                          </div>
+                          
+                          <p className="text-[10px] text-stone-500 font-sans mt-4 leading-relaxed tracking-wide">
+                            Produzione Etica · Tessuti Rigenerati ECONYL® · Zero Sprechi
+                          </p>
+                        </motion.div>
 
-                      {/* Reset button */}
-                      <button
-                        onClick={resetScanner}
-                        className="inline-flex items-center gap-2.5 border border-neutral-200 text-neutral-600 hover:border-neutral-900 hover:text-neutral-900 px-6 py-2.5 rounded-full text-[10px] tracking-[0.2em] uppercase font-sans transition-all duration-300"
-                      >
-                        <RefreshCw className="w-3 h-3" />
-                        Scansiona un nuovo capo
-                      </button>
-                    </div>
-                  </motion.div>
-                )}
+                        {/* Reset button */}
+                        <button
+                          onClick={resetScanner}
+                          className="bg-neutral-900 text-white rounded-md px-8 py-3 font-serif uppercase text-sm tracking-wider transition-all hover:bg-stone-800"
+                        >
+                          Scansiona un nuovo capo
+                        </button>
+                      </div>
+                    </motion.div>
+                  );
+                })()}
               </AnimatePresence>
             </div>
           </div>
