@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
@@ -38,16 +38,7 @@ const EmeraldScanner = () => {
   const [recordId, setRecordId] = useState<string | null>(null);
   const [resultScore, setResultScore] = useState<number | null>(null);
   const [resultDiagnosis, setResultDiagnosis] = useState<string | null>(null);
-  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const dropZoneRef = useRef<HTMLDivElement>(null);
-
-  // Cleanup polling on unmount
-  useEffect(() => {
-    return () => {
-      if (pollingRef.current) clearInterval(pollingRef.current);
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    };
-  }, []);
 
   // Cleanup preview URL
   useEffect(() => {
@@ -56,51 +47,7 @@ const EmeraldScanner = () => {
     };
   }, [previewUrl]);
 
-  // Polling logic with 60s timeout
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const stopPolling = useCallback(() => {
-    if (pollingRef.current) { clearInterval(pollingRef.current); pollingRef.current = null; }
-    if (timeoutRef.current) { clearTimeout(timeoutRef.current); timeoutRef.current = null; }
-  }, []);
-
-  const startPolling = useCallback((id: string) => {
-    stopPolling();
-
-    // 60s timeout
-    timeoutRef.current = setTimeout(() => {
-      stopPolling();
-      toast.error("L'analisi richiede tempo, i risultati appariranno a breve");
-      setPhase("input");
-    }, 60000);
-
-    pollingRef.current = setInterval(async () => {
-      try {
-        const { data, error } = await supabase
-          .from("scanner_requests")
-          .select("sustainability_score, diagnosis_result")
-          .eq("id", id)
-          .maybeSingle();
-
-        if (error) {
-          console.error("Polling error:", error);
-          return;
-        }
-
-        if (data && data.sustainability_score !== null && data.diagnosis_result !== null) {
-          stopPolling();
-          setResultScore(data.sustainability_score);
-          setResultDiagnosis(data.diagnosis_result);
-          setPhase("result");
-        }
-      } catch (err) {
-        console.error("Polling exception:", err);
-      }
-    }, 3000);
-  }, [stopPolling]);
-
   const resetScanner = () => {
-    stopPolling();
     setPhase("input");
     setRecordId(null);
     setResultScore(null);
@@ -230,11 +177,25 @@ const EmeraldScanner = () => {
         return;
       }
 
-      // Step 4: Call n8n webhook with correct URL and data.id
+      // Step 4: Call n8n webhook with enriched payload (synchronous)
+      setRecordId(data.id);
+      setPhase("waiting");
+
+      const webhookPayload = {
+        id: data.id,
+        image_url: imageUrl || null,
+        input_type: inputType,
+        brand: brand.trim() || null,
+        material: material.trim() || null,
+        garment_type: garmentType.trim() || null,
+      };
+
+      console.log("Webhook payload:", webhookPayload);
+
       const webhookRes = await fetch("https://n8n.kreareweb.com/webhook/scanner-requests", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: data.id }),
+        body: JSON.stringify(webhookPayload),
       });
 
       if (!webhookRes.ok) {
@@ -244,10 +205,20 @@ const EmeraldScanner = () => {
         return;
       }
 
-      // Step 4: poll only this record by its id
-      setRecordId(data.id);
-      setPhase("waiting");
-      startPolling(data.id);
+      const aiResult = await webhookRes.json();
+      console.log("Webhook response (sincrona):", aiResult);
+
+      // Step 5: Update UI directly from webhook response
+      if (!aiResult.ai_success || aiResult.sustainability_score === 0 || !aiResult.sustainability_score) {
+        setResultScore(null);
+        setResultDiagnosis(null);
+        setPhase("result");
+        return;
+      }
+
+      setResultScore(aiResult.sustainability_score);
+      setResultDiagnosis(aiResult.diagnosis_result);
+      setPhase("result");
     } catch (err: any) {
       console.error("Errore:", err);
       toast.error("Si è verificato un errore imprevisto. Riprova.");
