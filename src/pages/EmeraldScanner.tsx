@@ -188,16 +188,28 @@ const EmeraldScanner = () => {
         imageUrl = urlData.publicUrl;
       }
 
-      // Step 2: Insert and get created record with .select().single()
+      // Step 2: Compute text_content and input_type
+      const hasImage = Boolean(imageUrl);
+      const hasText = [brand, material, garmentType, perceivedQuality].some((v) => v.trim().length > 0);
+      const textParts: string[] = [];
+      if (brand.trim()) textParts.push(`Brand: ${brand.trim()}`);
+      if (material.trim()) textParts.push(`Materiale: ${material.trim()}`);
+      if (garmentType.trim()) textParts.push(`Tipo: ${garmentType.trim()}`);
+      if (perceivedQuality.trim()) textParts.push(`Qualità: ${perceivedQuality.trim()}`);
+      const textContent = textParts.length > 0 ? textParts.join(", ") : null;
+      const inputType = hasImage && hasText ? "both" : hasImage ? "image" : "text";
+
+      // Step 3: Insert with .select().single()
       const { data, error } = await supabase
         .from("scanner_requests")
         .insert([
           {
             image_url: imageUrl,
-            input_type: selectedFile ? "image" : "manual",
-            brand: brand || null,
-            garment_type: garmentType || null,
-            material: material || null,
+            text_content: textContent,
+            input_type: inputType,
+            brand: brand.trim() || null,
+            garment_type: garmentType.trim() || null,
+            material: material.trim() || null,
           },
         ])
         .select()
@@ -217,8 +229,8 @@ const EmeraldScanner = () => {
         return;
       }
 
-      // Step 3: Call n8n webhook only if data.id exists
-      const webhookRes = await fetch("https://n8n.kreareweb.com/webhook/krea-brain", {
+      // Step 4: Call n8n webhook with correct URL and data.id
+      const webhookRes = await fetch("https://n8n.kreareweb.com/webhook/scanner-requests", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: data.id }),

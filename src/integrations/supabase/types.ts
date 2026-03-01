@@ -103,6 +103,7 @@ export type Database = {
           input_type: string
           material: string | null
           sustainability_score: number | null
+          text_content: string | null
         }
         Insert: {
           brand?: string | null
@@ -114,6 +115,7 @@ export type Database = {
           input_type?: string
           material?: string | null
           sustainability_score?: number | null
+          text_content?: string | null
         }
         Update: {
           brand?: string | null
@@ -125,6 +127,7 @@ export type Database = {
           input_type?: string
           material?: string | null
           sustainability_score?: number | null
+          text_content?: string | null
         }
         Relationships: []
       }

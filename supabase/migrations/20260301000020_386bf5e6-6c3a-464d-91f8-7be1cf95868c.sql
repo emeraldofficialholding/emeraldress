@@ -1,0 +1,1 @@
+ALTER TABLE public.scanner_requests ADD COLUMN IF NOT EXISTS text_content text;
