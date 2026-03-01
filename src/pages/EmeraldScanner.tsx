@@ -209,34 +209,82 @@ const EmeraldScanner = () => {
       console.log("Webhook response (sincrona):", aiResult);
 
       // Step 5: Update UI directly from webhook response
-      if (!aiResult.ai_success || aiResult.sustainability_score === 0 || !aiResult.sustainability_score) {
-        setResultScore(null);
-        setResultDiagnosis(null);
+      const webhookScore = typeof aiResult.sustainability_score === 'number' ? aiResult.sustainability_score : null;
+      const webhookDiagnosis = aiResult.diagnosis_result || null;
+
+      if (webhookScore !== null && webhookScore > 0 && webhookDiagnosis) {
+        setResultScore(webhookScore);
+        setResultDiagnosis(webhookDiagnosis);
         setPhase("result");
         return;
       }
 
-      setResultScore(aiResult.sustainability_score);
-      setResultDiagnosis(aiResult.diagnosis_result);
+      // Fallback: read directly from Supabase if webhook data is incomplete
+      console.warn("Webhook data incomplete, falling back to DB read...", { webhookScore, webhookDiagnosis });
+      const { data: dbRow } = await supabase
+        .from("scanner_requests")
+        .select("sustainability_score, diagnosis_result")
+        .eq("id", data.id)
+        .single();
+
+      console.log("DB fallback row:", dbRow);
+
+      const dbScore = typeof dbRow?.sustainability_score === 'number' ? dbRow.sustainability_score : null;
+      const dbDiagnosis = dbRow?.diagnosis_result || null;
+
+      if (dbScore !== null && dbScore > 0) {
+        setResultScore(dbScore);
+        setResultDiagnosis(dbDiagnosis);
+      } else {
+        setResultScore(null);
+        setResultDiagnosis(null);
+      }
       setPhase("result");
     } catch (err: any) {
       console.error("Errore:", err);
+      // Last resort: try reading from DB if we have a recordId
+      if (recordId) {
+        try {
+          const { data: dbRow } = await supabase
+            .from("scanner_requests")
+            .select("sustainability_score, diagnosis_result")
+            .eq("id", recordId)
+            .single();
+          if (dbRow?.sustainability_score && dbRow.sustainability_score > 0) {
+            setResultScore(dbRow.sustainability_score);
+            setResultDiagnosis(dbRow.diagnosis_result);
+            setPhase("result");
+            return;
+          }
+        } catch (_) { /* ignore */ }
+      }
       toast.error("Si è verificato un errore imprevisto. Riprova.");
       setPhase("input");
     }
   };
 
-  // ─── Safe diagnosis parser ───
-  const parseDiagnosis = (result: any): string | null => {
-    if (!result) return null;
-    if (typeof result === 'string') {
+  // ─── Safe diagnosis parser (bulletproof) ───
+  const parseDiagnosis = (rawResult: any): string | null => {
+    if (!rawResult) return null;
+    // Already a clean string — use directly
+    if (typeof rawResult === 'string') {
+      const trimmed = rawResult.trim();
+      if (!trimmed || trimmed === 'null' || trimmed === 'undefined') return null;
+      // Try JSON parse in case it's a stringified object
       try {
-        const parsed = JSON.parse(result);
-        return parsed.diagnosis || parsed.text || parsed.diagnosis_result || result;
-      } catch (e) { return result; }
+        const parsed = JSON.parse(trimmed);
+        if (typeof parsed === 'string') return parsed;
+        if (typeof parsed === 'object' && parsed !== null) {
+          return parsed.diagnosis || parsed.text || parsed.diagnosis_result || JSON.stringify(parsed);
+        }
+      } catch (_) {
+        // Not JSON — it's a plain text string, use as-is
+      }
+      return trimmed;
     }
-    if (typeof result === 'object') {
-      return result.diagnosis || result.text || result.diagnosis_result || "Analisi completata.";
+    // It's an object
+    if (typeof rawResult === 'object' && rawResult !== null) {
+      return rawResult.diagnosis || rawResult.text || rawResult.diagnosis_result || "Analisi completata.";
     }
     return null;
   };
