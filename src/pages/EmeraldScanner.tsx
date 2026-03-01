@@ -243,9 +243,9 @@ const EmeraldScanner = () => {
 
   // Score visual helpers
   const getScoreLabel = (s: number) => {
-    if (s >= 75) return { ring: "stroke-emerald-600", text: "text-emerald-700", label: "ECCELLENZA SOSTENIBILE", labelColor: "text-emerald-700" };
-    if (s >= 50) return { ring: "stroke-emerald-400", text: "text-emerald-600", label: "SCELTA CONSAPEVOLE", labelColor: "text-emerald-500/80" };
-    return { ring: "stroke-stone-400", text: "text-stone-700", label: "DA RIVALUTARE", labelColor: "text-stone-600" };
+    if (s >= 71) return { ring: "stroke-emerald-700", text: "text-emerald-800", label: "ECCELLENZA SOSTENIBILE", labelColor: "text-emerald-800" };
+    if (s >= 26) return { ring: "stroke-emerald-400/50", text: "text-emerald-500/50", label: "SCELTA CONSAPEVOLE", labelColor: "text-emerald-500/50" };
+    return { ring: "stroke-stone-500", text: "text-stone-600", label: "DA RIVALUTARE", labelColor: "text-stone-600" };
   };
 
   const pillars = [
@@ -432,9 +432,9 @@ const EmeraldScanner = () => {
                         animate={{ opacity: 1 }}
                         className="font-serif text-xl md:text-2xl text-neutral-800 italic leading-snug"
                       >
-                        {phase === "uploading"
+                    {phase === "uploading"
                           ? "Preparazione dell'analisi..."
-                          : "L'Intelligenza Artificiale sta analizzando il DNA del capo..."}
+                          : "La nostra consulente tessile sta analizzando la fibra..."}
                       </motion.p>
                       {phase === "waiting" && (
                         <motion.p
@@ -535,22 +535,25 @@ const EmeraldScanner = () => {
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.8 }}
-                          className="mb-6"
+                          className="mb-6 px-4 md:px-10"
                         >
                           <div className="w-8 h-px bg-stone-200 mx-auto mb-5" />
-                          <p className="font-serif text-sm md:text-base text-stone-800 leading-loose text-center max-w-sm mx-auto">
+                          <p
+                            className="font-serif text-sm md:text-base text-stone-800 text-center max-w-xs mx-auto"
+                            style={{ lineHeight: 1.8, letterSpacing: '0.01em' }}
+                          >
                             {diagnosisText}
                           </p>
                         </motion.div>
 
-                        {/* ─── Emeraldress Comparison ─── */}
+                        {/* ─── "Il Nostro Standard" Comparison ─── */}
                         <motion.div
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 1.1 }}
                           className="bg-emerald-50/30 rounded-2xl p-6 border border-emerald-100/50 mb-6"
                         >
-                          <p className="font-serif italic text-base text-stone-700 mb-5">Lo Standard Emeraldress</p>
+                          <p className="font-serif italic text-base text-stone-700 mb-5">Il Nostro Standard</p>
                           
                           <div className="space-y-4">
                             {/* User score bar */}
@@ -584,6 +587,13 @@ const EmeraldScanner = () => {
                           <p className="text-[10px] text-stone-500 font-sans mt-4 leading-relaxed tracking-wide">
                             Produzione Etica · Tessuti Rigenerati ECONYL® · Zero Sprechi
                           </p>
+
+                          {/* Low-score educational note */}
+                          {score! < 50 && (
+                            <p className="text-[10px] text-stone-500 font-sans mt-4 italic leading-relaxed tracking-wide">
+                              Scegliere fibre riciclate certificate Emeraldress riduce l'impatto ambientale fino al 78% rispetto ai tessuti vergini, garantendo traspirabilità assoluta e rispetto per la pelle.
+                            </p>
+                          )}
                         </motion.div>
 
                         {/* Reset button */}
