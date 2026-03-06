@@ -823,6 +823,113 @@ export default function Admin() {
                 </motion.div>
               )}
 
+              {/* ══ NEWSLETTER ══════════════════════════════════════════════════ */}
+              {section === "newsletter" && (
+                <motion.div
+                  key="newsletter"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.25 }}
+                >
+                  <div className="flex items-center justify-between mb-6">
+                    <div>
+                      <h2 style={{ fontFamily: "var(--font-serif)" }} className="text-2xl font-semibold text-neutral-900">
+                        Newsletter
+                      </h2>
+                      <p className="text-sm text-neutral-400 mt-0.5">
+                        {subscribers.length} iscritti totali · <span className="text-emerald-700 font-medium">{activeSubscribers.length} attivi</span>
+                      </p>
+                    </div>
+                    <Button
+                      onClick={exportCSV}
+                      variant="outline"
+                      size="sm"
+                      className="rounded-xl border-neutral-200 text-neutral-600 hover:bg-neutral-50 gap-2"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline">Esporta CSV</span>
+                    </Button>
+                  </div>
+
+                  {/* Active count card */}
+                  <div className="grid grid-cols-2 gap-4 mb-6">
+                    <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm p-5">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
+                          <Users className="w-5 h-5 text-emerald-700" />
+                        </div>
+                        <div>
+                          <p className="text-2xl font-semibold text-neutral-900">{activeSubscribers.length}</p>
+                          <p className="text-xs text-neutral-400">Iscritti Attivi</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm p-5">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-neutral-100 flex items-center justify-center">
+                          <Mail className="w-5 h-5 text-neutral-500" />
+                        </div>
+                        <div>
+                          <p className="text-2xl font-semibold text-neutral-900">{subscribers.length}</p>
+                          <p className="text-xs text-neutral-400">Totale Iscritti</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Subscribers table */}
+                  <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm overflow-hidden">
+                    <div className="overflow-x-auto">
+                      <table className="w-full">
+                        <thead>
+                          <tr className="border-b border-neutral-100">
+                            {["Nome", "Email", "Telefono", "Fonte", "Stato", "Data"].map((h) => (
+                              <th key={h} className="text-left px-4 py-3 text-xs font-medium text-neutral-400 uppercase tracking-wider">
+                                {h}
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-neutral-50">
+                          {subscribers.map((s) => (
+                            <tr key={s.id} className="hover:bg-neutral-50 transition-colors">
+                              <td className="px-4 py-3 text-sm text-neutral-900">{s.name || "—"}</td>
+                              <td className="px-4 py-3 text-sm text-neutral-600">{s.email}</td>
+                              <td className="px-4 py-3 text-sm text-neutral-500">{s.phone || "—"}</td>
+                              <td className="px-4 py-3">
+                                {s.source ? (
+                                  <span className="inline-flex items-center text-xs px-2.5 py-1 rounded-full font-medium bg-neutral-100 text-neutral-600">
+                                    {s.source}
+                                  </span>
+                                ) : "—"}
+                              </td>
+                              <td className="px-4 py-3">
+                                <span className={`inline-flex items-center text-xs px-2.5 py-1 rounded-full font-medium ${
+                                  s.active ? "bg-emerald-50 text-emerald-700" : "bg-neutral-100 text-neutral-400"
+                                }`}>
+                                  {s.active ? "Attivo" : "Inattivo"}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3 text-sm text-neutral-500">
+                                {new Date(s.created_at).toLocaleDateString("it-IT", { day: "2-digit", month: "short", year: "numeric" })}
+                              </td>
+                            </tr>
+                          ))}
+                          {subscribers.length === 0 && (
+                            <tr>
+                              <td colSpan={6} className="px-4 py-12 text-center text-sm text-neutral-400">
+                                Nessun iscritto alla newsletter
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
             </AnimatePresence>
           </main>
           </>)}
