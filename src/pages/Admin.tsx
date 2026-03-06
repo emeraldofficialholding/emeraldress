@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard, Package, ShoppingBag, LogOut, Plus, X, Upload,
   TrendingUp, DollarSign, Archive, ChevronRight, Edit2, Trash2, Eye, EyeOff,
-  Lock, GripVertical, ImageIcon,
+  Lock, GripVertical, ImageIcon, Mail, Download, Users,
 } from "lucide-react";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -43,7 +43,17 @@ interface Order {
   created_at: string;
 }
 
-type AdminSection = "dashboard" | "products" | "orders";
+interface Subscriber {
+  id: string;
+  name: string | null;
+  email: string;
+  phone: string | null;
+  source: string | null;
+  active: boolean;
+  created_at: string;
+}
+
+type AdminSection = "dashboard" | "products" | "orders" | "newsletter";
 
 // ── Sales chart mock data helper ───────────────────────────────────────────────
 function buildChartData(orders: Order[]) {
@@ -102,6 +112,7 @@ export default function Admin() {
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [chartData, setChartData] = useState<{ date: string; revenue: number }[]>([]);
+  const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
 
   // product drawer
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -165,14 +176,33 @@ export default function Admin() {
 
   // ── Data fetching ────────────────────────────────────────────────────────────
   async function fetchAll() {
-    const [{ data: prods }, { data: ords }] = await Promise.all([
+    const [{ data: prods }, { data: ords }, { data: subs }] = await Promise.all([
       supabase.from("products").select("*").order("created_at", { ascending: false }),
       supabase.from("orders").select("*").order("created_at", { ascending: false }),
+      supabase.from("subscribers").select("*").order("created_at", { ascending: false }),
     ]);
     setProducts((prods as Product[]) || []);
     const ordList = (ords as Order[]) || [];
     setOrders(ordList);
     setChartData(buildChartData(ordList));
+    setSubscribers((subs as Subscriber[]) || []);
+  }
+
+  // ── Newsletter helpers ──────────────────────────────────────────────────────
+  const activeSubscribers = subscribers.filter((s) => s.active);
+
+  function exportCSV() {
+    const header = "Nome,Email,Telefono,Fonte,Attivo,Data Iscrizione\n";
+    const rows = subscribers.map((s) =>
+      [s.name || "", s.email, s.phone || "", s.source || "", s.active ? "Sì" : "No", new Date(s.created_at).toLocaleDateString("it-IT")].join(",")
+    ).join("\n");
+    const blob = new Blob([header + rows], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `subscribers_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
   }
 
   // ── KPIs ─────────────────────────────────────────────────────────────────────
@@ -339,6 +369,7 @@ export default function Admin() {
     { id: "dashboard" as AdminSection, icon: LayoutDashboard, label: "Dashboard" },
     { id: "products" as AdminSection, icon: Package, label: "Prodotti" },
     { id: "orders" as AdminSection, icon: ShoppingBag, label: "Ordini" },
+    { id: "newsletter" as AdminSection, icon: Mail, label: "Newsletter" },
   ];
 
   const statusColor: Record<string, string> = {
