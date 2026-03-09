@@ -98,9 +98,7 @@ export default function ComingSoon() {
           transition={{ duration: 1 }}
           className="flex flex-col items-center mb-12">
 
-          <div className="w-20 h-20 rounded-full flex items-center justify-center mb-6 shadow-[0_0_40px_rgba(16,185,129,0.3)] p-2 bg-inherit">
-            <img src={logoED} alt="Emeraldress" className="w-full h-full object-contain invert brightness-200" />
-          </div>
+          <img src={logoED} alt="Emeraldress" className="w-20 h-20 object-contain mb-6 invert brightness-200" />
           <span className="tracking-[0.4em] uppercase text-emerald-800 text-xs font-semibold mb-2">
             Emeraldress
           </span>
