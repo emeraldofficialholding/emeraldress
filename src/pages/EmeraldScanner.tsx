@@ -306,6 +306,10 @@ const EmeraldScanner = () => {
 
   return (
     <main className="bg-neutral-50 min-h-screen relative overflow-x-hidden font-sans" style={{ scrollBehavior: 'smooth' }}>
+      <Helmet>
+        <title>Scanner di Sostenibilità AI | Analizza i tuoi capi - Emeraldress</title>
+        <meta name="description" content="Usa lo scanner AI di Emeraldress per analizzare la sostenibilità dei tuoi capi di abbigliamento." />
+      </Helmet>
       {/* TEXTURE BACKGROUND */}
       <div
         className="absolute inset-0 opacity-[0.03] pointer-events-none z-0"
