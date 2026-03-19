@@ -40,7 +40,7 @@ const ManifestoSection = () => {
           email: formData.email,
           phone: formData.telefono,
           source: "manifesto_home"
-        }),
+        })
       });
 
       if (!res.ok) throw new Error("Webhook error");
@@ -220,7 +220,7 @@ const ManifestoSection = () => {
 
                 <div className="absolute inset-0 bg-gradient-to-t from-emerald-900/40 to-transparent" />
                 <div className="absolute bottom-6 left-6 text-white">
-                  <p className="font-serif text-2xl italic">"Eternal Style"</p>
+                  <p className="font-serif text-2xl italic">"EmeralDress"</p>
                 </div>
               </motion.div>
             </div>
