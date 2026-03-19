@@ -25,13 +25,13 @@ const timelineData = [
         </p>
         <div className="grid grid-cols-2 gap-4">
           <img
-            src="https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/Gemini_Generated_Image_bv0czcbv0czcbv0c%20-%20Modificata.png"
+            src="https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/ASSET/emeraldress-vision.webp"
             alt="Ispirazione iniziale"
             className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-md"
           />
 
           <img
-            src="https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/asset.jpg"
+            src="https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/ASSET/emeraldress-asset.webp"
             alt="Primi bozzetti"
             className="rounded-lg object-cover h-20 md:h-44 lg:h-60 w-full shadow-md"
           />
@@ -49,7 +49,7 @@ const timelineData = [
           crediamo che nel nostro piccolo <strong>possiamo contribuire a rende il mondo un posto più pulito.</strong>
         </p>
         <img
-          src="https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/DETTAGLIO%202.jpeg"
+          src="https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/ASSET/emeraldress-mission.webp"
           alt="Ricerca tessuti sani"
           className="rounded-lg object-cover h-40 md:h-64 w-full shadow-md"
         />
@@ -76,12 +76,15 @@ const ChiSiamo = () => {
     <main className="pt-0 bg-white">
       <Helmet>
         <title>Il Manifesto | L'Etica di Emeraldress</title>
-        <meta name="description" content="Il manifesto Emeraldress: scopri la nostra visione di lusso consapevole, filiera etica e manifattura italiana." />
+        <meta
+          name="description"
+          content="Il manifesto Emeraldress: scopri la nostra visione di lusso consapevole, filiera etica e manifattura italiana."
+        />
       </Helmet>
       <ScrollExpandMedia
         mediaType="video"
         mediaSrc="https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/HERO.mp4"
-        bgImageSrc="https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/SFONDO%20MINT.png"
+        bgImageSrc="https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/ASSET/emeraldress-asset.webp"
         title="Emerald Dress"
         scrollToExpand="Scorri per esplorare"
         textBlend
@@ -136,7 +139,7 @@ const ChiSiamo = () => {
               <h2 className="font-serif text-5xl md:text-6xl">MADE IN ITALY</h2>
             </div>
             <img
-              src="https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/products/NERO%20CLASSIC/NERO%20CLASSIC%20(3).jpeg"
+              src="https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/ASSET/emeraldress-madeinitaly.webp"
               alt="Atelier"
               className="w-full h-full object-cover transform scale-100 group-hover:scale-105 transition-transform duration-[2000ms]"
             />
@@ -171,10 +174,10 @@ const ChiSiamo = () => {
               {/* Instagram Grid */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-14">
                 {[
-                  "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/products/NERO%20CLASSIC/NERO%20CLASSIC%20(7).jpeg",
-                  "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/DETTAGLIO%203.jpeg",
-                  "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/products/NERO%20CLASSIC/NERO%20CLASSIC%20(8).jpeg",
-                  "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/products/BIANCO%20FIOCCO/BIANCO%20FIOCCO(7).jpeg",
+                  "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/ASSET/emeraldress-socialdress-1.webp",
+                  "hhttps://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/ASSET/emeraldress-socialdress-2.webp",
+                  "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/ASSET/emeraldress-socialdress-3.webp",
+                  "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/ASSET/emeraldress-socialdress-4.webp",
                 ].map((src, i) => (
                   <motion.div
                     key={i}
