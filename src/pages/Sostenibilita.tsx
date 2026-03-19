@@ -248,6 +248,10 @@ const LatestCollectionShowcase = () => {
 const Sostenibilita = () => {
   return (
     <main className="bg-white relative overflow-hidden w-full">
+      <Helmet>
+        <title>Sostenibilità e Tessuti Innovativi | Emeraldress</title>
+        <meta name="description" content="Scopri i tessuti rigenerati e il ciclo virtuoso della moda sostenibile Emeraldress." />
+      </Helmet>
       {/* 1. HERO SECTION */}
       <HeroSustainability />
 

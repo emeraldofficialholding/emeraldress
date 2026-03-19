@@ -74,6 +74,10 @@ const timelineData = [
 const ChiSiamo = () => {
   return (
     <main className="pt-0 bg-white">
+      <Helmet>
+        <title>Il Manifesto | L'Etica di Emeraldress</title>
+        <meta name="description" content="Il manifesto Emeraldress: scopri la nostra visione di lusso consapevole, filiera etica e manifattura italiana." />
+      </Helmet>
       <ScrollExpandMedia
         mediaType="video"
         mediaSrc="https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/HERO.mp4"

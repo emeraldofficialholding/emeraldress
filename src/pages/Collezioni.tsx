@@ -79,6 +79,10 @@ const Collezioni = () => {
 
   return (
     <main className="pt-28 pb-20 min-h-screen bg-[#e4ffec]/20 transition-colors duration-500">
+      <Helmet>
+        <title>Le Collezioni | Emeraldress Luxury Fashion</title>
+        <meta name="description" content="Esplora le collezioni Emeraldress: abbigliamento luxury sostenibile in fibra riciclata, manifattura italiana." />
+      </Helmet>
       {/* Header */}
       <div className="text-center mb-16 container mx-auto px-4">
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-3">
