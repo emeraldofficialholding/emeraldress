@@ -81,7 +81,7 @@ const ManifestoSection = () => {
               La nostra Filosofia
             </span>
 
-            <h2 className="font-serif text-4xl md:text-6xl lg:text-7xl leading-tight tracking-tight mb-12 drop-shadow-lg">
+            <h2 className="font-serif text-4xl md:text-6xl lg:text-7xl leading-tight tracking-tight mb-12 drop-shadow-lg" aria-label="La moda non deve costare la Terra">
               "La moda non deve <br /> costare la Terra."
             </h2>
 
@@ -115,7 +115,7 @@ const ManifestoSection = () => {
                 viewport={{ once: true }}
                 transition={{ duration: 0.8 }}>
 
-                <h3 className="font-serif text-5xl md:text-6xl text-emerald-950 leading-none mb-6">
+                <h3 className="font-serif text-5xl md:text-6xl text-emerald-950 leading-none mb-6" aria-label="Lusso Responsabile">
                   Lusso <br /> <span className="italic text-emerald-600">Responsabile</span>
                 </h3>
                 <div className="h-1 w-20 bg-emerald-400 mb-8" />

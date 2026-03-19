@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Loader2, Eye, EyeOff } from "lucide-react";
-import { supabase } from "@/supabaseCustom";
+import { supabase } from "@/integrations/supabase/client";
 
 // ── Shimmer particles (same aesthetic as ComingSoon) ───────────────────────────
 const particles = Array.from({ length: 12 }, (_, i) => ({
