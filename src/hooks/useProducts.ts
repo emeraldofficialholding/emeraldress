@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/supabaseCustom";
+import { supabase } from "@/integrations/supabase/client";
 
 // Ensures images/sizes are always returned as native JS arrays (never null/string)
 function normalizeProduct(p: Record<string, unknown>) {

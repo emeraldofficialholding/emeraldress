@@ -20,9 +20,8 @@ const HeroSection = () =>
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 1, delay: 0.3 }}
-      className="font-serif text-4xl md:text-6xl lg:text-7xl tracking-wide mb-4">EMERALDRESS
-
-
+      className="font-serif text-4xl md:text-6xl lg:text-7xl tracking-wide mb-4">
+        Lusso Consapevole e Manifattura Italiana — EMERALDRESS
     </motion.h1>
       <motion.p
       initial={{ opacity: 0, y: 20 }}

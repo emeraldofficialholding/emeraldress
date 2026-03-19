@@ -55,7 +55,7 @@ const ClassicsSection = () => {
           <FadeUp delay={0.15}>
             <div className="mb-6">
               <img src={logoET} alt="Emerald Touch" className="h-10 md:h-14 object-contain mb-3" />
-              <span className="block italic text-emerald-700 font-serif text-2xl md:text-3xl">L'Essenza del Lusso</span>
+              <h2 className="italic text-emerald-700 font-serif text-2xl md:text-3xl">L'Essenza del Lusso</h2>
             </div>
           </FadeUp>
 

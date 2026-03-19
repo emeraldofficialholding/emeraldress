@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import { supabase } from "@/supabaseCustom";
+import { supabase } from "@/integrations/supabase/client";
 import GemLoader from "@/components/GemLoader";
 
 // Routes accessible to everyone (no auth required)

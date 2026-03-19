@@ -64,6 +64,7 @@ const EmeraldTouchSection = () => {
               </p>
             </div>
 
+            <h2 className="sr-only">Collezione Emerald Touch</h2>
             <img src={logoET} alt="Emerald Touch" className="h-12 md:h-16 object-contain mx-auto mb-2" />
 
             <p className="text-neutral-500 font-sans text-lg leading-relaxed normal-case">
