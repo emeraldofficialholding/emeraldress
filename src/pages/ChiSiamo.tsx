@@ -1,3 +1,4 @@
+import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
 import { Timeline } from "@/components/ui/timeline";
 import ScrollExpandMedia from "@/components/ui/scroll-expansion-hero";
