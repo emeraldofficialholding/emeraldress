@@ -11,6 +11,7 @@ const HeroSection = () =>
       muted
       loop
       playsInline
+      poster="/placeholder.svg"
       className="absolute inset-0 h-full w-full object-cover"
     />
 

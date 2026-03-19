@@ -20,7 +20,8 @@ const ProductCard = ({ product, index = 0 }: ProductCardProps) => (
         <ImageFallback
           src={product.images[0]}
           hoverSrc={product.images[1]}
-          alt={product.name}
+          alt={`${product.name} — Emeraldress abbigliamento sostenibile di lusso`}
+          loading="lazy"
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
         />
       </div>
