@@ -22,7 +22,6 @@ const ProductCard = ({ product, index = 0 }: ProductCardProps) => (
           hoverSrc={product.images[1]}
           alt={`${product.name} — Emeraldress abbigliamento sostenibile di lusso`}
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
         />
       </div>
       <h3 className="font-serif text-sm md:text-base">{product.name}</h3>
