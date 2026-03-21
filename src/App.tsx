@@ -10,6 +10,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CartSheet from "@/components/CartSheet";
 import GatekeeperRoute from "@/components/GatekeeperRoute";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import Index from "./pages/Index";
 import ProductDetail from "./pages/ProductDetail";
 import EmeraldScanner from "./pages/EmeraldScanner";
@@ -68,7 +69,9 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <AppShell />
+          <ErrorBoundary>
+            <AppShell />
+          </ErrorBoundary>
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>

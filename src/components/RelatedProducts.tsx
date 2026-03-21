@@ -77,8 +77,8 @@ const RelatedProducts = ({ currentProductId, category }: { currentProductId: str
               <Link to={`/product/${product.id}`} className="group block">
                 <div className="aspect-[3/4] overflow-hidden bg-muted mb-2">
                   <ImageFallback
-                    src={product.images[0]}
-                    hoverSrc={product.images[1]}
+                    src={product.images?.[0]}
+                    hoverSrc={product.images?.[1]}
                     alt={product.name}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />

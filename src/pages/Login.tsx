@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Loader2, Eye, EyeOff } from "lucide-react";
@@ -69,6 +70,10 @@ export default function Login() {
   };
 
   return (
+    <>
+    <Helmet>
+      <meta name="robots" content="noindex, nofollow" />
+    </Helmet>
     <div
       className="min-h-screen flex items-center justify-center relative overflow-hidden"
       style={{ backgroundColor: "#e4ffec" }}
@@ -235,5 +240,6 @@ export default function Login() {
         </motion.p>
       </motion.div>
     </div>
+    </>
   );
 }

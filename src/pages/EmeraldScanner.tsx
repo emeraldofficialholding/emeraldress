@@ -17,7 +17,6 @@ import {
   Scissors,
   Repeat,
   ScanLine,
-  RefreshCw,
   ChartNoAxesCombined,
   ImageIcon,
   X,
@@ -146,7 +145,6 @@ const EmeraldScanner = () => {
       const inputType = hasImage && hasText ? "both" : hasImage ? "image" : "text";
 
       // Step 3: Insert with .select().single()
-      console.log("Verifica Connessione: puntando a", import.meta.env.VITE_SUPABASE_URL);
       const { data, error } = await supabase
         .from("scanner_requests")
         .insert([
@@ -189,13 +187,14 @@ const EmeraldScanner = () => {
         garment_type: garmentType.trim() || null,
       };
 
-      console.log("Webhook payload:", webhookPayload);
-
+      const webhookController = new AbortController();
+      const webhookTimeout = setTimeout(() => webhookController.abort(), 30000);
       const webhookRes = await fetch("https://n8n.kreareweb.com/webhook/scanner-requests", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(webhookPayload),
-      });
+        signal: webhookController.signal,
+      }).finally(() => clearTimeout(webhookTimeout));
 
       if (!webhookRes.ok) {
         console.error("Webhook error:", webhookRes.status);
@@ -205,7 +204,6 @@ const EmeraldScanner = () => {
       }
 
       const aiResult = await webhookRes.json();
-      console.log("Webhook response (sincrona):", aiResult);
 
       // Step 5: Update UI directly from webhook response
       const webhookScore = typeof aiResult.sustainability_score === "number" ? aiResult.sustainability_score : null;
@@ -219,14 +217,11 @@ const EmeraldScanner = () => {
       }
 
       // Fallback: read directly from Supabase if webhook data is incomplete
-      console.warn("Webhook data incomplete, falling back to DB read...", { webhookScore, webhookDiagnosis });
       const { data: dbRow } = await supabase
         .from("scanner_requests")
         .select("sustainability_score, diagnosis_result")
         .eq("id", data.id)
         .single();
-
-      console.log("DB fallback row:", dbRow);
 
       const dbScore = typeof dbRow?.sustainability_score === "number" ? dbRow.sustainability_score : null;
       const dbDiagnosis = dbRow?.diagnosis_result || null;
@@ -240,7 +235,11 @@ const EmeraldScanner = () => {
       }
       setPhase("result");
     } catch (err: any) {
-      console.error("Errore:", err);
+      if (err?.name !== "AbortError") {
+        toast.error("Si è verificato un errore. Riprova.");
+      } else {
+        toast.error("Il server non risponde. Riprova più tardi.");
+      }
       // Last resort: try reading from DB if we have a recordId
       if (recordId) {
         try {

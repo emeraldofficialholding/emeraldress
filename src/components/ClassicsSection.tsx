@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import heroVideo from "@/assets/hero-video.mp4";
 import logoET from "@/assets/logo-emeraldtouch.png";
 
 const FadeUp = ({

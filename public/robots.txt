@@ -1,5 +1,7 @@
 User-agent: *
 Allow: /
 Disallow: /admin
+Disallow: /login
+Disallow: /coming-soon
 
 Sitemap: https://www.emeraldress.com/sitemap.xml

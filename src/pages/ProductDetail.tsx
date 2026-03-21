@@ -1,5 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { useState, useRef, useCallback } from "react";
+import { Helmet } from "react-helmet-async";
 import { useProduct } from "@/hooks/useProducts";
 import { useCart } from "@/contexts/CartContext";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -259,6 +260,32 @@ const ProductDetail = () => {
 
   return (
     <>
+      <Helmet>
+        <title>{product.name} | Emeraldress</title>
+        <meta name="description" content={product.description || `${product.name} — Abbigliamento sostenibile di lusso, manifattura italiana Emeraldress.`} />
+        <link rel="canonical" href={`https://www.emeraldress.com/product/${product.id}`} />
+        <meta property="og:title" content={`${product.name} | Emeraldress`} />
+        <meta property="og:description" content={product.description || `${product.name} — Lusso consapevole, manifattura italiana.`} />
+        <meta property="og:image" content={images[0]} />
+        <meta property="og:url" content={`https://www.emeraldress.com/product/${product.id}`} />
+        <meta property="og:type" content="product" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:image" content={images[0]} />
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Product",
+          "name": product.name,
+          "description": product.description,
+          "image": images[0],
+          "brand": { "@type": "Brand", "name": "Emeraldress" },
+          "offers": {
+            "@type": "Offer",
+            "price": Number(product.price).toFixed(2),
+            "priceCurrency": "EUR",
+            "availability": product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
+          }
+        })}</script>
+      </Helmet>
       <SizeGuideModal open={sizeGuideOpen} onClose={() => setSizeGuideOpen(false)} />
 
       <main className="pt-20 pb-24 bg-background">

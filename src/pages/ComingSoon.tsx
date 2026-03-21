@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
 import { Loader2, Sparkles } from "lucide-react";
 import logoED from "@/assets/logo-ed.png";
@@ -54,6 +55,10 @@ export default function ComingSoon() {
   };
 
   return (
+    <>
+    <Helmet>
+      <meta name="robots" content="noindex, nofollow" />
+    </Helmet>
     <div className="min-h-screen w-full bg-[#e4ffec] flex flex-col items-center justify-center relative overflow-hidden px-4">
 
       {/* ── Shimmer particles ─────────────────────────────────────────────── */}
@@ -246,6 +251,8 @@ export default function ComingSoon() {
           </a>
         </motion.div>
       </div>
-    </div>);
+    </div>
+    </>
+  );
 
 }

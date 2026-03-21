@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard, Package, ShoppingBag, LogOut, Plus, X, Upload,
-  TrendingUp, DollarSign, Archive, ChevronRight, Edit2, Trash2, Eye, EyeOff,
+  TrendingUp, DollarSign, ChevronRight, Edit2, Trash2, Eye, EyeOff,
   Lock, GripVertical, ImageIcon, Mail, Download, Users,
 } from "lucide-react";
 import {
@@ -168,7 +169,6 @@ export default function Admin() {
       password: loginPassword,
     });
     if (error) {
-      console.error("Login error:", error);
       setLoginError(`Errore: ${error.message}`);
     }
     setLoginLoading(false);
@@ -176,23 +176,19 @@ export default function Admin() {
 
   // ── Data fetching ────────────────────────────────────────────────────────────
   async function fetchAll() {
-    const [{ data: prods }, { data: ords }, { data: subs, error: subscribersError }] = await Promise.all([
+    const [
+      { data: prods, error: prodsError },
+      { data: ords, error: ordsError },
+      { data: subs, error: subscribersError },
+    ] = await Promise.all([
       supabase.from("products").select("*").order("created_at", { ascending: false }),
       supabase.from("orders").select("*").order("created_at", { ascending: false }),
       supabase.from("subscribers").select("*"),
     ]);
 
-    const currentSupabaseUrl = (supabase as unknown as { supabaseUrl?: string }).supabaseUrl ?? "unknown";
-    console.log("[Admin Newsletter Debug]", {
-      supabaseUrl: currentSupabaseUrl,
-      subscribersError,
-      subscribersData: subs,
-    });
-
-    if (subscribersError) {
-      console.error("Errore fetch subscribers:", subscribersError);
-      toast.error("Errore nel caricamento iscritti newsletter");
-    }
+    if (prodsError) toast.error("Errore nel caricamento prodotti");
+    if (ordsError) toast.error("Errore nel caricamento ordini");
+    if (subscribersError) toast.error("Errore nel caricamento iscritti newsletter");
 
     setProducts((prods as Product[]) || []);
     const ordList = (ords as Order[]) || [];
@@ -328,10 +324,6 @@ export default function Admin() {
         images: finalUrls,       // native JS array, never JSON string
       };
 
-      console.log("[Admin] payload before save:", JSON.stringify(payload, null, 2));
-      console.log("[Admin] images type:", typeof payload.images, Array.isArray(payload.images));
-      console.log("[Admin] sizes type:", typeof payload.sizes, Array.isArray(payload.sizes));
-
       if (editingProduct) {
         const { error } = await supabase
           .from("products")
@@ -364,12 +356,14 @@ export default function Admin() {
 
   async function toggleStatus(p: Product) {
     const newStatus = p.status === "active" ? "draft" : "active";
-    await supabase.from("products").update({ status: newStatus }).eq("id", p.id);
+    const { error } = await supabase.from("products").update({ status: newStatus }).eq("id", p.id);
+    if (error) { toast.error(error.message); return; }
     fetchAll();
   }
 
   async function handleSignOut() {
-    await supabase.auth.signOut();
+    const { error } = await supabase.auth.signOut();
+    if (error) toast.error(error.message);
     navigate("/");
   }
 
@@ -395,6 +389,10 @@ export default function Admin() {
 
   // ══════════════════════════════════════════════════════════════════════════════
   return (
+    <>
+    <Helmet>
+      <meta name="robots" content="noindex, nofollow" />
+    </Helmet>
     <div className="min-h-screen bg-neutral-950 flex items-center justify-center p-4 lg:p-8" style={{ fontFamily: "var(--font-sans)" }}>
       {/* ── iPad Frame ── */}
       <motion.div
@@ -1207,5 +1205,6 @@ export default function Admin() {
         )}
       </AnimatePresence>
     </div>
+    </>
   );
 }

@@ -6,18 +6,15 @@ const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-  console.error(
+  throw new Error(
     "ERRORE: Variabili Supabase mancanti. Verifica il tuo file .env.\n" +
     "Assicurati di avere VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY settate correttamente."
   );
 }
 
-// Inizializzazione sicura del client Supabase
-// Se le chiavi mancano, usiamo stringhe vuote per evitare crash immediati,
-// ma le chiamate API falliranno (gestito silenziosamente dai componenti)
 export const supabase = createClient<Database>(
-  SUPABASE_URL || "https://placeholder.supabase.co",
-  SUPABASE_ANON_KEY || "placeholder-key",
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY,
   {
     auth: {
       storage: localStorage,

@@ -25,7 +25,7 @@ const CollectionCard = ({ product, index }: { product: any; index: number }) => 
       <Link to={`/product/${product.id}`} className="flex flex-col gap-4 cursor-pointer">
         <div className="relative w-full aspect-[3/4.5] overflow-hidden bg-[#fdfdfd]">
           <img
-            src={product.images[0]}
+            src={product.images?.[0]}
             alt={product.name}
             className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
           />
