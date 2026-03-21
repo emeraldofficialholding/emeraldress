@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import heroVideo from "@/assets/hero-video.mp4";
+import logoED from "@/assets/logo-ed.png";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 
 const HeroSection = () =>
