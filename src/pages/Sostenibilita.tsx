@@ -210,7 +210,7 @@ const LatestCollectionShowcase = () => {
                   <div className="aspect-[3/4] overflow-hidden rounded-[2rem] shadow-2xl relative">
                     <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-500 z-10" />
                     <img
-                      src={product.images[0] || "/placeholder.svg"}
+                      src={product.images[0] || "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/faviconemeraldress.svg"}
                       alt={product.name}
                       className="w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-110"
                     />

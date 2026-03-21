@@ -241,7 +241,7 @@ const ProductDetail = () => {
     })
     .map((s) => s.trim())
     .filter(Boolean);
-  const images = product.images?.length ? product.images : ["/placeholder.svg"];
+  const images = product.images?.length ? product.images : ["https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/faviconemeraldress.svg"];
 
   const handleAddToCart = () => {
     if (!selectedSize) return;
