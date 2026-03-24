@@ -14,11 +14,20 @@ const Index = () => {
         <link rel="canonical" href="https://www.emeraldress.com/" />
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",
-          "@type": "Organization",
+          "@type": "ClothingStore",
           "name": "Emeraldress",
           "url": "https://www.emeraldress.com",
           "logo": "https://www.emeraldress.com/logo-ed.png",
-          "description": "Brand italiano di moda luxury sostenibile.",
+          "description": "Brand italiano di moda luxury sostenibile con tessuti riciclati ECONYL® e manifattura artigianale.",
+          "slogan": "Lusso Consapevole e Manifattura Italiana",
+          "foundingDate": "2026",
+          "areaServed": "IT",
+          "address": {
+            "@type": "PostalAddress",
+            "addressCountry": "IT",
+            "addressRegion": "Sardegna"
+          },
+          "knowsAbout": ["moda sostenibile", "ECONYL", "luxury fashion", "manifattura italiana"],
           "brand": {
             "@type": "Brand",
             "name": "Emeraldress"
