@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard, Package, ShoppingBag, LogOut, Plus, X, Upload,
   TrendingUp, DollarSign, ChevronRight, Edit2, Trash2, Eye, EyeOff,
-  Lock, GripVertical, ImageIcon, Mail, Download, Users,
+  Lock, GripVertical, ImageIcon, Mail, Download, Users, Archive,
 } from "lucide-react";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
