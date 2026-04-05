@@ -1,7 +1,70 @@
+# =========================================================
+# Robots.txt per emeraldress.com
+# Ottimizzato per visibilità AI (GEO), SEO e protezione
+# =========================================================
+
+# 1. BOT AI - ACCESSO COMPLETO (Per apparire come brand autorevole su ChatGPT, Claude, Perplexity, Gemini)
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: Anthropic-ai
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: YouBot
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+# 2. BOT SEO COMPETITOR - BLOCCO TOTALE (Per evitare che ti spiino traffico e keyword)
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+User-agent: Rogerbot
+Disallow: /
+
+# 3. REGOLE GENERALI (Per Google, Bing, Yahoo e gli utenti normali)
 User-agent: *
 Allow: /
+
+# Protezione delle aree sensibili e pannelli di controllo
 Disallow: /admin
+Disallow: /admin/
 Disallow: /login
 Disallow: /coming-soon
+Disallow: /private/
 
+# Pulizia URL (Impedisce a Google di indicizzare link "sporchi" provenienti da Ads o Social, salvando la SEO)
+Disallow: /*?utm_*
+Disallow: /*?fbclid=*
+Disallow: /*?gclid=*
+
+# 4. SITEMAP UFFICIALE
 Sitemap: https://www.emeraldress.com/sitemap.xml
