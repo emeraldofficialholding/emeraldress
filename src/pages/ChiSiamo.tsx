@@ -4,7 +4,7 @@ import { Timeline } from "@/components/ui/timeline";
 import ScrollExpandMedia from "@/components/ui/scroll-expansion-hero";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 import { Instagram, PenTool, Heart, MessageCircle, Sparkles, ArrowRight } from "lucide-react";
-import logoET from "@/assets/logo-emeraldtouch.png";
+const logoET = "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/emeraldress-logo-touch-collection.svg";
 
 const fadeUp = {
   initial: { opacity: 0, y: 30 },
