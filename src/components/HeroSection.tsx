@@ -1,13 +1,14 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import heroVideo from "@/assets/hero-video.mp4";
 import logoED from "@/assets/logo-ed.png";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
+
+const HERO_VIDEO_URL = "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/emeraldress-lusso-consapevole.mp4";
 
 const HeroSection = () =>
   <section className="relative h-screen w-full overflow-hidden">
     <video
-      src={heroVideo}
+      src={HERO_VIDEO_URL}
       autoPlay
       muted
       loop
