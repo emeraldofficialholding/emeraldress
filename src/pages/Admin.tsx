@@ -1,12 +1,14 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { Helmet } from "react-helmet-async";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard, Package, ShoppingBag, LogOut, Plus, X, Upload,
   TrendingUp, DollarSign, ChevronRight, Edit2, Trash2, Eye, EyeOff,
-  Lock, GripVertical, ImageIcon, Mail, Download, Users, Archive,
+  Lock, GripVertical, ImageIcon, Mail, Download, Users, Archive, Send, Loader2,
 } from "lucide-react";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -125,6 +127,24 @@ export default function Admin() {
   const fileRef = useRef<HTMLInputElement>(null);
   const dragIndexRef = useRef<number | null>(null);
 
+  // newsletter campaign
+  const [selectedSubscribers, setSelectedSubscribers] = useState<string[]>([]);
+  const [emailSubject, setEmailSubject] = useState("");
+  const [emailBody, setEmailBody] = useState("");
+  const [selectedTemplate, setSelectedTemplate] = useState("");
+  const [sending, setSending] = useState(false);
+
+  const quillModules = useMemo(() => ({
+    toolbar: [
+      [{ header: [1, 2, 3, false] }],
+      ["bold", "italic", "underline", "strike"],
+      [{ color: [] }, { background: [] }],
+      [{ list: "ordered" }, { list: "bullet" }],
+      ["link", "image"],
+      ["clean"],
+    ],
+  }), []);
+
   // ── Auth check ───────────────────────────────────────────────────────────────
   async function checkAdmin(userId: string) {
     const { data } = await supabase
@@ -212,6 +232,84 @@ export default function Admin() {
     a.download = `subscribers_${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
+  }
+
+  function toggleSubscriber(email: string) {
+    setSelectedSubscribers((prev) =>
+      prev.includes(email) ? prev.filter((e) => e !== email) : [...prev, email]
+    );
+  }
+
+  function toggleAllSubscribers() {
+    if (selectedSubscribers.length === activeSubscribers.length) {
+      setSelectedSubscribers([]);
+    } else {
+      setSelectedSubscribers(activeSubscribers.map((s) => s.email));
+    }
+  }
+
+  function generateFinalHTML(bodyContent: string) {
+    return `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f9f9f9;font-family:Georgia,'Times New Roman',serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f9f9;">
+<tr><td align="center" style="padding:40px 20px;">
+<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+<tr><td style="background:#004d40;padding:32px 24px;text-align:center;">
+<h1 style="margin:0;color:#ffffff;font-family:Georgia,'Times New Roman',serif;font-size:28px;letter-spacing:3px;">EMERALDRESS</h1>
+</td></tr>
+<tr><td style="background:#ffffff;padding:32px 24px;">
+${bodyContent}
+</td></tr>
+<tr><td style="background:#f9f9f9;padding:24px;text-align:center;">
+<p style="margin:0;font-size:12px;color:#999;">© ${new Date().getFullYear()} Emeraldress — Lusso Consapevole</p>
+</td></tr>
+</table></td></tr></table></body></html>`;
+  }
+
+  function handleTemplateChange(template: string) {
+    setSelectedTemplate(template);
+    if (template === "teaser") {
+      setEmailSubject("Qualcosa di straordinario sta per arrivare...");
+      setEmailBody("<p>Cara amica dello stile,</p><p>Stiamo preparando qualcosa di unico per te. Un nuovo capitolo nella moda sostenibile di lusso, ispirato dalla bellezza della Costa Smeralda.</p><p><strong>Resta sintonizzata.</strong></p><p>Con stile,<br/>Il Team Emeraldress</p>");
+    } else if (template === "launch") {
+      setEmailSubject("È arrivato il momento — Scopri la nuova collezione");
+      setEmailBody("<p>Cara amica dello stile,</p><p>Il giorno è arrivato. La nostra nuova collezione è finalmente disponibile.</p><p>Ogni capo è realizzato con materiali rigenerati ECONYL® e manifattura artigianale italiana.</p><p><a href='https://www.emeraldress.com/collezioni' style='color:#004d40;font-weight:bold;'>Scopri la Collezione →</a></p><p>Con stile,<br/>Il Team Emeraldress</p>");
+    } else {
+      setEmailSubject("");
+      setEmailBody("");
+    }
+  }
+
+  async function handleSendNewsletter() {
+    if (!emailSubject || selectedSubscribers.length === 0) return;
+    setSending(true);
+    try {
+      const recipients = subscribers.filter((s) => selectedSubscribers.includes(s.email)).map((s) => ({
+        email: s.email,
+        name: s.name || "",
+      }));
+      const webhookUrl = import.meta.env.VITE_N8N_WEBHOOK_URL;
+      if (!webhookUrl) throw new Error("Webhook URL non configurato");
+      const res = await fetch(webhookUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          subject: emailSubject,
+          html: generateFinalHTML(emailBody),
+          recipients,
+        }),
+      });
+      if (!res.ok) throw new Error(`Errore webhook: ${res.status}`);
+      toast.success(`Newsletter inviata a ${recipients.length} destinatari`);
+      setSelectedSubscribers([]);
+      setEmailSubject("");
+      setEmailBody("");
+      setSelectedTemplate("");
+    } catch (e: unknown) {
+      toast.error((e as Error).message || "Errore durante l'invio");
+    } finally {
+      setSending(false);
+    }
   }
 
   // ── KPIs ─────────────────────────────────────────────────────────────────────
@@ -846,10 +944,13 @@ export default function Admin() {
                   <div className="flex items-center justify-between mb-6">
                     <div>
                       <h2 style={{ fontFamily: "var(--font-serif)" }} className="text-2xl font-semibold text-neutral-900">
-                        Newsletter
+                        Campagne Newsletter
                       </h2>
                       <p className="text-sm text-neutral-400 mt-0.5">
                         {subscribers.length} iscritti totali · <span className="text-emerald-700 font-medium">{activeSubscribers.length} attivi</span>
+                        {selectedSubscribers.length > 0 && (
+                          <> · <span className="text-emerald-900 font-semibold">Selezionati: {selectedSubscribers.length} su {activeSubscribers.length}</span></>
+                        )}
                       </p>
                     </div>
                     <Button
@@ -863,8 +964,8 @@ export default function Admin() {
                     </Button>
                   </div>
 
-                  {/* Active count card */}
-                  <div className="grid grid-cols-2 gap-4 mb-6">
+                  {/* KPI cards */}
+                  <div className="grid grid-cols-3 gap-4 mb-6">
                     <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm p-5">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
@@ -887,14 +988,33 @@ export default function Admin() {
                         </div>
                       </div>
                     </div>
+                    <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm p-5">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
+                          <Send className="w-5 h-5 text-emerald-800" />
+                        </div>
+                        <div>
+                          <p className="text-2xl font-semibold text-neutral-900">{selectedSubscribers.length}</p>
+                          <p className="text-xs text-neutral-400">Selezionati</p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
-                  {/* Subscribers table */}
-                  <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm overflow-hidden">
+                  {/* Subscribers table with checkboxes */}
+                  <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm overflow-hidden mb-6">
                     <div className="overflow-x-auto">
                       <table className="w-full">
                         <thead>
                           <tr className="border-b border-neutral-100">
+                            <th className="px-4 py-3 w-10">
+                              <input
+                                type="checkbox"
+                                checked={selectedSubscribers.length === activeSubscribers.length && activeSubscribers.length > 0}
+                                onChange={toggleAllSubscribers}
+                                className="w-4 h-4 rounded border-neutral-300 text-emerald-700 focus:ring-emerald-600 cursor-pointer"
+                              />
+                            </th>
                             {["Nome", "Email", "Telefono", "Fonte", "Stato", "Data"].map((h) => (
                               <th key={h} className="text-left px-4 py-3 text-xs font-medium text-neutral-400 uppercase tracking-wider">
                                 {h}
@@ -904,7 +1024,16 @@ export default function Admin() {
                         </thead>
                         <tbody className="divide-y divide-neutral-50">
                           {subscribers.map((s) => (
-                            <tr key={s.id} className="hover:bg-neutral-50 transition-colors">
+                            <tr key={s.id} className={`hover:bg-neutral-50 transition-colors ${selectedSubscribers.includes(s.email) ? "bg-emerald-50/40" : ""}`}>
+                              <td className="px-4 py-3">
+                                <input
+                                  type="checkbox"
+                                  checked={selectedSubscribers.includes(s.email)}
+                                  onChange={() => toggleSubscriber(s.email)}
+                                  disabled={!s.active}
+                                  className="w-4 h-4 rounded border-neutral-300 text-emerald-700 focus:ring-emerald-600 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                                />
+                              </td>
                               <td className="px-4 py-3 text-sm text-neutral-900">{s.name || "—"}</td>
                               <td className="px-4 py-3 text-sm text-neutral-600">{s.email}</td>
                               <td className="px-4 py-3 text-sm text-neutral-500">{s.phone || "—"}</td>
@@ -929,13 +1058,80 @@ export default function Admin() {
                           ))}
                           {subscribers.length === 0 && (
                             <tr>
-                              <td colSpan={6} className="px-4 py-12 text-center text-sm text-neutral-400">
+                              <td colSpan={7} className="px-4 py-12 text-center text-sm text-neutral-400">
                                 Nessun iscritto alla newsletter
                               </td>
                             </tr>
                           )}
                         </tbody>
                       </table>
+                    </div>
+                  </div>
+
+                  {/* ── Email Composer ────────────────────────────────── */}
+                  <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm p-6">
+                    <h3 style={{ fontFamily: "var(--font-serif)" }} className="text-lg font-semibold text-neutral-900 mb-5 flex items-center gap-2">
+                      <Mail className="w-5 h-5 text-emerald-700" />
+                      Composizione Email
+                    </h3>
+
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                      <div>
+                        <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">Oggetto *</Label>
+                        <Input
+                          value={emailSubject}
+                          onChange={(e) => setEmailSubject(e.target.value)}
+                          placeholder="Oggetto dell'email..."
+                          className="rounded-xl border-neutral-200 focus:ring-emerald-600"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">Template</Label>
+                        <select
+                          value={selectedTemplate}
+                          onChange={(e) => handleTemplateChange(e.target.value)}
+                          className="w-full h-10 rounded-xl border border-neutral-200 bg-white px-3 text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-emerald-600"
+                        >
+                          <option value="">Nuova Email Vuota</option>
+                          <option value="teaser">Teaser Lancio</option>
+                          <option value="launch">Lancio Ufficiale</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="mb-5 [&_.ql-toolbar]:rounded-t-xl [&_.ql-toolbar]:border-neutral-200 [&_.ql-container]:rounded-b-xl [&_.ql-container]:border-neutral-200 [&_.ql-editor]:min-h-[180px]">
+                      <ReactQuill
+                        theme="snow"
+                        value={emailBody}
+                        onChange={setEmailBody}
+                        modules={quillModules}
+                        placeholder="Scrivi il contenuto della tua newsletter..."
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between pt-4 border-t border-neutral-100">
+                      <p className="text-sm text-neutral-400">
+                        {selectedSubscribers.length > 0
+                          ? `${selectedSubscribers.length} destinatari selezionati`
+                          : "Seleziona almeno un destinatario dalla tabella"}
+                      </p>
+                      <Button
+                        onClick={handleSendNewsletter}
+                        disabled={sending || selectedSubscribers.length === 0 || !emailSubject}
+                        className="bg-emerald-950 hover:bg-emerald-900 text-white rounded-xl gap-2 px-6"
+                      >
+                        {sending ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            Invio in corso...
+                          </>
+                        ) : (
+                          <>
+                            <Send className="w-4 h-4" />
+                            Invia a {selectedSubscribers.length} destinatari
+                          </>
+                        )}
+                      </Button>
                     </div>
                   </div>
                 </motion.div>
