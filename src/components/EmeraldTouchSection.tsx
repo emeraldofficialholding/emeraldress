@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 import { Sparkles, ArrowRight } from "lucide-react";
-import logoET from "@/assets/logo-emeraldtouch.png";
+const logoET = "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/emeraldress-logo-touch-collection.svg";
 const logoED = "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/emeraldress-icon-ed.svg";
 
 const EmeraldTouchSection = () => {

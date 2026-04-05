@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { User, ShoppingBag, Menu, X, ChevronDown } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { motion, AnimatePresence, useAnimation } from "framer-motion";
-import logoET from "@/assets/logo-emeraldtouch.png";
+const logoET = "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/emeraldress-logo-touch-collection.svg";
 
 const links = [
   { to: "/", label: "Home" },

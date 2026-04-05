@@ -5,7 +5,7 @@ import { useProducts } from "@/hooks/useProducts";
 import GemLoader from "@/components/GemLoader";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, Sparkles } from "lucide-react";
-import logoET from "@/assets/logo-emeraldtouch.png";
+const logoET = "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/emeraldress-logo-touch-collection.svg";
 import {
   DropdownMenu,
   DropdownMenuContent,
