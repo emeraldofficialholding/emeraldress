@@ -17,7 +17,7 @@ const Index = () => {
           "@type": "ClothingStore",
           "name": "Emeraldress",
           "url": "https://www.emeraldress.com",
-          "logo": "https://www.emeraldress.com/logo-ed.png",
+          "logo": "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/emeraldress-icon-ed.svg",
           "description": "Brand italiano di moda luxury sostenibile con tessuti riciclati ECONYL® e manifattura artigianale.",
           "slogan": "Lusso Consapevole e Manifattura Italiana",
           "foundingDate": "2026",

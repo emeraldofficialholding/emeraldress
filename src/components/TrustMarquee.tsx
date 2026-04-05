@@ -12,7 +12,7 @@ import {
 } from "framer-motion";
 import { wrap } from "@motionone/utils";
 import { cn } from "@/lib/utils";
-import logoED from "@/assets/logo-ed.png";
+const logoED = "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/emeraldress-icon-ed.svg";
 
 type MarqueeBandProps = {
   children: React.ReactNode;

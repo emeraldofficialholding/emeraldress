@@ -13,7 +13,7 @@ import {
   CircleDashed,
   Wind,
 } from "lucide-react";
-import logoED from "@/assets/logo-ed.png";
+const logoED = "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/emeraldress-icon-ed.svg";
 import logoET from "@/assets/logo-emeraldtouch.png";
 import { Link } from "react-router-dom";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";

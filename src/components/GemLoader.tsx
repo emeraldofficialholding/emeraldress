@@ -1,4 +1,4 @@
-import logoED from "@/assets/logo-ed.png";
+const logoED = "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/emeraldress-icon-ed.svg";
 
 const GemLoader = () => (
   <div className="flex flex-col items-center justify-center py-20 gap-4">

@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import logoED from "@/assets/logo-ed.png";
+const logoED = "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/emeraldress-icon-ed.svg";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 
 const HERO_VIDEO_URL = "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/emeraldress-lusso-consapevole.mp4";
