@@ -234,6 +234,84 @@ export default function Admin() {
     URL.revokeObjectURL(url);
   }
 
+  function toggleSubscriber(email: string) {
+    setSelectedSubscribers((prev) =>
+      prev.includes(email) ? prev.filter((e) => e !== email) : [...prev, email]
+    );
+  }
+
+  function toggleAllSubscribers() {
+    if (selectedSubscribers.length === activeSubscribers.length) {
+      setSelectedSubscribers([]);
+    } else {
+      setSelectedSubscribers(activeSubscribers.map((s) => s.email));
+    }
+  }
+
+  function generateFinalHTML(bodyContent: string) {
+    return `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f9f9f9;font-family:Georgia,'Times New Roman',serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f9f9;">
+<tr><td align="center" style="padding:40px 20px;">
+<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+<tr><td style="background:#004d40;padding:32px 24px;text-align:center;">
+<h1 style="margin:0;color:#ffffff;font-family:Georgia,'Times New Roman',serif;font-size:28px;letter-spacing:3px;">EMERALDRESS</h1>
+</td></tr>
+<tr><td style="background:#ffffff;padding:32px 24px;">
+${bodyContent}
+</td></tr>
+<tr><td style="background:#f9f9f9;padding:24px;text-align:center;">
+<p style="margin:0;font-size:12px;color:#999;">© ${new Date().getFullYear()} Emeraldress — Lusso Consapevole</p>
+</td></tr>
+</table></td></tr></table></body></html>`;
+  }
+
+  function handleTemplateChange(template: string) {
+    setSelectedTemplate(template);
+    if (template === "teaser") {
+      setEmailSubject("Qualcosa di straordinario sta per arrivare...");
+      setEmailBody("<p>Cara amica dello stile,</p><p>Stiamo preparando qualcosa di unico per te. Un nuovo capitolo nella moda sostenibile di lusso, ispirato dalla bellezza della Costa Smeralda.</p><p><strong>Resta sintonizzata.</strong></p><p>Con stile,<br/>Il Team Emeraldress</p>");
+    } else if (template === "launch") {
+      setEmailSubject("È arrivato il momento — Scopri la nuova collezione");
+      setEmailBody("<p>Cara amica dello stile,</p><p>Il giorno è arrivato. La nostra nuova collezione è finalmente disponibile.</p><p>Ogni capo è realizzato con materiali rigenerati ECONYL® e manifattura artigianale italiana.</p><p><a href='https://www.emeraldress.com/collezioni' style='color:#004d40;font-weight:bold;'>Scopri la Collezione →</a></p><p>Con stile,<br/>Il Team Emeraldress</p>");
+    } else {
+      setEmailSubject("");
+      setEmailBody("");
+    }
+  }
+
+  async function handleSendNewsletter() {
+    if (!emailSubject || selectedSubscribers.length === 0) return;
+    setSending(true);
+    try {
+      const recipients = subscribers.filter((s) => selectedSubscribers.includes(s.email)).map((s) => ({
+        email: s.email,
+        name: s.name || "",
+      }));
+      const webhookUrl = import.meta.env.VITE_N8N_WEBHOOK_URL;
+      if (!webhookUrl) throw new Error("Webhook URL non configurato");
+      const res = await fetch(webhookUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          subject: emailSubject,
+          html: generateFinalHTML(emailBody),
+          recipients,
+        }),
+      });
+      if (!res.ok) throw new Error(`Errore webhook: ${res.status}`);
+      toast.success(`Newsletter inviata a ${recipients.length} destinatari`);
+      setSelectedSubscribers([]);
+      setEmailSubject("");
+      setEmailBody("");
+      setSelectedTemplate("");
+    } catch (e: unknown) {
+      toast.error((e as Error).message || "Errore durante l'invio");
+    } finally {
+      setSending(false);
+    }
+  }
+
   // ── KPIs ─────────────────────────────────────────────────────────────────────
   const totalRevenue = orders.reduce((s, o) => s + Number(o.total_amount), 0);
   const totalStock = products.reduce((s, p) => s + (p.stock || 0), 0);
