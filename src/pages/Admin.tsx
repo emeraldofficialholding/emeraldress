@@ -944,10 +944,13 @@ ${bodyContent}
                   <div className="flex items-center justify-between mb-6">
                     <div>
                       <h2 style={{ fontFamily: "var(--font-serif)" }} className="text-2xl font-semibold text-neutral-900">
-                        Newsletter
+                        Campagne Newsletter
                       </h2>
                       <p className="text-sm text-neutral-400 mt-0.5">
                         {subscribers.length} iscritti totali · <span className="text-emerald-700 font-medium">{activeSubscribers.length} attivi</span>
+                        {selectedSubscribers.length > 0 && (
+                          <> · <span className="text-emerald-900 font-semibold">Selezionati: {selectedSubscribers.length} su {activeSubscribers.length}</span></>
+                        )}
                       </p>
                     </div>
                     <Button
@@ -961,8 +964,8 @@ ${bodyContent}
                     </Button>
                   </div>
 
-                  {/* Active count card */}
-                  <div className="grid grid-cols-2 gap-4 mb-6">
+                  {/* KPI cards */}
+                  <div className="grid grid-cols-3 gap-4 mb-6">
                     <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm p-5">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
@@ -985,14 +988,33 @@ ${bodyContent}
                         </div>
                       </div>
                     </div>
+                    <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm p-5">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
+                          <Send className="w-5 h-5 text-emerald-800" />
+                        </div>
+                        <div>
+                          <p className="text-2xl font-semibold text-neutral-900">{selectedSubscribers.length}</p>
+                          <p className="text-xs text-neutral-400">Selezionati</p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
-                  {/* Subscribers table */}
-                  <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm overflow-hidden">
+                  {/* Subscribers table with checkboxes */}
+                  <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm overflow-hidden mb-6">
                     <div className="overflow-x-auto">
                       <table className="w-full">
                         <thead>
                           <tr className="border-b border-neutral-100">
+                            <th className="px-4 py-3 w-10">
+                              <input
+                                type="checkbox"
+                                checked={selectedSubscribers.length === activeSubscribers.length && activeSubscribers.length > 0}
+                                onChange={toggleAllSubscribers}
+                                className="w-4 h-4 rounded border-neutral-300 text-emerald-700 focus:ring-emerald-600 cursor-pointer"
+                              />
+                            </th>
                             {["Nome", "Email", "Telefono", "Fonte", "Stato", "Data"].map((h) => (
                               <th key={h} className="text-left px-4 py-3 text-xs font-medium text-neutral-400 uppercase tracking-wider">
                                 {h}
@@ -1002,7 +1024,16 @@ ${bodyContent}
                         </thead>
                         <tbody className="divide-y divide-neutral-50">
                           {subscribers.map((s) => (
-                            <tr key={s.id} className="hover:bg-neutral-50 transition-colors">
+                            <tr key={s.id} className={`hover:bg-neutral-50 transition-colors ${selectedSubscribers.includes(s.email) ? "bg-emerald-50/40" : ""}`}>
+                              <td className="px-4 py-3">
+                                <input
+                                  type="checkbox"
+                                  checked={selectedSubscribers.includes(s.email)}
+                                  onChange={() => toggleSubscriber(s.email)}
+                                  disabled={!s.active}
+                                  className="w-4 h-4 rounded border-neutral-300 text-emerald-700 focus:ring-emerald-600 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                                />
+                              </td>
                               <td className="px-4 py-3 text-sm text-neutral-900">{s.name || "—"}</td>
                               <td className="px-4 py-3 text-sm text-neutral-600">{s.email}</td>
                               <td className="px-4 py-3 text-sm text-neutral-500">{s.phone || "—"}</td>
@@ -1027,13 +1058,80 @@ ${bodyContent}
                           ))}
                           {subscribers.length === 0 && (
                             <tr>
-                              <td colSpan={6} className="px-4 py-12 text-center text-sm text-neutral-400">
+                              <td colSpan={7} className="px-4 py-12 text-center text-sm text-neutral-400">
                                 Nessun iscritto alla newsletter
                               </td>
                             </tr>
                           )}
                         </tbody>
                       </table>
+                    </div>
+                  </div>
+
+                  {/* ── Email Composer ────────────────────────────────── */}
+                  <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm p-6">
+                    <h3 style={{ fontFamily: "var(--font-serif)" }} className="text-lg font-semibold text-neutral-900 mb-5 flex items-center gap-2">
+                      <Mail className="w-5 h-5 text-emerald-700" />
+                      Composizione Email
+                    </h3>
+
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                      <div>
+                        <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">Oggetto *</Label>
+                        <Input
+                          value={emailSubject}
+                          onChange={(e) => setEmailSubject(e.target.value)}
+                          placeholder="Oggetto dell'email..."
+                          className="rounded-xl border-neutral-200 focus:ring-emerald-600"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">Template</Label>
+                        <select
+                          value={selectedTemplate}
+                          onChange={(e) => handleTemplateChange(e.target.value)}
+                          className="w-full h-10 rounded-xl border border-neutral-200 bg-white px-3 text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-emerald-600"
+                        >
+                          <option value="">Nuova Email Vuota</option>
+                          <option value="teaser">Teaser Lancio</option>
+                          <option value="launch">Lancio Ufficiale</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="mb-5 [&_.ql-toolbar]:rounded-t-xl [&_.ql-toolbar]:border-neutral-200 [&_.ql-container]:rounded-b-xl [&_.ql-container]:border-neutral-200 [&_.ql-editor]:min-h-[180px]">
+                      <ReactQuill
+                        theme="snow"
+                        value={emailBody}
+                        onChange={setEmailBody}
+                        modules={quillModules}
+                        placeholder="Scrivi il contenuto della tua newsletter..."
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between pt-4 border-t border-neutral-100">
+                      <p className="text-sm text-neutral-400">
+                        {selectedSubscribers.length > 0
+                          ? `${selectedSubscribers.length} destinatari selezionati`
+                          : "Seleziona almeno un destinatario dalla tabella"}
+                      </p>
+                      <Button
+                        onClick={handleSendNewsletter}
+                        disabled={sending || selectedSubscribers.length === 0 || !emailSubject}
+                        className="bg-emerald-950 hover:bg-emerald-900 text-white rounded-xl gap-2 px-6"
+                      >
+                        {sending ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            Invio in corso...
+                          </>
+                        ) : (
+                          <>
+                            <Send className="w-4 h-4" />
+                            Invia a {selectedSubscribers.length} destinatari
+                          </>
+                        )}
+                      </Button>
                     </div>
                   </div>
                 </motion.div>
