@@ -127,6 +127,24 @@ export default function Admin() {
   const fileRef = useRef<HTMLInputElement>(null);
   const dragIndexRef = useRef<number | null>(null);
 
+  // newsletter campaign
+  const [selectedSubscribers, setSelectedSubscribers] = useState<string[]>([]);
+  const [emailSubject, setEmailSubject] = useState("");
+  const [emailBody, setEmailBody] = useState("");
+  const [selectedTemplate, setSelectedTemplate] = useState("");
+  const [sending, setSending] = useState(false);
+
+  const quillModules = useMemo(() => ({
+    toolbar: [
+      [{ header: [1, 2, 3, false] }],
+      ["bold", "italic", "underline", "strike"],
+      [{ color: [] }, { background: [] }],
+      [{ list: "ordered" }, { list: "bullet" }],
+      ["link", "image"],
+      ["clean"],
+    ],
+  }), []);
+
   // ── Auth check ───────────────────────────────────────────────────────────────
   async function checkAdmin(userId: string) {
     const { data } = await supabase
