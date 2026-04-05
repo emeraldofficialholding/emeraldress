@@ -20,6 +20,7 @@ export interface Product {
   sizes: string[] | null;
   fabric_details: string | null;
   shipping_info: string | null;
+  stock: number;
   created_at: string;
 }
 
