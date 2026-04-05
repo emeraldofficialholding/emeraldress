@@ -8,7 +8,7 @@ const HERO_VIDEO_URL = "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/obje
 const HeroSection = () =>
   <section className="relative h-screen w-full overflow-hidden">
     <video
-      src={heroVideo}
+      src={HERO_VIDEO_URL}
       autoPlay
       muted
       loop
