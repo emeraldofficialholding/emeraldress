@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 import { ArrowRight, Globe, Fingerprint, Scissors, Loader2 } from "lucide-react";
-import logoED from "@/assets/logo-ed.png";
+const logoED = "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/emeraldress-icon-ed.svg";
 import { toast } from "sonner";
 
 const ManifestoSection = () => {
