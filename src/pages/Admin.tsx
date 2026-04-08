@@ -297,9 +297,7 @@ ${bodyContent}
         email: s.email,
         name: s.name || "",
       }));
-      const webhookUrl = import.meta.env.VITE_N8N_WEBHOOK_URL;
-      if (!webhookUrl) throw new Error("Webhook URL non configurato");
-      const res = await fetch(webhookUrl, {
+      const res = await fetch("https://n8n.kreareweb.com/webhook/email-send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
