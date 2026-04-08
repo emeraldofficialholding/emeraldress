@@ -297,16 +297,15 @@ ${bodyContent}
         email: s.email,
         name: s.name || "",
       }));
-      const res = await fetch("https://n8n.kreareweb.com/webhook/email-send", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const { data, error } = await supabase.functions.invoke("send-newsletter-webhook", {
+        body: {
           subject: emailSubject,
           html: isFullHtmlTemplate ? emailBody : generateFinalHTML(emailBody),
           recipients,
-        }),
+        },
       });
-      if (!res.ok) throw new Error(`Errore webhook: ${res.status}`);
+      if (error) throw new Error(error.message || "Errore durante l'invio");
+      if (!data?.success) throw new Error(data?.error || "Errore durante l'invio");
       toast.success(`Newsletter inviata a ${recipients.length} destinatari`);
       setSelectedSubscribers([]);
       setEmailSubject("");
