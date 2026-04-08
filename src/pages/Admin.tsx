@@ -9,7 +9,9 @@ import {
   LayoutDashboard, Package, ShoppingBag, LogOut, Plus, X, Upload,
   TrendingUp, DollarSign, ChevronRight, Edit2, Trash2, Eye, EyeOff,
   Lock, GripVertical, ImageIcon, Mail, Download, Users, Archive, Send, Loader2,
+  Code, Type,
 } from "lucide-react";
+import { FULL_HTML_TEMPLATES } from "@/data/emailTemplates";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from "recharts";
@@ -133,6 +135,8 @@ export default function Admin() {
   const [emailBody, setEmailBody] = useState("");
   const [selectedTemplate, setSelectedTemplate] = useState("");
   const [sending, setSending] = useState(false);
+  const [editorMode, setEditorMode] = useState<"richtext" | "html">("richtext");
+  const [isFullHtmlTemplate, setIsFullHtmlTemplate] = useState(false);
 
   const quillModules = useMemo(() => ({
     toolbar: [
@@ -268,15 +272,20 @@ ${bodyContent}
 
   function handleTemplateChange(template: string) {
     setSelectedTemplate(template);
-    if (template === "teaser") {
-      setEmailSubject("Qualcosa di straordinario sta per arrivare...");
-      setEmailBody("<p>Cara amica dello stile,</p><p>Stiamo preparando qualcosa di unico per te. Un nuovo capitolo nella moda sostenibile di lusso, ispirato dalla bellezza della Costa Smeralda.</p><p><strong>Resta sintonizzata.</strong></p><p>Con stile,<br/>Il Team Emeraldress</p>");
+    const fullHtml = FULL_HTML_TEMPLATES[template];
+    if (fullHtml) {
+      setEmailSubject(fullHtml.subject);
+      setEmailBody(fullHtml.html);
+      setIsFullHtmlTemplate(true);
+      setEditorMode("html");
     } else if (template === "launch") {
       setEmailSubject("È arrivato il momento — Scopri la nuova collezione");
       setEmailBody("<p>Cara amica dello stile,</p><p>Il giorno è arrivato. La nostra nuova collezione è finalmente disponibile.</p><p>Ogni capo è realizzato con materiali rigenerati ECONYL® e manifattura artigianale italiana.</p><p><a href='https://www.emeraldress.com/collezioni' style='color:#004d40;font-weight:bold;'>Scopri la Collezione →</a></p><p>Con stile,<br/>Il Team Emeraldress</p>");
+      setIsFullHtmlTemplate(false);
     } else {
       setEmailSubject("");
       setEmailBody("");
+      setIsFullHtmlTemplate(false);
     }
   }
 
@@ -295,7 +304,7 @@ ${bodyContent}
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           subject: emailSubject,
-          html: generateFinalHTML(emailBody),
+          html: isFullHtmlTemplate ? emailBody : generateFinalHTML(emailBody),
           recipients,
         }),
       });
@@ -305,6 +314,8 @@ ${bodyContent}
       setEmailSubject("");
       setEmailBody("");
       setSelectedTemplate("");
+      setIsFullHtmlTemplate(false);
+      setEditorMode("richtext");
     } catch (e: unknown) {
       toast.error((e as Error).message || "Errore durante l'invio");
     } finally {
@@ -1099,15 +1110,65 @@ ${bodyContent}
                       </div>
                     </div>
 
-                    <div className="mb-5 [&_.ql-toolbar]:rounded-t-xl [&_.ql-toolbar]:border-neutral-200 [&_.ql-container]:rounded-b-xl [&_.ql-container]:border-neutral-200 [&_.ql-editor]:min-h-[180px]">
-                      <ReactQuill
-                        theme="snow"
-                        value={emailBody}
-                        onChange={setEmailBody}
-                        modules={quillModules}
-                        placeholder="Scrivi il contenuto della tua newsletter..."
-                      />
+                    {/* Editor mode toggle */}
+                    <div className="flex items-center gap-2 mb-3">
+                      <button
+                        type="button"
+                        onClick={() => setEditorMode("richtext")}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                          editorMode === "richtext"
+                            ? "bg-emerald-100 text-emerald-800"
+                            : "bg-neutral-100 text-neutral-500 hover:bg-neutral-200"
+                        }`}
+                      >
+                        <Type className="w-3.5 h-3.5" />
+                        Testo
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setEditorMode("html")}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                          editorMode === "html"
+                            ? "bg-emerald-100 text-emerald-800"
+                            : "bg-neutral-100 text-neutral-500 hover:bg-neutral-200"
+                        }`}
+                      >
+                        <Code className="w-3.5 h-3.5" />
+                        HTML
+                      </button>
+                      {isFullHtmlTemplate && (
+                        <span className="ml-auto text-[10px] text-amber-600 bg-amber-50 px-2 py-1 rounded-full font-medium">
+                          Template completo — inviato senza wrapper
+                        </span>
+                      )}
                     </div>
+
+                    {editorMode === "richtext" ? (
+                      <div className="mb-5 [&_.ql-toolbar]:rounded-t-xl [&_.ql-toolbar]:border-neutral-200 [&_.ql-container]:rounded-b-xl [&_.ql-container]:border-neutral-200 [&_.ql-editor]:min-h-[180px]">
+                        <ReactQuill
+                          theme="snow"
+                          value={emailBody}
+                          onChange={setEmailBody}
+                          modules={quillModules}
+                          placeholder="Scrivi il contenuto della tua newsletter..."
+                        />
+                      </div>
+                    ) : (
+                      <div className="mb-5">
+                        <textarea
+                          value={emailBody}
+                          onChange={(e) => {
+                            setEmailBody(e.target.value);
+                            if (!FULL_HTML_TEMPLATES[selectedTemplate]) {
+                              setIsFullHtmlTemplate(e.target.value.trim().toLowerCase().startsWith("<!doctype") || e.target.value.trim().toLowerCase().startsWith("<html"));
+                            }
+                          }}
+                          placeholder="Incolla qui il codice HTML della tua email..."
+                          className="w-full min-h-[250px] rounded-xl border border-neutral-200 bg-neutral-950 text-emerald-300 font-mono text-xs p-4 focus:outline-none focus:ring-2 focus:ring-emerald-600 resize-y"
+                          spellCheck={false}
+                        />
+                      </div>
+                    )}
 
                     <div className="flex items-center justify-between pt-4 border-t border-neutral-100">
                       <p className="text-sm text-neutral-400">
