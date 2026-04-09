@@ -266,6 +266,7 @@ export default function Admin() {
       { data: cols, error: colsError },
       { data: settingsRows, error: settingsError },
       { data: scans, error: scansError },
+      { data: cpns, error: cpnsError },
     ] = await Promise.all([
       supabase.from("products").select("*").order("created_at", { ascending: false }),
       supabase.from("orders").select("*").order("created_at", { ascending: false }),
@@ -273,6 +274,7 @@ export default function Admin() {
       supabase.from("collections" as any).select("*").order("name"),
       supabase.from("app_settings" as any).select("*").eq("id", 1).maybeSingle(),
       supabase.from("scanner_requests").select("*").order("created_at", { ascending: false }).limit(100),
+      supabase.from("coupons" as any).select("*").order("code"),
     ]);
 
     if (prodsError) toast.error("Errore nel caricamento prodotti");
