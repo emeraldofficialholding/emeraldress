@@ -9,7 +9,7 @@ import {
   LayoutDashboard, Package, ShoppingBag, LogOut, Plus, X, Upload,
   TrendingUp, DollarSign, ChevronRight, Edit2, Trash2, Eye, EyeOff,
   Lock, GripVertical, ImageIcon, Mail, Download, Users, Archive, Send, Loader2,
-  Code, Type, Layers, Settings, Palette, ScanSearch,
+  Code, Type, Layers, Settings, Palette, ScanSearch, Tag, Percent, Copy,
 } from "lucide-react";
 import { FULL_HTML_TEMPLATES } from "@/data/emailTemplates";
 import {
@@ -66,7 +66,7 @@ interface Collection {
   is_active: boolean;
 }
 
-type AdminSection = "dashboard" | "products" | "orders" | "newsletter" | "collections" | "settings" | "scanner";
+type AdminSection = "dashboard" | "products" | "orders" | "newsletter" | "collections" | "settings" | "scanner" | "marketing";
 
 // ── Sales chart mock data helper ───────────────────────────────────────────────
 function buildChartData(orders: Order[]) {
@@ -158,6 +158,25 @@ export default function Admin() {
   }
   const [scannerRequests, setScannerRequests] = useState<ScannerRequest[]>([]);
   const [selectedScan, setSelectedScan] = useState<ScannerRequest | null>(null);
+
+  // coupons
+  interface Coupon {
+    id: string;
+    code: string;
+    discount_type: "percentage" | "fixed";
+    value: number;
+    is_active: boolean;
+    valid_until: string | null;
+    usage_limit: number | null;
+    used_count: number;
+  }
+  const [coupons, setCoupons] = useState<Coupon[]>([]);
+  const [couponDrawerOpen, setCouponDrawerOpen] = useState(false);
+  const [editingCoupon, setEditingCoupon] = useState<Coupon | null>(null);
+  const [couponForm, setCouponForm] = useState({
+    code: "", discount_type: "percentage" as "percentage" | "fixed", value: "", is_active: true, valid_until: "", usage_limit: "",
+  });
+  const [couponSubmitting, setCouponSubmitting] = useState(false);
 
   // product drawer
   const [drawerOpen, setDrawerOpen] = useState(false);
