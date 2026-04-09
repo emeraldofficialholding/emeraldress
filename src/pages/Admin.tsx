@@ -9,7 +9,7 @@ import {
   LayoutDashboard, Package, ShoppingBag, LogOut, Plus, X, Upload,
   TrendingUp, DollarSign, ChevronRight, Edit2, Trash2, Eye, EyeOff,
   Lock, GripVertical, ImageIcon, Mail, Download, Users, Archive, Send, Loader2,
-  Code, Type, Layers, Settings, Palette,
+  Code, Type, Layers, Settings, Palette, ScanSearch,
 } from "lucide-react";
 import { FULL_HTML_TEMPLATES } from "@/data/emailTemplates";
 import {
@@ -66,7 +66,7 @@ interface Collection {
   is_active: boolean;
 }
 
-type AdminSection = "dashboard" | "products" | "orders" | "newsletter" | "collections" | "settings";
+type AdminSection = "dashboard" | "products" | "orders" | "newsletter" | "collections" | "settings" | "scanner";
 
 // ── Sales chart mock data helper ───────────────────────────────────────────────
 function buildChartData(orders: Order[]) {
@@ -143,6 +143,21 @@ export default function Admin() {
   const [settingsSaving, setSettingsSaving] = useState(false);
   const settingsFileRef = useRef<HTMLInputElement>(null);
   const [settingsUploadingKey, setSettingsUploadingKey] = useState<string | null>(null);
+
+  // scanner hub
+  interface ScannerRequest {
+    id: string;
+    image_url: string | null;
+    input_type: string;
+    diagnosis_result: any;
+    sustainability_score: number | null;
+    material: string | null;
+    brand: string | null;
+    garment_type: string | null;
+    created_at: string;
+  }
+  const [scannerRequests, setScannerRequests] = useState<ScannerRequest[]>([]);
+  const [selectedScan, setSelectedScan] = useState<ScannerRequest | null>(null);
 
   // product drawer
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -231,19 +246,21 @@ export default function Admin() {
       { data: subs, error: subscribersError },
       { data: cols, error: colsError },
       { data: settingsRows, error: settingsError },
+      { data: scans, error: scansError },
     ] = await Promise.all([
       supabase.from("products").select("*").order("created_at", { ascending: false }),
       supabase.from("orders").select("*").order("created_at", { ascending: false }),
       supabase.from("subscribers").select("*"),
       supabase.from("collections" as any).select("*").order("name"),
       supabase.from("app_settings" as any).select("*").eq("id", 1).maybeSingle(),
+      supabase.from("scanner_requests").select("*").order("created_at", { ascending: false }).limit(100),
     ]);
 
     if (prodsError) toast.error("Errore nel caricamento prodotti");
     if (ordsError) toast.error("Errore nel caricamento ordini");
     if (subscribersError) toast.error("Errore nel caricamento iscritti newsletter");
-    if (colsError) toast.error("Errore nel caricamento collezioni");
     if (settingsError) toast.error("Errore nel caricamento impostazioni");
+    if (scansError) toast.error("Errore nel caricamento scansioni");
 
     setProducts((prods as Product[]) || []);
     const ordList = (ords as Order[]) || [];
@@ -258,6 +275,7 @@ export default function Admin() {
       if (s.page_images) setPageImages(s.page_images);
       if (s.branding) setBranding(s.branding);
     }
+    setScannerRequests((scans as unknown as ScannerRequest[]) || []);
   }
 
   // ── Newsletter helpers ──────────────────────────────────────────────────────
@@ -614,7 +632,17 @@ ${bodyContent}
     { id: "products" as AdminSection, icon: Package, label: "Prodotti" },
     { id: "orders" as AdminSection, icon: ShoppingBag, label: "Ordini" },
     { id: "newsletter" as AdminSection, icon: Mail, label: "Newsletter" },
+    { id: "scanner" as AdminSection, icon: ScanSearch, label: "Scanner" },
     { id: "settings" as AdminSection, icon: Settings, label: "Impostazioni" },
+  ];
+
+  // Mobile bottom bar items (subset)
+  const mobileNav = [
+    { id: "dashboard" as AdminSection, icon: LayoutDashboard, label: "Home" },
+    { id: "products" as AdminSection, icon: Package, label: "Prodotti" },
+    { id: "scanner" as AdminSection, icon: ScanSearch, label: "Scanner" },
+    { id: "newsletter" as AdminSection, icon: Mail, label: "News" },
+    { id: "settings" as AdminSection, icon: Settings, label: "Altro" },
   ];
 
   const statusColor: Record<string, string> = {
@@ -734,19 +762,14 @@ ${bodyContent}
 
           {/* ── Admin dashboard (sidebar + content) ── */}
           {authState === "admin" && (<>
-          {/* ── Sidebar ── */}
-          <aside className="w-16 lg:w-56 bg-white border-r border-neutral-100 flex flex-col py-6 shrink-0">
+          {/* ── Sidebar (desktop only) ── */}
+          <aside className="hidden lg:flex w-56 bg-white border-r border-neutral-100 flex-col py-6 shrink-0">
             {/* Brand */}
-            <div className="px-4 mb-8 hidden lg:block">
+            <div className="px-4 mb-8">
               <p className="text-xs tracking-[0.2em] text-neutral-400 uppercase font-sans">Admin</p>
               <h1 style={{ fontFamily: "var(--font-serif)" }} className="text-lg font-semibold text-neutral-900 leading-tight">
                 Emeraldress
               </h1>
-            </div>
-            <div className="lg:hidden flex justify-center mb-8">
-              <div className="w-8 h-8 rounded-full bg-emerald-950 flex items-center justify-center">
-                <span className="text-white text-xs font-serif font-bold">E</span>
-              </div>
             </div>
 
             {/* Nav */}
@@ -762,8 +785,8 @@ ${bodyContent}
                   }`}
                 >
                   <Icon className="w-4 h-4 shrink-0" />
-                  <span className="hidden lg:block text-sm font-medium">{label}</span>
-                  {section === id && <ChevronRight className="w-3 h-3 ml-auto hidden lg:block" />}
+                  <span className="text-sm font-medium">{label}</span>
+                  {section === id && <ChevronRight className="w-3 h-3 ml-auto" />}
                 </button>
               ))}
             </nav>
@@ -775,13 +798,13 @@ ${bodyContent}
                 className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-neutral-400 hover:text-red-500 hover:bg-red-50 transition-all duration-200"
               >
                 <LogOut className="w-4 h-4 shrink-0" />
-                <span className="hidden lg:block text-sm">Esci</span>
+                <span className="text-sm">Esci</span>
               </button>
             </div>
           </aside>
 
           {/* ── Main Content ── */}
-          <main className="flex-1 overflow-auto p-6">
+          <main className="flex-1 overflow-auto p-4 lg:p-6 pb-24 lg:pb-6">
             <AnimatePresence mode="wait">
 
               {/* ══ DASHBOARD ══════════════════════════════════════════════════ */}
@@ -1663,8 +1686,191 @@ ${bodyContent}
                 </motion.div>
               )}
 
+              {/* ══ SCANNER HUB ════════════════════════════════════════════════ */}
+              {section === "scanner" && (
+                <motion.div
+                  key="scanner"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.25 }}
+                >
+                  <div className="mb-6">
+                    <h2 style={{ fontFamily: "var(--font-serif)" }} className="text-2xl font-semibold text-neutral-900">
+                      Scanner Hub
+                    </h2>
+                    <p className="text-sm text-neutral-400 mt-0.5">{scannerRequests.length} scansioni totali</p>
+                  </div>
+
+                  {scannerRequests.length === 0 ? (
+                    <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm p-12 text-center">
+                      <ScanSearch className="w-10 h-10 text-neutral-300 mx-auto mb-3" />
+                      <p className="text-sm text-neutral-400">Nessuna scansione ancora</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {scannerRequests.map((scan) => {
+                        const diag = typeof scan.diagnosis_result === "string"
+                          ? (() => { try { return JSON.parse(scan.diagnosis_result); } catch { return { summary: scan.diagnosis_result }; } })()
+                          : scan.diagnosis_result || {};
+                        const summary = diag?.summary || diag?.diagnosi || diag?.description || (typeof scan.diagnosis_result === "string" ? scan.diagnosis_result : "—");
+                        const score = scan.sustainability_score;
+                        const scoreColor = !score ? "bg-neutral-100 text-neutral-500"
+                          : score >= 71 ? "bg-emerald-100 text-emerald-800"
+                          : score >= 26 ? "bg-yellow-100 text-yellow-800"
+                          : "bg-red-100 text-red-700";
+
+                        return (
+                          <button
+                            key={scan.id}
+                            onClick={() => setSelectedScan(scan)}
+                            className="bg-white rounded-2xl border border-neutral-100 shadow-sm overflow-hidden hover:shadow-md transition-shadow text-left group"
+                          >
+                            {/* Thumbnail */}
+                            <div className="h-36 bg-neutral-100 relative overflow-hidden">
+                              {scan.image_url ? (
+                                <img src={scan.image_url} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center">
+                                  <ScanSearch className="w-8 h-8 text-neutral-300" />
+                                </div>
+                              )}
+                              {score != null && score > 0 && (
+                                <span className={`absolute top-2 right-2 text-xs font-bold px-2 py-1 rounded-full ${scoreColor}`}>
+                                  {score}/100
+                                </span>
+                              )}
+                            </div>
+                            {/* Info */}
+                            <div className="p-4">
+                              <div className="flex items-center gap-2 mb-2">
+                                <span className="text-[10px] uppercase tracking-wider text-neutral-400 font-medium">{scan.input_type}</span>
+                                <span className="text-[10px] text-neutral-300">·</span>
+                                <span className="text-[10px] text-neutral-400">
+                                  {new Date(scan.created_at).toLocaleDateString("it-IT", { day: "2-digit", month: "short", year: "numeric" })}
+                                </span>
+                              </div>
+                              <p className="text-sm text-neutral-700 line-clamp-2 break-words">{typeof summary === "string" ? summary : JSON.stringify(summary).slice(0, 120)}</p>
+                              {scan.material && <p className="text-xs text-neutral-400 mt-1.5">Materiale: {scan.material}</p>}
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* Scanner Detail Drawer */}
+                  <AnimatePresence>
+                    {selectedScan && (
+                      <>
+                        <motion.div
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
+                          onClick={() => setSelectedScan(null)}
+                        />
+                        <motion.div
+                          initial={{ x: "100%" }}
+                          animate={{ x: 0 }}
+                          exit={{ x: "100%" }}
+                          transition={{ type: "spring", damping: 30, stiffness: 300 }}
+                          className="fixed right-0 top-0 bottom-0 z-50 w-full max-w-md bg-white shadow-2xl flex flex-col"
+                        >
+                          <div className="flex items-center justify-between px-6 py-5 border-b border-neutral-100">
+                            <h3 style={{ fontFamily: "var(--font-serif)" }} className="text-lg font-semibold text-neutral-900">
+                              Dettaglio Scansione
+                            </h3>
+                            <button onClick={() => setSelectedScan(null)} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-neutral-100 transition-colors">
+                              <X className="w-4 h-4 text-neutral-500" />
+                            </button>
+                          </div>
+                          <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+                            {/* Image */}
+                            {selectedScan.image_url && (
+                              <div className="rounded-xl overflow-hidden border border-neutral-200">
+                                <img src={selectedScan.image_url} alt="" className="w-full h-48 object-cover" />
+                              </div>
+                            )}
+
+                            {/* Score */}
+                            {selectedScan.sustainability_score != null && selectedScan.sustainability_score > 0 && (
+                              <div className="flex items-center gap-3">
+                                <div className={`w-14 h-14 rounded-xl flex items-center justify-center text-lg font-bold ${
+                                  selectedScan.sustainability_score >= 71 ? "bg-emerald-100 text-emerald-800"
+                                  : selectedScan.sustainability_score >= 26 ? "bg-yellow-100 text-yellow-800"
+                                  : "bg-red-100 text-red-700"
+                                }`}>
+                                  {selectedScan.sustainability_score}
+                                </div>
+                                <div>
+                                  <p className="text-sm font-medium text-neutral-900">Punteggio Sostenibilità</p>
+                                  <p className="text-xs text-neutral-400">
+                                    {selectedScan.sustainability_score >= 71 ? "Eccellenza Sostenibile"
+                                    : selectedScan.sustainability_score >= 26 ? "Scelta Consapevole"
+                                    : "Da Rivalutare"}
+                                  </p>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Meta */}
+                            <div className="grid grid-cols-2 gap-3">
+                              {[
+                                { label: "Tipo Input", value: selectedScan.input_type },
+                                { label: "Materiale", value: selectedScan.material },
+                                { label: "Brand", value: selectedScan.brand },
+                                { label: "Tipo Capo", value: selectedScan.garment_type },
+                                { label: "Data", value: new Date(selectedScan.created_at).toLocaleDateString("it-IT", { day: "2-digit", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" }) },
+                              ].filter(({ value }) => value).map(({ label, value }) => (
+                                <div key={label} className="bg-neutral-50 rounded-xl px-3 py-2.5">
+                                  <p className="text-[10px] text-neutral-400 uppercase tracking-wider mb-0.5">{label}</p>
+                                  <p className="text-sm text-neutral-900 font-medium">{value}</p>
+                                </div>
+                              ))}
+                            </div>
+
+                            {/* Diagnosis */}
+                            {selectedScan.diagnosis_result && (
+                              <div>
+                                <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-2 block">Diagnosi Completa</Label>
+                                <div className="bg-neutral-50 rounded-xl p-4 text-sm text-neutral-700 break-words whitespace-pre-wrap max-h-80 overflow-y-auto">
+                                  {typeof selectedScan.diagnosis_result === "string"
+                                    ? selectedScan.diagnosis_result
+                                    : JSON.stringify(selectedScan.diagnosis_result, null, 2)}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </motion.div>
+                      </>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              )}
+
             </AnimatePresence>
           </main>
+
+          {/* ── Mobile Bottom Tab Bar ── */}
+          <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-neutral-200 safe-area-pb">
+            <nav className="flex items-center justify-around h-16 px-2">
+              {mobileNav.map(({ id, icon: Icon, label }) => (
+                <button
+                  key={id}
+                  onClick={() => setSection(id)}
+                  className={`flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg transition-colors min-w-[56px] ${
+                    section === id
+                      ? "text-emerald-800"
+                      : "text-neutral-400"
+                  }`}
+                >
+                  <Icon className={`w-5 h-5 ${section === id ? "text-emerald-800" : ""}`} />
+                  <span className="text-[10px] font-medium">{label}</span>
+                </button>
+              ))}
+            </nav>
+          </div>
           </>)}
         </div>
 
