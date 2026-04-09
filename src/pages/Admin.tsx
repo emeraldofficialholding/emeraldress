@@ -66,7 +66,16 @@ interface Collection {
   is_active: boolean;
 }
 
-type AdminSection = "dashboard" | "products" | "orders" | "newsletter" | "collections" | "settings" | "scanner" | "marketing";
+type AdminSection = "dashboard" | "products" | "orders" | "newsletter" | "collections" | "settings" | "scanner" | "marketing" | "email_templates";
+
+interface EmailTemplate {
+  id: string;
+  name: string;
+  subject: string;
+  body_html: string;
+  created_at: string;
+  updated_at: string;
+}
 
 // ── Sales chart mock data helper ───────────────────────────────────────────────
 function buildChartData(orders: Order[]) {
@@ -177,6 +186,14 @@ export default function Admin() {
     code: "", discount_type: "percentage" as "percentage" | "fixed", value: "", is_active: true, valid_until: "", usage_limit: "",
   });
   const [couponSubmitting, setCouponSubmitting] = useState(false);
+
+  // email templates
+  const [emailTemplates, setEmailTemplates] = useState<EmailTemplate[]>([]);
+  const [etEditing, setEtEditing] = useState<EmailTemplate | null>(null);
+  const [etForm, setEtForm] = useState({ name: "", subject: "", body_html: "" });
+  const [etSaving, setEtSaving] = useState(false);
+  const [etShowEditor, setEtShowEditor] = useState(false);
+  const etQuillRef = useRef<any>(null);
 
   // product drawer
   const [drawerOpen, setDrawerOpen] = useState(false);
