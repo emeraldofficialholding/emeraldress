@@ -1480,6 +1480,189 @@ ${bodyContent}
                 </motion.div>
               )}
 
+              {/* ══ SETTINGS ════════════════════════════════════════════════════ */}
+              {section === "settings" && (
+                <motion.div
+                  key="settings"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.25 }}
+                >
+                  <div className="mb-6">
+                    <h2 style={{ fontFamily: "var(--font-serif)" }} className="text-2xl font-semibold text-neutral-900">
+                      Impostazioni Sito
+                    </h2>
+                    <p className="text-sm text-neutral-400 mt-0.5">Gestisci testi, immagini e branding del sito</p>
+                  </div>
+
+                  {/* Tabs */}
+                  <div className="flex gap-1 mb-6 bg-neutral-100 rounded-xl p-1 w-fit">
+                    {([
+                      { id: "texts" as const, label: "Testi", icon: Type },
+                      { id: "images" as const, label: "Immagini", icon: ImageIcon },
+                      { id: "branding" as const, label: "Branding", icon: Palette },
+                    ]).map(({ id, label, icon: Icon }) => (
+                      <button
+                        key={id}
+                        onClick={() => setSettingsTab(id)}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                          settingsTab === id
+                            ? "bg-white text-neutral-900 shadow-sm"
+                            : "text-neutral-500 hover:text-neutral-700"
+                        }`}
+                      >
+                        <Icon className="w-4 h-4" />
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm p-6">
+
+                    {/* ── Tab Testi ── */}
+                    {settingsTab === "texts" && (
+                      <div className="space-y-5">
+                        <p className="text-sm text-neutral-500 mb-4">Modifica i testi principali delle pagine del sito.</p>
+                        {[
+                          { key: "home_title", label: "Titolo Homepage", placeholder: "es. Lusso Consapevole" },
+                          { key: "home_subtitle", label: "Sottotitolo Homepage", placeholder: "es. Moda sostenibile, eleganza senza tempo" },
+                          { key: "about_title", label: "Titolo Chi Siamo", placeholder: "es. La Nostra Storia" },
+                          { key: "about_description", label: "Descrizione Chi Siamo", placeholder: "Racconta la storia del brand...", multiline: true },
+                          { key: "sustainability_title", label: "Titolo Sostenibilità", placeholder: "es. Il Nostro Impegno" },
+                          { key: "sustainability_description", label: "Descrizione Sostenibilità", placeholder: "Descrivi l'impegno green...", multiline: true },
+                          { key: "footer_tagline", label: "Tagline Footer", placeholder: "es. Emeraldress — Lusso Consapevole" },
+                        ].map(({ key, label, placeholder, multiline }) => (
+                          <div key={key}>
+                            <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">{label}</Label>
+                            {multiline ? (
+                              <Textarea
+                                value={pageContent[key] || ""}
+                                onChange={(e) => setPageContent((prev) => ({ ...prev, [key]: e.target.value }))}
+                                placeholder={placeholder}
+                                rows={3}
+                                className="rounded-xl border-neutral-200 resize-none focus:ring-emerald-600"
+                              />
+                            ) : (
+                              <Input
+                                value={pageContent[key] || ""}
+                                onChange={(e) => setPageContent((prev) => ({ ...prev, [key]: e.target.value }))}
+                                placeholder={placeholder}
+                                className="rounded-xl border-neutral-200 focus:ring-emerald-600"
+                              />
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* ── Tab Immagini ── */}
+                    {settingsTab === "images" && (
+                      <div className="space-y-5">
+                        <p className="text-sm text-neutral-500 mb-4">Carica e gestisci le immagini principali del sito.</p>
+                        {[
+                          { key: "hero_bg", label: "Immagine Hero Homepage" },
+                          { key: "logo_url", label: "Logo del Sito" },
+                          { key: "about_image", label: "Immagine Chi Siamo" },
+                          { key: "sustainability_image", label: "Immagine Sostenibilità" },
+                          { key: "og_image", label: "Immagine OG / Social" },
+                        ].map(({ key, label }) => (
+                          <div key={key}>
+                            <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">{label}</Label>
+                            <div className="flex items-center gap-3">
+                              {pageImages[key] && (
+                                <div className="w-16 h-16 rounded-lg overflow-hidden border border-neutral-200 bg-neutral-100 shrink-0">
+                                  <img src={pageImages[key]} alt={label} className="w-full h-full object-cover" />
+                                </div>
+                              )}
+                              <div className="flex-1">
+                                <Input
+                                  value={pageImages[key] || ""}
+                                  onChange={(e) => setPageImages((prev) => ({ ...prev, [key]: e.target.value }))}
+                                  placeholder="URL immagine o carica file..."
+                                  className="rounded-xl border-neutral-200 focus:ring-emerald-600 mb-1.5"
+                                />
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  disabled={settingsUploadingKey === key}
+                                  onClick={() => {
+                                    const input = document.createElement("input");
+                                    input.type = "file";
+                                    input.accept = "image/*";
+                                    input.onchange = (e) => {
+                                      const file = (e.target as HTMLInputElement).files?.[0];
+                                      if (file) handleSettingsImageUpload(key, file);
+                                    };
+                                    input.click();
+                                  }}
+                                  className="rounded-lg border-neutral-200 text-neutral-600 hover:bg-neutral-50 gap-1.5 text-xs"
+                                >
+                                  {settingsUploadingKey === key ? (
+                                    <><Loader2 className="w-3 h-3 animate-spin" /> Caricamento...</>
+                                  ) : (
+                                    <><Upload className="w-3 h-3" /> Carica File</>
+                                  )}
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* ── Tab Branding ── */}
+                    {settingsTab === "branding" && (
+                      <div className="space-y-5">
+                        <p className="text-sm text-neutral-500 mb-4">Personalizza i colori principali del brand.</p>
+                        {[
+                          { key: "primary_color", label: "Colore Primario" },
+                          { key: "secondary_color", label: "Colore Secondario" },
+                        ].map(({ key, label }) => (
+                          <div key={key}>
+                            <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">{label}</Label>
+                            <div className="flex items-center gap-3">
+                              <input
+                                type="color"
+                                value={branding[key] || "#000000"}
+                                onChange={(e) => setBranding((prev) => ({ ...prev, [key]: e.target.value }))}
+                                className="w-12 h-10 rounded-lg border border-neutral-200 cursor-pointer p-0.5"
+                              />
+                              <Input
+                                value={branding[key] || ""}
+                                onChange={(e) => setBranding((prev) => ({ ...prev, [key]: e.target.value }))}
+                                placeholder="#004d40"
+                                className="rounded-xl border-neutral-200 focus:ring-emerald-600 font-mono text-sm max-w-[180px]"
+                              />
+                              <div
+                                className="w-10 h-10 rounded-lg border border-neutral-200"
+                                style={{ backgroundColor: branding[key] || "#000" }}
+                              />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Save button */}
+                  <div className="flex justify-end mt-6">
+                    <Button
+                      onClick={saveSettings}
+                      disabled={settingsSaving}
+                      className="bg-emerald-950 hover:bg-emerald-900 text-white rounded-xl gap-2 px-8"
+                    >
+                      {settingsSaving ? (
+                        <><Loader2 className="w-4 h-4 animate-spin" /> Salvataggio...</>
+                      ) : (
+                        "Salva Impostazioni"
+                      )}
+                    </Button>
+                  </div>
+                </motion.div>
+              )}
+
             </AnimatePresence>
           </main>
           </>)}
