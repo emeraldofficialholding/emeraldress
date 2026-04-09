@@ -48,17 +48,14 @@ interface Order {
   created_at: string;
 }
 
-interface Subscriber {
+interface Collection {
   id: string;
-  name: string | null;
-  email: string;
-  phone: string | null;
-  source: string | null;
-  active: boolean;
-  created_at: string;
+  name: string;
+  description: string | null;
+  is_active: boolean;
 }
 
-type AdminSection = "dashboard" | "products" | "orders" | "newsletter";
+type AdminSection = "dashboard" | "products" | "orders" | "newsletter" | "collections";
 
 // ── Sales chart mock data helper ───────────────────────────────────────────────
 function buildChartData(orders: Order[]) {
