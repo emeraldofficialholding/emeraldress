@@ -153,7 +153,9 @@ export default function Admin() {
   const [collectionSubmitting, setCollectionSubmitting] = useState(false);
 
   // site settings
-  const [settingsTab, setSettingsTab] = useState<"texts" | "images" | "branding">("texts");
+  const [settingsTab, setSettingsTab] = useState<"texts" | "images" | "branding" | "seo">("texts");
+  const [seoSettings, setSeoSettings] = useState<Record<string, string>>({ meta_title: "", meta_description: "", og_image_url: "" });
+  const [seoUploading, setSeoUploading] = useState(false);
   const [pageContent, setPageContent] = useState<Record<string, string>>({});
   const [pageImages, setPageImages] = useState<Record<string, string>>({});
   const [branding, setBranding] = useState<Record<string, string>>({ primary_color: "#004d40", secondary_color: "#a7f3d0" });
@@ -325,6 +327,7 @@ export default function Admin() {
       if (s.page_content) setPageContent(s.page_content);
       if (s.page_images) setPageImages(s.page_images);
       if (s.branding) setBranding(s.branding);
+      if (s.seo_settings) setSeoSettings(s.seo_settings);
     }
     setScannerRequests((scans as unknown as ScannerRequest[]) || []);
     setCoupons((cpns as unknown as Coupon[]) || []);
@@ -686,6 +689,7 @@ ${bodyContent}
         page_content: pageContent,
         page_images: pageImages,
         branding,
+        seo_settings: seoSettings,
       } as any);
       if (error) throw error;
       toast.success("Impostazioni salvate");
@@ -1968,6 +1972,7 @@ ${bodyContent}
                       { id: "texts" as const, label: "Testi", icon: Type },
                       { id: "images" as const, label: "Immagini", icon: ImageIcon },
                       { id: "branding" as const, label: "Branding", icon: Palette },
+                      { id: "seo" as const, label: "SEO", icon: ScanSearch },
                     ]).map(({ id, label, icon: Icon }) => (
                       <button
                         key={id}
@@ -2196,6 +2201,97 @@ ${bodyContent}
                             <div className="px-4 py-2.5 rounded-lg text-sm font-medium text-white" style={{ backgroundColor: branding.accent_color || "#065f46" }}>
                               Accento
                             </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* ── Tab SEO ── */}
+                    {settingsTab === "seo" && (
+                      <div className="space-y-6">
+                        <p className="text-sm text-neutral-500 mb-2">Configura i meta tag SEO della homepage e l'immagine di anteprima social.</p>
+                        <div className="space-y-4">
+                          <div>
+                            <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">Meta Title</Label>
+                            <Input
+                              value={seoSettings.meta_title || ""}
+                              onChange={(e) => setSeoSettings((p) => ({ ...p, meta_title: e.target.value }))}
+                              placeholder="Emeraldress | Abbigliamento Sostenibile di Lusso"
+                              className="rounded-xl border-neutral-200 focus:ring-emerald-600"
+                              maxLength={60}
+                            />
+                            <p className="text-xs text-neutral-400 mt-1">{(seoSettings.meta_title || "").length}/60 caratteri</p>
+                          </div>
+                          <div>
+                            <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">Meta Description</Label>
+                            <Textarea
+                              value={seoSettings.meta_description || ""}
+                              onChange={(e) => setSeoSettings((p) => ({ ...p, meta_description: e.target.value }))}
+                              placeholder="Scopri l'esclusiva collezione Emeraldress: abiti realizzati in Italia con tessuti sostenibili..."
+                              rows={3}
+                              className="rounded-xl border-neutral-200 resize-none focus:ring-emerald-600"
+                              maxLength={160}
+                            />
+                            <p className="text-xs text-neutral-400 mt-1">{(seoSettings.meta_description || "").length}/160 caratteri</p>
+                          </div>
+                          <div>
+                            <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-2 block">Social Preview Image (OG Image)</Label>
+                            <div className="border border-neutral-200 rounded-xl p-4 bg-neutral-50/50">
+                              <div className="w-full aspect-video rounded-lg overflow-hidden border border-neutral-200 bg-neutral-100 mb-3 flex items-center justify-center max-w-md">
+                                {seoSettings.og_image_url ? (
+                                  <img src={seoSettings.og_image_url} alt="OG Preview" className="w-full h-full object-cover" />
+                                ) : (
+                                  <div className="flex flex-col items-center gap-1 text-neutral-400">
+                                    <ImageIcon className="w-8 h-8" />
+                                    <span className="text-xs">Nessuna immagine OG</span>
+                                  </div>
+                                )}
+                              </div>
+                              <Input
+                                value={seoSettings.og_image_url || ""}
+                                onChange={(e) => setSeoSettings((p) => ({ ...p, og_image_url: e.target.value }))}
+                                placeholder="URL immagine OG..."
+                                className="rounded-lg border-neutral-200 focus:ring-emerald-600 text-xs mb-2 max-w-md"
+                              />
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                disabled={seoUploading}
+                                onClick={() => {
+                                  const input = document.createElement("input");
+                                  input.type = "file";
+                                  input.accept = "image/*";
+                                  input.onchange = async (ev) => {
+                                    const file = (ev.target as HTMLInputElement).files?.[0];
+                                    if (!file) return;
+                                    setSeoUploading(true);
+                                    try {
+                                      const ext = file.name.split(".").pop();
+                                      const path = `site/og-image-${Date.now()}.${ext}`;
+                                      const { error: upErr } = await supabase.storage.from("emerald-asset").upload(path, file, { upsert: true });
+                                      if (upErr) throw upErr;
+                                      const { data: urlData } = supabase.storage.from("emerald-asset").getPublicUrl(path);
+                                      setSeoSettings((p) => ({ ...p, og_image_url: urlData.publicUrl }));
+                                      toast.success("Immagine OG caricata");
+                                    } catch (err: any) {
+                                      toast.error(err.message || "Errore upload");
+                                    } finally {
+                                      setSeoUploading(false);
+                                    }
+                                  };
+                                  input.click();
+                                }}
+                                className="rounded-lg border-neutral-200 text-neutral-600 hover:bg-neutral-50 gap-1.5 text-xs"
+                              >
+                                {seoUploading ? (
+                                  <><Loader2 className="w-3 h-3 animate-spin" /> Caricamento...</>
+                                ) : (
+                                  <><Upload className="w-3 h-3" /> Carica Immagine OG</>
+                                )}
+                              </Button>
+                            </div>
+                            <p className="text-xs text-neutral-400 mt-2">Dimensione consigliata: 1200×630 px. Verrà usata come anteprima su Facebook, Twitter, WhatsApp, ecc.</p>
                           </div>
                         </div>
                       </div>
