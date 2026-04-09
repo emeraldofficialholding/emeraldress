@@ -220,21 +220,25 @@ export default function Admin() {
       { data: prods, error: prodsError },
       { data: ords, error: ordsError },
       { data: subs, error: subscribersError },
+      { data: cols, error: colsError },
     ] = await Promise.all([
       supabase.from("products").select("*").order("created_at", { ascending: false }),
       supabase.from("orders").select("*").order("created_at", { ascending: false }),
       supabase.from("subscribers").select("*"),
+      supabase.from("collections" as any).select("*").order("name"),
     ]);
 
     if (prodsError) toast.error("Errore nel caricamento prodotti");
     if (ordsError) toast.error("Errore nel caricamento ordini");
     if (subscribersError) toast.error("Errore nel caricamento iscritti newsletter");
+    if (colsError) toast.error("Errore nel caricamento collezioni");
 
     setProducts((prods as Product[]) || []);
     const ordList = (ords as Order[]) || [];
     setOrders(ordList);
     setChartData(buildChartData(ordList));
     setSubscribers((subs as Subscriber[]) || []);
+    setCollections((cols as Collection[]) || []);
   }
 
   // ── Newsletter helpers ──────────────────────────────────────────────────────
