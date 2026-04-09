@@ -230,17 +230,20 @@ export default function Admin() {
       { data: ords, error: ordsError },
       { data: subs, error: subscribersError },
       { data: cols, error: colsError },
+      { data: settingsRows, error: settingsError },
     ] = await Promise.all([
       supabase.from("products").select("*").order("created_at", { ascending: false }),
       supabase.from("orders").select("*").order("created_at", { ascending: false }),
       supabase.from("subscribers").select("*"),
       supabase.from("collections" as any).select("*").order("name"),
+      supabase.from("app_settings" as any).select("*").eq("id", 1).maybeSingle(),
     ]);
 
     if (prodsError) toast.error("Errore nel caricamento prodotti");
     if (ordsError) toast.error("Errore nel caricamento ordini");
     if (subscribersError) toast.error("Errore nel caricamento iscritti newsletter");
     if (colsError) toast.error("Errore nel caricamento collezioni");
+    if (settingsError) toast.error("Errore nel caricamento impostazioni");
 
     setProducts((prods as Product[]) || []);
     const ordList = (ords as Order[]) || [];
@@ -248,6 +251,13 @@ export default function Admin() {
     setChartData(buildChartData(ordList));
     setSubscribers((subs as Subscriber[]) || []);
     setCollections((cols as unknown as Collection[]) || []);
+
+    if (settingsRows) {
+      const s = settingsRows as any;
+      if (s.page_content) setPageContent(s.page_content);
+      if (s.page_images) setPageImages(s.page_images);
+      if (s.branding) setBranding(s.branding);
+    }
   }
 
   // ── Newsletter helpers ──────────────────────────────────────────────────────
