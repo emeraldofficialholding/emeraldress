@@ -11,8 +11,11 @@ import {
   Lock, GripVertical, ImageIcon, Mail, Download, Users, Archive, Send, Loader2,
   Code, Type, Layers, Settings, Palette, ScanSearch, Tag, Percent, Copy,
   BarChart3, MousePointerClick, RotateCcw, ExternalLink, AlertTriangle, Megaphone, Link as LinkIcon,
-  Star, MessageSquare, Home, ArrowLeft,
+  Star, MessageSquare, Home, ArrowLeft, Menu,
 } from "lucide-react";
+import {
+  Sheet, SheetContent, SheetHeader, SheetTitle,
+} from "@/components/ui/sheet";
 import { FULL_HTML_TEMPLATES } from "@/data/emailTemplates";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -131,6 +134,7 @@ export default function Admin() {
   const navigate = useNavigate();
   const [authState, setAuthState] = useState<"loading" | "unauthenticated" | "not-admin" | "admin">("loading");
   const [section, setSection] = useState<AdminSection>("dashboard");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // login form
   const [loginEmail, setLoginEmail] = useState("");
@@ -905,14 +909,11 @@ ${bodyContent}
     { id: "settings" as AdminSection, icon: Settings, label: "Impostazioni" },
   ];
 
-  // Mobile bottom bar items (subset)
-  const mobileNav = [
-    { id: "dashboard" as AdminSection, icon: LayoutDashboard, label: "Home" },
-    { id: "products" as AdminSection, icon: Package, label: "Prodotti" },
-    { id: "scanner" as AdminSection, icon: ScanSearch, label: "Scanner" },
-    { id: "newsletter" as AdminSection, icon: Mail, label: "News" },
-    { id: "settings" as AdminSection, icon: Settings, label: "Altro" },
-  ];
+  // Mobile nav helper
+  const handleMobileNav = (id: AdminSection) => {
+    setSection(id);
+    setMobileMenuOpen(false);
+  };
 
   const statusColor: Record<string, string> = {
     pending: "bg-yellow-100 text-yellow-800",
@@ -928,16 +929,61 @@ ${bodyContent}
     <Helmet>
       <meta name="robots" content="noindex, nofollow" />
     </Helmet>
-    <div className="min-h-screen w-full bg-neutral-50 flex flex-col" style={{ fontFamily: "var(--font-sans)" }}>
+    <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-neutral-50 flex flex-col" style={{ fontFamily: "var(--font-sans)" }}>
       {/* ── Mobile Header ── */}
-      <header className="lg:hidden sticky top-0 z-50 bg-white border-b border-neutral-200 flex items-center justify-between h-14 px-4">
-        <button onClick={() => navigate("/")} className="flex items-center gap-2 text-neutral-500 hover:text-emerald-700 transition-colors">
-          <ArrowLeft className="w-4 h-4" />
-          <span className="text-xs font-medium">Sito</span>
+      <header className="lg:hidden sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-neutral-200 flex items-center justify-between h-12 px-3">
+        <button onClick={() => setMobileMenuOpen(true)} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-neutral-100 transition-colors">
+          <Menu className="w-5 h-5 text-neutral-700" />
         </button>
-        <h1 style={{ fontFamily: "var(--font-serif)" }} className="text-base font-semibold text-neutral-900">Admin</h1>
-        <div className="w-14" />
+        <h1 style={{ fontFamily: "var(--font-serif)" }} className="text-sm font-semibold text-neutral-900">Emeraldress Admin</h1>
+        <button onClick={() => navigate("/")} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-neutral-100 transition-colors">
+          <Home className="w-4 h-4 text-neutral-500" />
+        </button>
       </header>
+
+      {/* ── Mobile Slide-out Menu ── */}
+      <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+        <SheetContent side="left" className="w-64 p-0">
+          <SheetHeader className="px-4 pt-5 pb-3 border-b border-neutral-100">
+            <SheetTitle className="text-left">
+              <p className="text-[10px] tracking-[0.2em] text-neutral-400 uppercase">Admin</p>
+              <p style={{ fontFamily: "var(--font-serif)" }} className="text-base font-semibold text-neutral-900">Emeraldress</p>
+            </SheetTitle>
+          </SheetHeader>
+          <nav className="flex-1 px-2 py-3 space-y-0.5 overflow-y-auto">
+            {nav.map(({ id, icon: Icon, label }) => (
+              <button
+                key={id}
+                onClick={() => handleMobileNav(id)}
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-left transition-all text-sm ${
+                  section === id
+                    ? "bg-emerald-950 text-white"
+                    : "text-neutral-600 hover:bg-neutral-50"
+                }`}
+              >
+                <Icon className="w-4 h-4 shrink-0" />
+                <span className="font-medium">{label}</span>
+              </button>
+            ))}
+          </nav>
+          <div className="border-t border-neutral-100 px-2 py-3 space-y-0.5">
+            <button
+              onClick={() => { setMobileMenuOpen(false); navigate("/"); }}
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-neutral-500 hover:text-emerald-700 hover:bg-emerald-50 transition-all text-sm"
+            >
+              <Home className="w-4 h-4 shrink-0" />
+              <span>Torna al Sito</span>
+            </button>
+            <button
+              onClick={() => { setMobileMenuOpen(false); handleSignOut(); }}
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-neutral-500 hover:text-red-500 hover:bg-red-50 transition-all text-sm"
+            >
+              <LogOut className="w-4 h-4 shrink-0" />
+              <span>Esci</span>
+            </button>
+          </div>
+        </SheetContent>
+      </Sheet>
 
       <div className="flex flex-1 min-h-0">
           {/* ── Loading state ── */}
@@ -1063,7 +1109,7 @@ ${bodyContent}
           </aside>
 
           {/* ── Main Content ── */}
-          <main className="flex-1 overflow-auto p-4 lg:p-6 pb-24 lg:pb-6">
+          <main className="flex-1 overflow-auto overflow-x-hidden p-3 lg:p-6">
             <AnimatePresence mode="wait">
 
               {/* ══ DASHBOARD ══════════════════════════════════════════════════ */}
@@ -1075,15 +1121,15 @@ ${bodyContent}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.25 }}
                 >
-                  <div className="mb-6">
-                    <h2 style={{ fontFamily: "var(--font-serif)" }} className="text-2xl font-semibold text-neutral-900">
+                  <div className="mb-4 lg:mb-6">
+                    <h2 style={{ fontFamily: "var(--font-serif)" }} className="text-lg lg:text-2xl font-semibold text-neutral-900">
                       Panoramica
                     </h2>
-                    <p className="text-sm text-neutral-400 mt-0.5">Benvenuto nella dashboard di amministrazione</p>
+                    <p className="text-xs lg:text-sm text-neutral-400 mt-0.5">Benvenuto nella dashboard di amministrazione</p>
                   </div>
 
                   {/* KPI Cards */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 lg:gap-4 mb-4 lg:mb-8">
                     {[
                       {
                         icon: ShoppingBag,
@@ -1110,36 +1156,38 @@ ${bodyContent}
                         bg: "bg-emerald-50",
                       },
                     ].map(({ icon: Icon, label, value, sub, color, bg }) => (
-                      <div key={label} className="bg-white rounded-2xl border border-neutral-100 p-5 shadow-sm">
-                        <div className={`w-10 h-10 ${bg} rounded-xl flex items-center justify-center mb-4`}>
-                          <Icon className={`w-5 h-5 ${color}`} />
+                      <div key={label} className="bg-white rounded-xl lg:rounded-2xl border border-neutral-100 p-3 lg:p-5 shadow-sm flex items-center gap-3 sm:block">
+                        <div className={`w-8 h-8 lg:w-10 lg:h-10 ${bg} rounded-lg lg:rounded-xl flex items-center justify-center sm:mb-3`}>
+                          <Icon className={`w-4 h-4 lg:w-5 lg:h-5 ${color}`} />
                         </div>
-                        <p className="text-xs text-neutral-400 uppercase tracking-wider font-sans">{label}</p>
-                        <p style={{ fontFamily: "var(--font-serif)" }} className="text-2xl font-semibold text-neutral-900 mt-1">{value}</p>
-                        <p className="text-xs text-neutral-400 mt-0.5">{sub}</p>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[10px] lg:text-xs text-neutral-400 uppercase tracking-wider font-sans">{label}</p>
+                          <p style={{ fontFamily: "var(--font-serif)" }} className="text-lg lg:text-2xl font-semibold text-neutral-900">{value}</p>
+                          <p className="text-[10px] lg:text-xs text-neutral-400">{sub}</p>
+                        </div>
                       </div>
                     ))}
                   </div>
 
                   {/* Analytics Widgets */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-                    <div className="bg-white rounded-2xl border border-neutral-100 p-5 shadow-sm">
-                      <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center mb-4">
-                        <BarChart3 className="w-5 h-5 text-emerald-700" />
+                  <div className="grid grid-cols-2 gap-2 lg:gap-4 mb-4 lg:mb-8">
+                    <div className="bg-white rounded-xl lg:rounded-2xl border border-neutral-100 p-3 lg:p-5 shadow-sm">
+                      <div className="w-8 h-8 lg:w-10 lg:h-10 bg-emerald-50 rounded-lg lg:rounded-xl flex items-center justify-center mb-2 lg:mb-4">
+                        <BarChart3 className="w-4 h-4 lg:w-5 lg:h-5 text-emerald-700" />
                       </div>
-                      <p className="text-xs text-neutral-400 uppercase tracking-wider font-sans">Visite Oggi</p>
-                      <p style={{ fontFamily: "var(--font-serif)" }} className="text-2xl font-semibold text-neutral-900 mt-1">{visitsToday}</p>
-                      <p className="text-xs text-neutral-400 mt-0.5">ultime 24 ore</p>
+                      <p className="text-[10px] lg:text-xs text-neutral-400 uppercase tracking-wider font-sans">Visite Oggi</p>
+                      <p style={{ fontFamily: "var(--font-serif)" }} className="text-lg lg:text-2xl font-semibold text-neutral-900">{visitsToday}</p>
+                      <p className="text-[10px] lg:text-xs text-neutral-400">ultime 24 ore</p>
                     </div>
-                    <div className="bg-white rounded-2xl border border-neutral-100 p-5 shadow-sm">
-                      <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center mb-4">
-                        <MousePointerClick className="w-5 h-5 text-emerald-700" />
+                    <div className="bg-white rounded-xl lg:rounded-2xl border border-neutral-100 p-3 lg:p-5 shadow-sm">
+                      <div className="w-8 h-8 lg:w-10 lg:h-10 bg-emerald-50 rounded-lg lg:rounded-xl flex items-center justify-center mb-2 lg:mb-4">
+                        <MousePointerClick className="w-4 h-4 lg:w-5 lg:h-5 text-emerald-700" />
                       </div>
-                      <p className="text-xs text-neutral-400 uppercase tracking-wider font-sans">Tasso di Conversione</p>
-                      <p style={{ fontFamily: "var(--font-serif)" }} className="text-2xl font-semibold text-neutral-900 mt-1">
+                      <p className="text-[10px] lg:text-xs text-neutral-400 uppercase tracking-wider font-sans">Conversione</p>
+                      <p style={{ fontFamily: "var(--font-serif)" }} className="text-lg lg:text-2xl font-semibold text-neutral-900">
                         {uniqueVisitors > 0 ? ((orders.length / uniqueVisitors) * 100).toFixed(1) : "0.0"}%
                       </p>
-                      <p className="text-xs text-neutral-400 mt-0.5">{orders.length} ordini / {uniqueVisitors} visitatori unici</p>
+                      <p className="text-[10px] lg:text-xs text-neutral-400">{orders.length} ordini / {uniqueVisitors} visitatori</p>
                     </div>
                   </div>
 
@@ -3231,25 +3279,6 @@ ${bodyContent}
             </AnimatePresence>
           </main>
 
-          {/* ── Mobile Bottom Tab Bar ── */}
-          <div className="lg:hidden fixed bottom-0 left-0 w-full z-50 bg-white border-t border-neutral-200">
-            <nav className="flex items-center justify-around h-16 px-2">
-              {mobileNav.map(({ id, icon: Icon, label }) => (
-                <button
-                  key={id}
-                  onClick={() => setSection(id)}
-                  className={`flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg transition-colors min-w-[56px] ${
-                    section === id
-                      ? "text-emerald-800"
-                      : "text-neutral-400"
-                  }`}
-                >
-                  <Icon className={`w-5 h-5 ${section === id ? "text-emerald-800" : ""}`} />
-                  <span className="text-[10px] font-medium">{label}</span>
-                </button>
-              ))}
-            </nav>
-          </div>
           </>)}
         </div>
 
