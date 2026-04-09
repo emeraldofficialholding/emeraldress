@@ -11,6 +11,7 @@ import Footer from "@/components/Footer";
 import CartSheet from "@/components/CartSheet";
 import GatekeeperRoute from "@/components/GatekeeperRoute";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import PromoBanner from "@/components/PromoBanner";
 import { usePageTracking } from "@/hooks/usePageTracking";
 import Index from "./pages/Index";
 import ProductDetail from "./pages/ProductDetail";
@@ -44,6 +45,7 @@ function AppShell() {
 
   return (
     <CartProvider>
+      {!isStandalone && <PromoBanner />}
       {!isStandalone && <Navbar />}
       {!isStandalone && <CartSheet />}
       <Routes>
