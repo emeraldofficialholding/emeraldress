@@ -648,12 +648,84 @@ ${bodyContent}
     }
   }
 
+  // ── Coupon CRUD ──────────────────────────────────────────────────────────────
+  function generateCouponCode() {
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    let code = "EM-";
+    for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
+    return code;
+  }
+
+  function openNewCoupon() {
+    setEditingCoupon(null);
+    setCouponForm({ code: generateCouponCode(), discount_type: "percentage", value: "", is_active: true, valid_until: "", usage_limit: "" });
+    setCouponDrawerOpen(true);
+  }
+
+  function openEditCoupon(c: Coupon) {
+    setEditingCoupon(c);
+    setCouponForm({
+      code: c.code,
+      discount_type: c.discount_type,
+      value: String(c.value),
+      is_active: c.is_active,
+      valid_until: c.valid_until ? c.valid_until.slice(0, 10) : "",
+      usage_limit: c.usage_limit != null ? String(c.usage_limit) : "",
+    });
+    setCouponDrawerOpen(true);
+  }
+
+  async function handleCouponSubmit() {
+    if (!couponForm.code || !couponForm.value) { toast.error("Codice e valore sono obbligatori"); return; }
+    setCouponSubmitting(true);
+    try {
+      const payload = {
+        code: couponForm.code.toUpperCase(),
+        discount_type: couponForm.discount_type,
+        value: parseFloat(couponForm.value),
+        is_active: couponForm.is_active,
+        valid_until: couponForm.valid_until || null,
+        usage_limit: couponForm.usage_limit ? parseInt(couponForm.usage_limit) : null,
+      };
+      if (editingCoupon) {
+        const { error } = await supabase.from("coupons" as any).update(payload as any).eq("id", editingCoupon.id);
+        if (error) throw error;
+        toast.success("Coupon aggiornato");
+      } else {
+        const { error } = await supabase.from("coupons" as any).insert(payload as any);
+        if (error) throw error;
+        toast.success("Coupon creato");
+      }
+      setCouponDrawerOpen(false);
+      fetchAll();
+    } catch (e: unknown) {
+      toast.error((e as Error).message || "Errore");
+    } finally {
+      setCouponSubmitting(false);
+    }
+  }
+
+  async function deleteCoupon(id: string) {
+    if (!confirm("Eliminare questo coupon?")) return;
+    const { error } = await supabase.from("coupons" as any).delete().eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Coupon eliminato");
+    fetchAll();
+  }
+
+  async function toggleCouponActive(c: Coupon) {
+    const { error } = await supabase.from("coupons" as any).update({ is_active: !c.is_active } as any).eq("id", c.id);
+    if (error) { toast.error(error.message); return; }
+    fetchAll();
+  }
+
   // ── Sidebar nav items ────────────────────────────────────────────────────────
   const nav = [
     { id: "dashboard" as AdminSection, icon: LayoutDashboard, label: "Dashboard" },
     { id: "collections" as AdminSection, icon: Layers, label: "Collezioni" },
     { id: "products" as AdminSection, icon: Package, label: "Prodotti" },
     { id: "orders" as AdminSection, icon: ShoppingBag, label: "Ordini" },
+    { id: "marketing" as AdminSection, icon: Tag, label: "Marketing" },
     { id: "newsletter" as AdminSection, icon: Mail, label: "Newsletter" },
     { id: "scanner" as AdminSection, icon: ScanSearch, label: "Scanner" },
     { id: "settings" as AdminSection, icon: Settings, label: "Impostazioni" },
