@@ -9,7 +9,7 @@ import {
   LayoutDashboard, Package, ShoppingBag, LogOut, Plus, X, Upload,
   TrendingUp, DollarSign, ChevronRight, Edit2, Trash2, Eye, EyeOff,
   Lock, GripVertical, ImageIcon, Mail, Download, Users, Archive, Send, Loader2,
-  Code, Type, Layers,
+  Code, Type, Layers, Settings, Palette,
 } from "lucide-react";
 import { FULL_HTML_TEMPLATES } from "@/data/emailTemplates";
 import {
@@ -66,7 +66,7 @@ interface Collection {
   is_active: boolean;
 }
 
-type AdminSection = "dashboard" | "products" | "orders" | "newsletter" | "collections";
+type AdminSection = "dashboard" | "products" | "orders" | "newsletter" | "collections" | "settings";
 
 // ── Sales chart mock data helper ───────────────────────────────────────────────
 function buildChartData(orders: Order[]) {
@@ -134,6 +134,15 @@ export default function Admin() {
   const [editingCollection, setEditingCollection] = useState<Collection | null>(null);
   const [collectionForm, setCollectionForm] = useState({ name: "", description: "", is_active: true });
   const [collectionSubmitting, setCollectionSubmitting] = useState(false);
+
+  // site settings
+  const [settingsTab, setSettingsTab] = useState<"texts" | "images" | "branding">("texts");
+  const [pageContent, setPageContent] = useState<Record<string, string>>({});
+  const [pageImages, setPageImages] = useState<Record<string, string>>({});
+  const [branding, setBranding] = useState<Record<string, string>>({ primary_color: "#004d40", secondary_color: "#a7f3d0" });
+  const [settingsSaving, setSettingsSaving] = useState(false);
+  const settingsFileRef = useRef<HTMLInputElement>(null);
+  const [settingsUploadingKey, setSettingsUploadingKey] = useState<string | null>(null);
 
   // product drawer
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -221,17 +230,20 @@ export default function Admin() {
       { data: ords, error: ordsError },
       { data: subs, error: subscribersError },
       { data: cols, error: colsError },
+      { data: settingsRows, error: settingsError },
     ] = await Promise.all([
       supabase.from("products").select("*").order("created_at", { ascending: false }),
       supabase.from("orders").select("*").order("created_at", { ascending: false }),
       supabase.from("subscribers").select("*"),
       supabase.from("collections" as any).select("*").order("name"),
+      supabase.from("app_settings" as any).select("*").eq("id", 1).maybeSingle(),
     ]);
 
     if (prodsError) toast.error("Errore nel caricamento prodotti");
     if (ordsError) toast.error("Errore nel caricamento ordini");
     if (subscribersError) toast.error("Errore nel caricamento iscritti newsletter");
     if (colsError) toast.error("Errore nel caricamento collezioni");
+    if (settingsError) toast.error("Errore nel caricamento impostazioni");
 
     setProducts((prods as Product[]) || []);
     const ordList = (ords as Order[]) || [];
@@ -239,6 +251,13 @@ export default function Admin() {
     setChartData(buildChartData(ordList));
     setSubscribers((subs as Subscriber[]) || []);
     setCollections((cols as unknown as Collection[]) || []);
+
+    if (settingsRows) {
+      const s = settingsRows as any;
+      if (s.page_content) setPageContent(s.page_content);
+      if (s.page_images) setPageImages(s.page_images);
+      if (s.branding) setBranding(s.branding);
+    }
   }
 
   // ── Newsletter helpers ──────────────────────────────────────────────────────
@@ -548,6 +567,46 @@ ${bodyContent}
     fetchAll();
   }
 
+  // ── Settings helpers ──────────────────────────────────────────────────────────
+  async function saveSettings() {
+    setSettingsSaving(true);
+    try {
+      const { error } = await supabase.from("app_settings" as any).upsert({
+        id: 1,
+        page_content: pageContent,
+        page_images: pageImages,
+        branding,
+      } as any);
+      if (error) throw error;
+      toast.success("Impostazioni salvate");
+    } catch (e: unknown) {
+      toast.error((e as Error).message || "Errore nel salvataggio");
+    } finally {
+      setSettingsSaving(false);
+    }
+  }
+
+  async function handleSettingsImageUpload(key: string, file: File) {
+    setSettingsUploadingKey(key);
+    try {
+      const ext = file.name.split(".").pop();
+      const path = `site/${key}-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("emerald-asset")
+        .upload(path, file, { upsert: true });
+      if (upErr) throw upErr;
+      const { data: { publicUrl } } = supabase.storage
+        .from("emerald-asset")
+        .getPublicUrl(path);
+      setPageImages((prev) => ({ ...prev, [key]: publicUrl }));
+      toast.success(`Immagine "${key}" caricata`);
+    } catch (e: unknown) {
+      toast.error((e as Error).message || "Errore upload");
+    } finally {
+      setSettingsUploadingKey(null);
+    }
+  }
+
   // ── Sidebar nav items ────────────────────────────────────────────────────────
   const nav = [
     { id: "dashboard" as AdminSection, icon: LayoutDashboard, label: "Dashboard" },
@@ -555,6 +614,7 @@ ${bodyContent}
     { id: "products" as AdminSection, icon: Package, label: "Prodotti" },
     { id: "orders" as AdminSection, icon: ShoppingBag, label: "Ordini" },
     { id: "newsletter" as AdminSection, icon: Mail, label: "Newsletter" },
+    { id: "settings" as AdminSection, icon: Settings, label: "Impostazioni" },
   ];
 
   const statusColor: Record<string, string> = {
@@ -1416,6 +1476,189 @@ ${bodyContent}
                         )}
                       </Button>
                     </div>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* ══ SETTINGS ════════════════════════════════════════════════════ */}
+              {section === "settings" && (
+                <motion.div
+                  key="settings"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.25 }}
+                >
+                  <div className="mb-6">
+                    <h2 style={{ fontFamily: "var(--font-serif)" }} className="text-2xl font-semibold text-neutral-900">
+                      Impostazioni Sito
+                    </h2>
+                    <p className="text-sm text-neutral-400 mt-0.5">Gestisci testi, immagini e branding del sito</p>
+                  </div>
+
+                  {/* Tabs */}
+                  <div className="flex gap-1 mb-6 bg-neutral-100 rounded-xl p-1 w-fit">
+                    {([
+                      { id: "texts" as const, label: "Testi", icon: Type },
+                      { id: "images" as const, label: "Immagini", icon: ImageIcon },
+                      { id: "branding" as const, label: "Branding", icon: Palette },
+                    ]).map(({ id, label, icon: Icon }) => (
+                      <button
+                        key={id}
+                        onClick={() => setSettingsTab(id)}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                          settingsTab === id
+                            ? "bg-white text-neutral-900 shadow-sm"
+                            : "text-neutral-500 hover:text-neutral-700"
+                        }`}
+                      >
+                        <Icon className="w-4 h-4" />
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm p-6">
+
+                    {/* ── Tab Testi ── */}
+                    {settingsTab === "texts" && (
+                      <div className="space-y-5">
+                        <p className="text-sm text-neutral-500 mb-4">Modifica i testi principali delle pagine del sito.</p>
+                        {[
+                          { key: "home_title", label: "Titolo Homepage", placeholder: "es. Lusso Consapevole" },
+                          { key: "home_subtitle", label: "Sottotitolo Homepage", placeholder: "es. Moda sostenibile, eleganza senza tempo" },
+                          { key: "about_title", label: "Titolo Chi Siamo", placeholder: "es. La Nostra Storia" },
+                          { key: "about_description", label: "Descrizione Chi Siamo", placeholder: "Racconta la storia del brand...", multiline: true },
+                          { key: "sustainability_title", label: "Titolo Sostenibilità", placeholder: "es. Il Nostro Impegno" },
+                          { key: "sustainability_description", label: "Descrizione Sostenibilità", placeholder: "Descrivi l'impegno green...", multiline: true },
+                          { key: "footer_tagline", label: "Tagline Footer", placeholder: "es. Emeraldress — Lusso Consapevole" },
+                        ].map(({ key, label, placeholder, multiline }) => (
+                          <div key={key}>
+                            <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">{label}</Label>
+                            {multiline ? (
+                              <Textarea
+                                value={pageContent[key] || ""}
+                                onChange={(e) => setPageContent((prev) => ({ ...prev, [key]: e.target.value }))}
+                                placeholder={placeholder}
+                                rows={3}
+                                className="rounded-xl border-neutral-200 resize-none focus:ring-emerald-600"
+                              />
+                            ) : (
+                              <Input
+                                value={pageContent[key] || ""}
+                                onChange={(e) => setPageContent((prev) => ({ ...prev, [key]: e.target.value }))}
+                                placeholder={placeholder}
+                                className="rounded-xl border-neutral-200 focus:ring-emerald-600"
+                              />
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* ── Tab Immagini ── */}
+                    {settingsTab === "images" && (
+                      <div className="space-y-5">
+                        <p className="text-sm text-neutral-500 mb-4">Carica e gestisci le immagini principali del sito.</p>
+                        {[
+                          { key: "hero_bg", label: "Immagine Hero Homepage" },
+                          { key: "logo_url", label: "Logo del Sito" },
+                          { key: "about_image", label: "Immagine Chi Siamo" },
+                          { key: "sustainability_image", label: "Immagine Sostenibilità" },
+                          { key: "og_image", label: "Immagine OG / Social" },
+                        ].map(({ key, label }) => (
+                          <div key={key}>
+                            <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">{label}</Label>
+                            <div className="flex items-center gap-3">
+                              {pageImages[key] && (
+                                <div className="w-16 h-16 rounded-lg overflow-hidden border border-neutral-200 bg-neutral-100 shrink-0">
+                                  <img src={pageImages[key]} alt={label} className="w-full h-full object-cover" />
+                                </div>
+                              )}
+                              <div className="flex-1">
+                                <Input
+                                  value={pageImages[key] || ""}
+                                  onChange={(e) => setPageImages((prev) => ({ ...prev, [key]: e.target.value }))}
+                                  placeholder="URL immagine o carica file..."
+                                  className="rounded-xl border-neutral-200 focus:ring-emerald-600 mb-1.5"
+                                />
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  disabled={settingsUploadingKey === key}
+                                  onClick={() => {
+                                    const input = document.createElement("input");
+                                    input.type = "file";
+                                    input.accept = "image/*";
+                                    input.onchange = (e) => {
+                                      const file = (e.target as HTMLInputElement).files?.[0];
+                                      if (file) handleSettingsImageUpload(key, file);
+                                    };
+                                    input.click();
+                                  }}
+                                  className="rounded-lg border-neutral-200 text-neutral-600 hover:bg-neutral-50 gap-1.5 text-xs"
+                                >
+                                  {settingsUploadingKey === key ? (
+                                    <><Loader2 className="w-3 h-3 animate-spin" /> Caricamento...</>
+                                  ) : (
+                                    <><Upload className="w-3 h-3" /> Carica File</>
+                                  )}
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* ── Tab Branding ── */}
+                    {settingsTab === "branding" && (
+                      <div className="space-y-5">
+                        <p className="text-sm text-neutral-500 mb-4">Personalizza i colori principali del brand.</p>
+                        {[
+                          { key: "primary_color", label: "Colore Primario" },
+                          { key: "secondary_color", label: "Colore Secondario" },
+                        ].map(({ key, label }) => (
+                          <div key={key}>
+                            <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">{label}</Label>
+                            <div className="flex items-center gap-3">
+                              <input
+                                type="color"
+                                value={branding[key] || "#000000"}
+                                onChange={(e) => setBranding((prev) => ({ ...prev, [key]: e.target.value }))}
+                                className="w-12 h-10 rounded-lg border border-neutral-200 cursor-pointer p-0.5"
+                              />
+                              <Input
+                                value={branding[key] || ""}
+                                onChange={(e) => setBranding((prev) => ({ ...prev, [key]: e.target.value }))}
+                                placeholder="#004d40"
+                                className="rounded-xl border-neutral-200 focus:ring-emerald-600 font-mono text-sm max-w-[180px]"
+                              />
+                              <div
+                                className="w-10 h-10 rounded-lg border border-neutral-200"
+                                style={{ backgroundColor: branding[key] || "#000" }}
+                              />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Save button */}
+                  <div className="flex justify-end mt-6">
+                    <Button
+                      onClick={saveSettings}
+                      disabled={settingsSaving}
+                      className="bg-emerald-950 hover:bg-emerald-900 text-white rounded-xl gap-2 px-8"
+                    >
+                      {settingsSaving ? (
+                        <><Loader2 className="w-4 h-4 animate-spin" /> Salvataggio...</>
+                      ) : (
+                        "Salva Impostazioni"
+                      )}
+                    </Button>
                   </div>
                 </motion.div>
               )}
