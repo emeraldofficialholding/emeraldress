@@ -21,6 +21,7 @@ export type Database = {
           id: number
           page_content: Json
           page_images: Json
+          seo_settings: Json
           updated_at: string
         }
         Insert: {
@@ -29,6 +30,7 @@ export type Database = {
           id?: number
           page_content?: Json
           page_images?: Json
+          seo_settings?: Json
           updated_at?: string
         }
         Update: {
@@ -37,6 +39,7 @@ export type Database = {
           id?: number
           page_content?: Json
           page_images?: Json
+          seo_settings?: Json
           updated_at?: string
         }
         Relationships: []
