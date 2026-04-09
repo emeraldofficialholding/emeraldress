@@ -282,6 +282,7 @@ export default function Admin() {
     if (subscribersError) toast.error("Errore nel caricamento iscritti newsletter");
     if (settingsError) toast.error("Errore nel caricamento impostazioni");
     if (scansError) toast.error("Errore nel caricamento scansioni");
+    if (cpnsError) toast.error("Errore nel caricamento coupon");
 
     setProducts((prods as Product[]) || []);
     const ordList = (ords as Order[]) || [];
@@ -297,6 +298,7 @@ export default function Admin() {
       if (s.branding) setBranding(s.branding);
     }
     setScannerRequests((scans as unknown as ScannerRequest[]) || []);
+    setCoupons((cpns as unknown as Coupon[]) || []);
   }
 
   // ── Newsletter helpers ──────────────────────────────────────────────────────
