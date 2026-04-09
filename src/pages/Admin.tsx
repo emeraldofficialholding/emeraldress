@@ -929,7 +929,7 @@ ${bodyContent}
     <Helmet>
       <meta name="robots" content="noindex, nofollow" />
     </Helmet>
-    <div className="min-h-screen w-full bg-neutral-50 flex flex-col" style={{ fontFamily: "var(--font-sans)" }}>
+    <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-neutral-50 flex flex-col" style={{ fontFamily: "var(--font-sans)" }}>
       {/* ── Mobile Header ── */}
       <header className="lg:hidden sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-neutral-200 flex items-center justify-between h-12 px-3">
         <button onClick={() => setMobileMenuOpen(true)} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-neutral-100 transition-colors">
@@ -1121,11 +1121,11 @@ ${bodyContent}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.25 }}
                 >
-                  <div className="mb-6">
-                    <h2 style={{ fontFamily: "var(--font-serif)" }} className="text-2xl font-semibold text-neutral-900">
+                  <div className="mb-4 lg:mb-6">
+                    <h2 style={{ fontFamily: "var(--font-serif)" }} className="text-lg lg:text-2xl font-semibold text-neutral-900">
                       Panoramica
                     </h2>
-                    <p className="text-sm text-neutral-400 mt-0.5">Benvenuto nella dashboard di amministrazione</p>
+                    <p className="text-xs lg:text-sm text-neutral-400 mt-0.5">Benvenuto nella dashboard di amministrazione</p>
                   </div>
 
                   {/* KPI Cards */}
