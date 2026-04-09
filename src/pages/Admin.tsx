@@ -11,6 +11,7 @@ import {
   Lock, GripVertical, ImageIcon, Mail, Download, Users, Archive, Send, Loader2,
   Code, Type, Layers, Settings, Palette, ScanSearch, Tag, Percent, Copy,
   BarChart3, MousePointerClick, RotateCcw, ExternalLink, AlertTriangle, Megaphone, Link as LinkIcon,
+  Star, MessageSquare,
 } from "lucide-react";
 import { FULL_HTML_TEMPLATES } from "@/data/emailTemplates";
 import {
@@ -72,7 +73,7 @@ interface Collection {
   is_active: boolean;
 }
 
-type AdminSection = "dashboard" | "products" | "orders" | "clients" | "newsletter" | "collections" | "settings" | "scanner" | "marketing" | "email_templates";
+type AdminSection = "dashboard" | "products" | "orders" | "clients" | "reviews" | "newsletter" | "collections" | "settings" | "scanner" | "marketing" | "email_templates";
 
 interface EmailTemplate {
   id: string;
