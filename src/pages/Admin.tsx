@@ -193,6 +193,7 @@ export default function Admin() {
   const [etForm, setEtForm] = useState({ name: "", subject: "", body_html: "" });
   const [etSaving, setEtSaving] = useState(false);
   const [etShowEditor, setEtShowEditor] = useState(false);
+  const [etEditorMode, setEtEditorMode] = useState<"visual" | "html">("visual");
   const etQuillRef = useRef<any>(null);
 
   // product drawer
@@ -1746,17 +1747,49 @@ ${bodyContent}
                           </div>
                         </div>
 
-                        {/* Editor */}
+                        {/* Editor Mode Toggle */}
                         <div>
-                          <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">Corpo Email (HTML)</Label>
-                          <ReactQuill
-                            ref={etQuillRef}
-                            theme="snow"
-                            value={etForm.body_html}
-                            onChange={(val) => setEtForm((p) => ({ ...p, body_html: val }))}
-                            className="rounded-xl overflow-hidden border border-neutral-200"
-                            style={{ minHeight: 250 }}
-                          />
+                          <div className="flex items-center justify-between mb-2">
+                            <Label className="text-xs text-neutral-500 uppercase tracking-wider">Corpo Email</Label>
+                            <div className="flex gap-0.5 bg-neutral-100 rounded-lg p-0.5">
+                              {([
+                                { id: "visual" as const, label: "Editor Visuale", icon: Type },
+                                { id: "html" as const, label: "Codice HTML", icon: Code },
+                              ]).map(({ id, label, icon: Icon }) => (
+                                <button
+                                  key={id}
+                                  onClick={() => setEtEditorMode(id)}
+                                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                                    etEditorMode === id
+                                      ? "bg-white text-neutral-900 shadow-sm"
+                                      : "text-neutral-500 hover:text-neutral-700"
+                                  }`}
+                                >
+                                  <Icon className="w-3 h-3" />
+                                  {label}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          {etEditorMode === "visual" ? (
+                            <ReactQuill
+                              ref={etQuillRef}
+                              theme="snow"
+                              value={etForm.body_html}
+                              onChange={(val) => setEtForm((p) => ({ ...p, body_html: val }))}
+                              className="rounded-xl overflow-hidden border border-neutral-200"
+                              style={{ minHeight: 250 }}
+                            />
+                          ) : (
+                            <Textarea
+                              value={etForm.body_html}
+                              onChange={(e) => setEtForm((p) => ({ ...p, body_html: e.target.value }))}
+                              placeholder="Incolla qui il codice HTML del template..."
+                              rows={14}
+                              className="rounded-xl border-neutral-200 focus:ring-emerald-600 font-mono text-xs leading-relaxed resize-y"
+                            />
+                          )}
                         </div>
 
                         <div className="flex justify-end gap-3 pt-2">
