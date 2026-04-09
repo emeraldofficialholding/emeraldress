@@ -332,6 +332,7 @@ export default function Admin() {
       if (s.page_images) setPageImages(s.page_images);
       if (s.branding) setBranding(s.branding);
       if (s.seo_settings) setSeoSettings(s.seo_settings);
+      if (s.promo_banner) setPromoBanner(s.promo_banner);
     }
     setScannerRequests((scans as unknown as ScannerRequest[]) || []);
     setCoupons((cpns as unknown as Coupon[]) || []);
@@ -718,6 +719,7 @@ ${bodyContent}
         page_images: pageImages,
         branding,
         seo_settings: seoSettings,
+        promo_banner: promoBanner,
       } as any);
       if (error) throw error;
       toast.success("Impostazioni salvate");
