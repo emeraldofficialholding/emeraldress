@@ -33,6 +33,9 @@ function AppShell() {
     (r) => location.pathname === r || location.pathname.startsWith(r + "/")
   );
 
+  // Track page views
+  usePageTracking();
+
   // Scroll to top on route change
   useEffect(() => {
     window.scrollTo(0, 0);
