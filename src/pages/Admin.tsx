@@ -141,6 +141,11 @@ export default function Admin() {
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [collections, setCollections] = useState<Collection[]>([]);
 
+  // order detail & shipping
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [shippingForm, setShippingForm] = useState({ tracking_number: "", tracking_url: "" });
+  const [shippingSaving, setShippingSaving] = useState(false);
+
   // collection form
   const [collectionDrawerOpen, setCollectionDrawerOpen] = useState(false);
   const [editingCollection, setEditingCollection] = useState<Collection | null>(null);
