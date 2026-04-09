@@ -246,19 +246,21 @@ export default function Admin() {
       { data: subs, error: subscribersError },
       { data: cols, error: colsError },
       { data: settingsRows, error: settingsError },
+      { data: scans, error: scansError },
     ] = await Promise.all([
       supabase.from("products").select("*").order("created_at", { ascending: false }),
       supabase.from("orders").select("*").order("created_at", { ascending: false }),
       supabase.from("subscribers").select("*"),
       supabase.from("collections" as any).select("*").order("name"),
       supabase.from("app_settings" as any).select("*").eq("id", 1).maybeSingle(),
+      supabase.from("scanner_requests").select("*").order("created_at", { ascending: false }).limit(100),
     ]);
 
     if (prodsError) toast.error("Errore nel caricamento prodotti");
     if (ordsError) toast.error("Errore nel caricamento ordini");
     if (subscribersError) toast.error("Errore nel caricamento iscritti newsletter");
-    if (colsError) toast.error("Errore nel caricamento collezioni");
     if (settingsError) toast.error("Errore nel caricamento impostazioni");
+    if (scansError) toast.error("Errore nel caricamento scansioni");
 
     setProducts((prods as Product[]) || []);
     const ordList = (ords as Order[]) || [];
