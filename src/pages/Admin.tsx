@@ -1591,7 +1591,7 @@ ${bodyContent}
                   </div>
                 </div>
 
-                {/* Stock & Category */}
+                {/* Stock & Collezione */}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">Stock</Label>
@@ -1603,14 +1603,24 @@ ${bodyContent}
                     />
                   </div>
                   <div>
-                    <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">Categoria</Label>
+                    <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">Collezione</Label>
                     <select
-                      value={form.category}
-                      onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
+                      value={form.collection_id}
+                      onChange={(e) => {
+                        const colId = e.target.value;
+                        const col = collections.find((c) => c.id === colId);
+                        setForm((f) => ({
+                          ...f,
+                          collection_id: colId,
+                          category: col ? col.name : f.category,
+                        }));
+                      }}
                       className="w-full h-10 rounded-xl border border-neutral-200 bg-white px-3 text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-emerald-600"
                     >
-                      <option value="classics">Classics</option>
-                      <option value="emerald-touch">Emerald Touch</option>
+                      <option value="">— Seleziona collezione —</option>
+                      {collections.filter((c) => c.is_active).map((c) => (
+                        <option key={c.id} value={c.id}>{c.name}</option>
+                      ))}
                     </select>
                   </div>
                 </div>
