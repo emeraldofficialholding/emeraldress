@@ -9,7 +9,7 @@ import {
   LayoutDashboard, Package, ShoppingBag, LogOut, Plus, X, Upload,
   TrendingUp, DollarSign, ChevronRight, Edit2, Trash2, Eye, EyeOff,
   Lock, GripVertical, ImageIcon, Mail, Download, Users, Archive, Send, Loader2,
-  Code, Type,
+  Code, Type, Layers,
 } from "lucide-react";
 import { FULL_HTML_TEMPLATES } from "@/data/emailTemplates";
 import {
@@ -33,6 +33,7 @@ interface Product {
   stock: number;
   status: string;
   category: string;
+  collection_id: string | null;
   images: string[];
   sizes: string[] | null;
   fabric_details: string | null;
@@ -58,7 +59,14 @@ interface Subscriber {
   created_at: string;
 }
 
-type AdminSection = "dashboard" | "products" | "orders" | "newsletter";
+interface Collection {
+  id: string;
+  name: string;
+  description: string | null;
+  is_active: boolean;
+}
+
+type AdminSection = "dashboard" | "products" | "orders" | "newsletter" | "collections";
 
 // ── Sales chart mock data helper ───────────────────────────────────────────────
 function buildChartData(orders: Order[]) {
@@ -95,6 +103,7 @@ const emptyForm = {
   sale_price: "",
   stock: "0",
   category: "classics",
+  collection_id: "",
   fabric_details: "",
   shipping_info: "",
   sizes: "S,M,L",
@@ -118,6 +127,13 @@ export default function Admin() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [chartData, setChartData] = useState<{ date: string; revenue: number }[]>([]);
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
+  const [collections, setCollections] = useState<Collection[]>([]);
+
+  // collection form
+  const [collectionDrawerOpen, setCollectionDrawerOpen] = useState(false);
+  const [editingCollection, setEditingCollection] = useState<Collection | null>(null);
+  const [collectionForm, setCollectionForm] = useState({ name: "", description: "", is_active: true });
+  const [collectionSubmitting, setCollectionSubmitting] = useState(false);
 
   // product drawer
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -204,21 +220,25 @@ export default function Admin() {
       { data: prods, error: prodsError },
       { data: ords, error: ordsError },
       { data: subs, error: subscribersError },
+      { data: cols, error: colsError },
     ] = await Promise.all([
       supabase.from("products").select("*").order("created_at", { ascending: false }),
       supabase.from("orders").select("*").order("created_at", { ascending: false }),
       supabase.from("subscribers").select("*"),
+      supabase.from("collections" as any).select("*").order("name"),
     ]);
 
     if (prodsError) toast.error("Errore nel caricamento prodotti");
     if (ordsError) toast.error("Errore nel caricamento ordini");
     if (subscribersError) toast.error("Errore nel caricamento iscritti newsletter");
+    if (colsError) toast.error("Errore nel caricamento collezioni");
 
     setProducts((prods as Product[]) || []);
     const ordList = (ords as Order[]) || [];
     setOrders(ordList);
     setChartData(buildChartData(ordList));
     setSubscribers((subs as Subscriber[]) || []);
+    setCollections((cols as unknown as Collection[]) || []);
   }
 
   // ── Newsletter helpers ──────────────────────────────────────────────────────
@@ -371,6 +391,7 @@ ${bodyContent}
       sale_price: p.sale_price ? String(p.sale_price) : "",
       stock: String(p.stock ?? 0),
       category: p.category,
+      collection_id: p.collection_id || "",
       fabric_details: p.fabric_details || "",
       shipping_info: p.shipping_info || "",
       sizes: (p.sizes || []).join(","),
@@ -417,29 +438,30 @@ ${bodyContent}
         ? form.sizes.split(",").map((s) => s.trim()).filter(Boolean)
         : [];
 
-      const payload = {
+      const payload: Record<string, unknown> = {
         name: form.name,
         description: form.description || null,
         price: parseFloat(form.price),
         sale_price: form.sale_price ? parseFloat(form.sale_price) : null,
         stock: parseInt(form.stock) || 0,
         category: form.category,
+        collection_id: form.collection_id || null,
         fabric_details: form.fabric_details || null,
         shipping_info: form.shipping_info || null,
-        sizes: sizesArray,       // native JS array, never JSON string
+        sizes: sizesArray,
         status: form.status,
-        images: finalUrls,       // native JS array, never JSON string
+        images: finalUrls,
       };
 
       if (editingProduct) {
         const { error } = await supabase
           .from("products")
-          .update(payload)
+          .update(payload as any)
           .eq("id", editingProduct.id);
         if (error) throw error;
         toast.success("Prodotto aggiornato");
       } else {
-        const { error } = await supabase.from("products").insert(payload);
+        const { error } = await supabase.from("products").insert(payload as any);
         if (error) throw error;
         toast.success("Prodotto creato");
       }
@@ -478,9 +500,58 @@ ${bodyContent}
   // The iPad frame handles all states (loading, login, not-admin, admin)
   // so we don't early-return here.
 
+  // ── Collections CRUD ──────────────────────────────────────────────────────────
+  function openNewCollection() {
+    setEditingCollection(null);
+    setCollectionForm({ name: "", description: "", is_active: true });
+    setCollectionDrawerOpen(true);
+  }
+
+  function openEditCollection(c: Collection) {
+    setEditingCollection(c);
+    setCollectionForm({ name: c.name, description: c.description || "", is_active: c.is_active });
+    setCollectionDrawerOpen(true);
+  }
+
+  async function handleCollectionSubmit() {
+    if (!collectionForm.name) { toast.error("Il nome è obbligatorio"); return; }
+    setCollectionSubmitting(true);
+    try {
+      const payload = {
+        name: collectionForm.name,
+        description: collectionForm.description || null,
+        is_active: collectionForm.is_active,
+      };
+      if (editingCollection) {
+        const { error } = await supabase.from("collections" as any).update(payload as any).eq("id", editingCollection.id);
+        if (error) throw error;
+        toast.success("Collezione aggiornata");
+      } else {
+        const { error } = await supabase.from("collections" as any).insert(payload as any);
+        if (error) throw error;
+        toast.success("Collezione creata");
+      }
+      setCollectionDrawerOpen(false);
+      fetchAll();
+    } catch (e: unknown) {
+      toast.error((e as Error).message || "Errore");
+    } finally {
+      setCollectionSubmitting(false);
+    }
+  }
+
+  async function deleteCollection(id: string) {
+    if (!confirm("Eliminare questa collezione?")) return;
+    const { error } = await supabase.from("collections" as any).delete().eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Collezione eliminata");
+    fetchAll();
+  }
+
   // ── Sidebar nav items ────────────────────────────────────────────────────────
   const nav = [
     { id: "dashboard" as AdminSection, icon: LayoutDashboard, label: "Dashboard" },
+    { id: "collections" as AdminSection, icon: Layers, label: "Collezioni" },
     { id: "products" as AdminSection, icon: Package, label: "Prodotti" },
     { id: "orders" as AdminSection, icon: ShoppingBag, label: "Ordini" },
     { id: "newsletter" as AdminSection, icon: Mail, label: "Newsletter" },
@@ -745,7 +816,160 @@ ${bodyContent}
                 </motion.div>
               )}
 
-              {/* ══ PRODUCTS ═══════════════════════════════════════════════════ */}
+              {/* ══ COLLECTIONS ════════════════════════════════════════════════ */}
+              {section === "collections" && (
+                <motion.div
+                  key="collections"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.25 }}
+                >
+                  <div className="flex items-center justify-between mb-6">
+                    <div>
+                      <h2 style={{ fontFamily: "var(--font-serif)" }} className="text-2xl font-semibold text-neutral-900">
+                        Collezioni
+                      </h2>
+                      <p className="text-sm text-neutral-400 mt-0.5">{collections.length} collezioni totali</p>
+                    </div>
+                    <Button
+                      onClick={openNewCollection}
+                      className="bg-emerald-950 hover:bg-emerald-900 text-white rounded-xl gap-2 text-sm"
+                    >
+                      <Plus className="w-4 h-4" /> Nuova Collezione
+                    </Button>
+                  </div>
+
+                  <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm overflow-hidden">
+                    <div className="overflow-x-auto">
+                      <table className="w-full">
+                        <thead>
+                          <tr className="border-b border-neutral-100">
+                            {["Nome", "Descrizione", "Stato", "Azioni"].map((h) => (
+                              <th key={h} className="text-left px-4 py-3 text-xs font-medium text-neutral-400 uppercase tracking-wider">
+                                {h}
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-neutral-50">
+                          {collections.map((c) => (
+                            <tr key={c.id} className="hover:bg-neutral-50 transition-colors">
+                              <td className="px-4 py-3 text-sm font-medium text-neutral-900">{c.name}</td>
+                              <td className="px-4 py-3 text-sm text-neutral-500 max-w-xs truncate">{c.description || "—"}</td>
+                              <td className="px-4 py-3">
+                                <span className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium ${
+                                  c.is_active
+                                    ? "bg-emerald-50 text-emerald-700"
+                                    : "bg-neutral-100 text-neutral-500"
+                                }`}>
+                                  <span className={`w-1.5 h-1.5 rounded-full ${c.is_active ? "bg-emerald-500" : "bg-neutral-400"}`} />
+                                  {c.is_active ? "Attiva" : "Inattiva"}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3">
+                                <div className="flex items-center gap-1">
+                                  <button
+                                    onClick={() => openEditCollection(c)}
+                                    className="p-1.5 text-neutral-400 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors"
+                                  >
+                                    <Edit2 className="w-3.5 h-3.5" />
+                                  </button>
+                                  <button
+                                    onClick={() => deleteCollection(c.id)}
+                                    className="p-1.5 text-neutral-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                          {collections.length === 0 && (
+                            <tr>
+                              <td colSpan={4} className="px-4 py-12 text-center text-sm text-neutral-400">
+                                Nessuna collezione. Crea la tua prima collezione!
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  {/* Collection drawer */}
+                  <AnimatePresence>
+                    {collectionDrawerOpen && (
+                      <>
+                        <motion.div
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
+                          onClick={() => setCollectionDrawerOpen(false)}
+                        />
+                        <motion.div
+                          initial={{ x: "100%" }}
+                          animate={{ x: 0 }}
+                          exit={{ x: "100%" }}
+                          transition={{ type: "spring", damping: 30, stiffness: 300 }}
+                          className="fixed right-0 top-0 bottom-0 z-50 w-full max-w-sm bg-white shadow-2xl flex flex-col"
+                        >
+                          <div className="flex items-center justify-between px-6 py-5 border-b border-neutral-100">
+                            <h3 style={{ fontFamily: "var(--font-serif)" }} className="text-lg font-semibold text-neutral-900">
+                              {editingCollection ? "Modifica Collezione" : "Nuova Collezione"}
+                            </h3>
+                            <button onClick={() => setCollectionDrawerOpen(false)} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-neutral-100 transition-colors">
+                              <X className="w-4 h-4 text-neutral-500" />
+                            </button>
+                          </div>
+                          <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+                            <div>
+                              <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">Nome *</Label>
+                              <Input
+                                value={collectionForm.name}
+                                onChange={(e) => setCollectionForm((f) => ({ ...f, name: e.target.value }))}
+                                placeholder="es. Primavera/Estate 2025"
+                                className="rounded-xl border-neutral-200 focus:ring-emerald-600"
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">Descrizione</Label>
+                              <Textarea
+                                value={collectionForm.description}
+                                onChange={(e) => setCollectionForm((f) => ({ ...f, description: e.target.value }))}
+                                placeholder="Descrizione della collezione..."
+                                rows={3}
+                                className="rounded-xl border-neutral-200 resize-none focus:ring-emerald-600"
+                              />
+                            </div>
+                            <div className="flex items-center justify-between py-3 px-4 bg-neutral-50 rounded-xl">
+                              <div>
+                                <p className="text-sm font-medium text-neutral-900">Collezione Attiva</p>
+                                <p className="text-xs text-neutral-400">Visibile sulla piattaforma</p>
+                              </div>
+                              <Switch
+                                checked={collectionForm.is_active}
+                                onCheckedChange={(v) => setCollectionForm((f) => ({ ...f, is_active: v }))}
+                                className="data-[state=checked]:bg-emerald-700"
+                              />
+                            </div>
+                          </div>
+                          <div className="px-6 py-4 border-t border-neutral-100 flex gap-3">
+                            <Button variant="outline" onClick={() => setCollectionDrawerOpen(false)} className="flex-1 rounded-xl border-neutral-200">
+                              Annulla
+                            </Button>
+                            <Button onClick={handleCollectionSubmit} disabled={collectionSubmitting} className="flex-1 bg-emerald-950 hover:bg-emerald-900 text-white rounded-xl">
+                              {collectionSubmitting ? "Salvataggio..." : editingCollection ? "Aggiorna" : "Crea"}
+                            </Button>
+                          </div>
+                        </motion.div>
+                      </>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              )}
+
               {section === "products" && (
                 <motion.div
                   key="products"
@@ -1367,7 +1591,7 @@ ${bodyContent}
                   </div>
                 </div>
 
-                {/* Stock & Category */}
+                {/* Stock & Collezione */}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">Stock</Label>
@@ -1379,14 +1603,24 @@ ${bodyContent}
                     />
                   </div>
                   <div>
-                    <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">Categoria</Label>
+                    <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">Collezione</Label>
                     <select
-                      value={form.category}
-                      onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
+                      value={form.collection_id}
+                      onChange={(e) => {
+                        const colId = e.target.value;
+                        const col = collections.find((c) => c.id === colId);
+                        setForm((f) => ({
+                          ...f,
+                          collection_id: colId,
+                          category: col ? col.name : f.category,
+                        }));
+                      }}
                       className="w-full h-10 rounded-xl border border-neutral-200 bg-white px-3 text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-emerald-600"
                     >
-                      <option value="classics">Classics</option>
-                      <option value="emerald-touch">Emerald Touch</option>
+                      <option value="">— Seleziona collezione —</option>
+                      {collections.filter((c) => c.is_active).map((c) => (
+                        <option key={c.id} value={c.id}>{c.name}</option>
+                      ))}
                     </select>
                   </div>
                 </div>
