@@ -323,6 +323,7 @@ export default function Admin() {
       supabase.from("scanner_requests").select("*").order("created_at", { ascending: false }).limit(100),
       supabase.from("coupons" as any).select("*").order("code"),
       supabase.from("email_templates" as any).select("*").order("updated_at", { ascending: false }),
+      supabase.from("reviews" as any).select("*").order("created_at", { ascending: false }),
     ]);
 
     if (prodsError) toast.error("Errore nel caricamento prodotti");
@@ -333,7 +334,8 @@ export default function Admin() {
     if (cpnsError) toast.error("Errore nel caricamento coupon");
     if (etsError) toast.error("Errore nel caricamento template email");
 
-    setProducts((prods as Product[]) || []);
+    const prodList = (prods as Product[]) || [];
+    setProducts(prodList);
     const ordList = (ords as Order[]) || [];
     setOrders(ordList);
     setChartData(buildChartData(ordList));
