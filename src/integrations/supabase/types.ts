@@ -21,6 +21,7 @@ export type Database = {
           id: number
           page_content: Json
           page_images: Json
+          promo_banner: Json
           seo_settings: Json
           updated_at: string
         }
@@ -30,6 +31,7 @@ export type Database = {
           id?: number
           page_content?: Json
           page_images?: Json
+          promo_banner?: Json
           seo_settings?: Json
           updated_at?: string
         }
@@ -39,6 +41,7 @@ export type Database = {
           id?: number
           page_content?: Json
           page_images?: Json
+          promo_banner?: Json
           seo_settings?: Json
           updated_at?: string
         }
