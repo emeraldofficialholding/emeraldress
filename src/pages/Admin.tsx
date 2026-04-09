@@ -399,7 +399,45 @@ ${bodyContent}
     }
   }
 
-  async function handleSendNewsletter() {
+  async function handleSaveShipping() {
+    if (!selectedOrder) return;
+    setShippingSaving(true);
+    try {
+      const { error } = await supabase
+        .from("orders")
+        .update({
+          tracking_number: shippingForm.tracking_number || null,
+          tracking_url: shippingForm.tracking_url || null,
+          status: "shipped",
+        } as any)
+        .eq("id", selectedOrder.id);
+      if (error) throw error;
+
+      const webhookUrl = import.meta.env.VITE_N8N_SHIPPING_WEBHOOK_URL;
+      if (webhookUrl) {
+        await fetch(webhookUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            order_id: selectedOrder.id,
+            customer_email: selectedOrder.customer_email,
+            customer_name: selectedOrder.customer_email.split("@")[0],
+            tracking_number: shippingForm.tracking_number,
+            tracking_url: shippingForm.tracking_url,
+          }),
+        });
+      }
+
+      setSelectedOrder({ ...selectedOrder, tracking_number: shippingForm.tracking_number, tracking_url: shippingForm.tracking_url, status: "shipped" });
+      setOrders((prev) => prev.map((o) => o.id === selectedOrder.id ? { ...o, tracking_number: shippingForm.tracking_number, tracking_url: shippingForm.tracking_url, status: "shipped" } : o));
+      toast.success("Dati spedizione salvati e notifica inviata a n8n");
+    } catch (err: any) {
+      toast.error("Errore: " + (err.message || "Salvataggio fallito"));
+    } finally {
+      setShippingSaving(false);
+    }
+  }
+
     const tpl = emailTemplates.find((t) => t.id === selectedTemplate);
     if (!tpl || selectedSubscribers.length === 0) return;
     setSending(true);
