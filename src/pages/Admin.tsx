@@ -574,6 +574,7 @@ ${bodyContent}
     { id: "products" as AdminSection, icon: Package, label: "Prodotti" },
     { id: "orders" as AdminSection, icon: ShoppingBag, label: "Ordini" },
     { id: "newsletter" as AdminSection, icon: Mail, label: "Newsletter" },
+    { id: "settings" as AdminSection, icon: Settings, label: "Impostazioni" },
   ];
 
   const statusColor: Record<string, string> = {
