@@ -816,7 +816,160 @@ ${bodyContent}
                 </motion.div>
               )}
 
-              {/* ══ PRODUCTS ═══════════════════════════════════════════════════ */}
+              {/* ══ COLLECTIONS ════════════════════════════════════════════════ */}
+              {section === "collections" && (
+                <motion.div
+                  key="collections"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.25 }}
+                >
+                  <div className="flex items-center justify-between mb-6">
+                    <div>
+                      <h2 style={{ fontFamily: "var(--font-serif)" }} className="text-2xl font-semibold text-neutral-900">
+                        Collezioni
+                      </h2>
+                      <p className="text-sm text-neutral-400 mt-0.5">{collections.length} collezioni totali</p>
+                    </div>
+                    <Button
+                      onClick={openNewCollection}
+                      className="bg-emerald-950 hover:bg-emerald-900 text-white rounded-xl gap-2 text-sm"
+                    >
+                      <Plus className="w-4 h-4" /> Nuova Collezione
+                    </Button>
+                  </div>
+
+                  <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm overflow-hidden">
+                    <div className="overflow-x-auto">
+                      <table className="w-full">
+                        <thead>
+                          <tr className="border-b border-neutral-100">
+                            {["Nome", "Descrizione", "Stato", "Azioni"].map((h) => (
+                              <th key={h} className="text-left px-4 py-3 text-xs font-medium text-neutral-400 uppercase tracking-wider">
+                                {h}
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-neutral-50">
+                          {collections.map((c) => (
+                            <tr key={c.id} className="hover:bg-neutral-50 transition-colors">
+                              <td className="px-4 py-3 text-sm font-medium text-neutral-900">{c.name}</td>
+                              <td className="px-4 py-3 text-sm text-neutral-500 max-w-xs truncate">{c.description || "—"}</td>
+                              <td className="px-4 py-3">
+                                <span className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium ${
+                                  c.is_active
+                                    ? "bg-emerald-50 text-emerald-700"
+                                    : "bg-neutral-100 text-neutral-500"
+                                }`}>
+                                  <span className={`w-1.5 h-1.5 rounded-full ${c.is_active ? "bg-emerald-500" : "bg-neutral-400"}`} />
+                                  {c.is_active ? "Attiva" : "Inattiva"}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3">
+                                <div className="flex items-center gap-1">
+                                  <button
+                                    onClick={() => openEditCollection(c)}
+                                    className="p-1.5 text-neutral-400 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors"
+                                  >
+                                    <Edit2 className="w-3.5 h-3.5" />
+                                  </button>
+                                  <button
+                                    onClick={() => deleteCollection(c.id)}
+                                    className="p-1.5 text-neutral-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                          {collections.length === 0 && (
+                            <tr>
+                              <td colSpan={4} className="px-4 py-12 text-center text-sm text-neutral-400">
+                                Nessuna collezione. Crea la tua prima collezione!
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  {/* Collection drawer */}
+                  <AnimatePresence>
+                    {collectionDrawerOpen && (
+                      <>
+                        <motion.div
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
+                          onClick={() => setCollectionDrawerOpen(false)}
+                        />
+                        <motion.div
+                          initial={{ x: "100%" }}
+                          animate={{ x: 0 }}
+                          exit={{ x: "100%" }}
+                          transition={{ type: "spring", damping: 30, stiffness: 300 }}
+                          className="fixed right-0 top-0 bottom-0 z-50 w-full max-w-sm bg-white shadow-2xl flex flex-col"
+                        >
+                          <div className="flex items-center justify-between px-6 py-5 border-b border-neutral-100">
+                            <h3 style={{ fontFamily: "var(--font-serif)" }} className="text-lg font-semibold text-neutral-900">
+                              {editingCollection ? "Modifica Collezione" : "Nuova Collezione"}
+                            </h3>
+                            <button onClick={() => setCollectionDrawerOpen(false)} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-neutral-100 transition-colors">
+                              <X className="w-4 h-4 text-neutral-500" />
+                            </button>
+                          </div>
+                          <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+                            <div>
+                              <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">Nome *</Label>
+                              <Input
+                                value={collectionForm.name}
+                                onChange={(e) => setCollectionForm((f) => ({ ...f, name: e.target.value }))}
+                                placeholder="es. Primavera/Estate 2025"
+                                className="rounded-xl border-neutral-200 focus:ring-emerald-600"
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">Descrizione</Label>
+                              <Textarea
+                                value={collectionForm.description}
+                                onChange={(e) => setCollectionForm((f) => ({ ...f, description: e.target.value }))}
+                                placeholder="Descrizione della collezione..."
+                                rows={3}
+                                className="rounded-xl border-neutral-200 resize-none focus:ring-emerald-600"
+                              />
+                            </div>
+                            <div className="flex items-center justify-between py-3 px-4 bg-neutral-50 rounded-xl">
+                              <div>
+                                <p className="text-sm font-medium text-neutral-900">Collezione Attiva</p>
+                                <p className="text-xs text-neutral-400">Visibile sulla piattaforma</p>
+                              </div>
+                              <Switch
+                                checked={collectionForm.is_active}
+                                onCheckedChange={(v) => setCollectionForm((f) => ({ ...f, is_active: v }))}
+                                className="data-[state=checked]:bg-emerald-700"
+                              />
+                            </div>
+                          </div>
+                          <div className="px-6 py-4 border-t border-neutral-100 flex gap-3">
+                            <Button variant="outline" onClick={() => setCollectionDrawerOpen(false)} className="flex-1 rounded-xl border-neutral-200">
+                              Annulla
+                            </Button>
+                            <Button onClick={handleCollectionSubmit} disabled={collectionSubmitting} className="flex-1 bg-emerald-950 hover:bg-emerald-900 text-white rounded-xl">
+                              {collectionSubmitting ? "Salvataggio..." : editingCollection ? "Aggiorna" : "Crea"}
+                            </Button>
+                          </div>
+                        </motion.div>
+                      </>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              )}
+
               {section === "products" && (
                 <motion.div
                   key="products"
