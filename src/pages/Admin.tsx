@@ -1896,7 +1896,109 @@ ${bodyContent}
                 );
               })()}
 
-              {section === "newsletter" && (
+              {/* ══ RECENSIONI ════════════════════════════════════════════════ */}
+              {section === "reviews" && (
+                <motion.div
+                  key="reviews"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <div className="mb-6">
+                    <h2 style={{ fontFamily: "var(--font-serif)" }} className="text-2xl font-semibold text-neutral-900">
+                      Recensioni
+                    </h2>
+                    <p className="text-sm text-neutral-400 mt-0.5">
+                      {reviews.length} recensioni &middot; {reviews.filter(r => r.is_approved).length} approvate
+                    </p>
+                  </div>
+
+                  {reviews.length === 0 ? (
+                    <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm p-12 text-center">
+                      <MessageSquare className="w-10 h-10 text-neutral-300 mx-auto mb-3" />
+                      <p className="text-neutral-500">Nessuna recensione ricevuta.</p>
+                    </div>
+                  ) : (
+                    <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm overflow-hidden">
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="border-b border-neutral-100 bg-neutral-50/50">
+                              <th className="text-left py-3 px-4 font-medium text-neutral-500 text-xs uppercase tracking-wider">Prodotto</th>
+                              <th className="text-left py-3 px-4 font-medium text-neutral-500 text-xs uppercase tracking-wider">Cliente</th>
+                              <th className="text-center py-3 px-4 font-medium text-neutral-500 text-xs uppercase tracking-wider">Voto</th>
+                              <th className="text-left py-3 px-4 font-medium text-neutral-500 text-xs uppercase tracking-wider">Commento</th>
+                              <th className="text-center py-3 px-4 font-medium text-neutral-500 text-xs uppercase tracking-wider">Stato</th>
+                              <th className="text-center py-3 px-4 font-medium text-neutral-500 text-xs uppercase tracking-wider">Azioni</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {reviews.map((r) => (
+                              <tr key={r.id} className="border-b border-neutral-50 hover:bg-neutral-50/50 transition-colors">
+                                <td className="py-3 px-4">
+                                  <p className="font-medium text-neutral-900 text-sm truncate max-w-[160px]">{r.product_name}</p>
+                                  <p className="text-xs text-neutral-400">{new Date(r.created_at).toLocaleDateString("it-IT")}</p>
+                                </td>
+                                <td className="py-3 px-4 text-neutral-700">{r.customer_name}</td>
+                                <td className="py-3 px-4 text-center">
+                                  <div className="flex items-center justify-center gap-0.5">
+                                    {Array.from({ length: 5 }).map((_, i) => (
+                                      <Star
+                                        key={i}
+                                        className={`w-3.5 h-3.5 ${i < r.rating ? "text-amber-400 fill-amber-400" : "text-neutral-200"}`}
+                                      />
+                                    ))}
+                                  </div>
+                                </td>
+                                <td className="py-3 px-4 text-neutral-600 text-xs max-w-[240px] truncate">
+                                  {r.comment || <span className="italic text-neutral-300">Nessun commento</span>}
+                                </td>
+                                <td className="py-3 px-4 text-center">
+                                  <div className="flex items-center justify-center gap-2">
+                                    <Switch
+                                      checked={r.is_approved}
+                                      onCheckedChange={async (val) => {
+                                        const { error } = await supabase
+                                          .from("reviews" as any)
+                                          .update({ is_approved: val } as any)
+                                          .eq("id", r.id);
+                                        if (error) { toast.error(error.message); return; }
+                                        setReviews((prev) => prev.map((rv) => rv.id === r.id ? { ...rv, is_approved: val } : rv));
+                                        toast.success(val ? "Recensione approvata" : "Recensione nascosta");
+                                      }}
+                                    />
+                                    <span className={`text-xs font-medium ${r.is_approved ? "text-emerald-600" : "text-neutral-400"}`}>
+                                      {r.is_approved ? "Online" : "Nascosta"}
+                                    </span>
+                                  </div>
+                                </td>
+                                <td className="py-3 px-4 text-center">
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg"
+                                    onClick={async () => {
+                                      if (!confirm("Eliminare definitivamente questa recensione?")) return;
+                                      const { error } = await supabase.from("reviews" as any).delete().eq("id", r.id);
+                                      if (error) { toast.error(error.message); return; }
+                                      setReviews((prev) => prev.filter((rv) => rv.id !== r.id));
+                                      toast.success("Recensione eliminata");
+                                    }}
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </Button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+                </motion.div>
+              )}
+
                 <motion.div
                   key="newsletter"
                   initial={{ opacity: 0, y: 10 }}
