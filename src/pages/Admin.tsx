@@ -238,7 +238,7 @@ export default function Admin() {
     setOrders(ordList);
     setChartData(buildChartData(ordList));
     setSubscribers((subs as Subscriber[]) || []);
-    setCollections((cols as Collection[]) || []);
+    setCollections((cols as unknown as Collection[]) || []);
   }
 
   // ── Newsletter helpers ──────────────────────────────────────────────────────
