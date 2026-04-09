@@ -1124,6 +1124,91 @@ ${bodyContent}
                     </div>
                   </div>
 
+                  {/* Low Stock Alert */}
+                  {(() => {
+                    const outOfStock = products.filter((p) => p.stock === 0);
+                    const lowStock = products.filter((p) => p.stock > 0 && p.stock < 3);
+                    const alertProducts = [...outOfStock, ...lowStock];
+                    const isSendingRef = { current: false };
+                    return (
+                      <div className="bg-white rounded-2xl border border-neutral-100 p-5 shadow-sm mb-8">
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center">
+                            <AlertTriangle className="w-5 h-5 text-orange-600" />
+                          </div>
+                          <div>
+                            <h3 style={{ fontFamily: "var(--font-serif)" }} className="text-base font-semibold text-neutral-900">
+                              Allerta Scorte in Esaurimento
+                            </h3>
+                            <p className="text-xs text-neutral-400">{alertProducts.length} prodotti da monitorare</p>
+                          </div>
+                        </div>
+                        {alertProducts.length === 0 ? (
+                          <div className="text-center py-6">
+                            <p className="text-sm text-emerald-600 font-medium">✓ Tutte le scorte sono a livello ottimale</p>
+                          </div>
+                        ) : (
+                          <>
+                            <div className="space-y-2 max-h-64 overflow-y-auto">
+                              {alertProducts.map((p) => (
+                                <div key={p.id} className="flex items-center gap-3 p-2.5 rounded-xl bg-neutral-50 border border-neutral-100">
+                                  {p.images?.[0] ? (
+                                    <img src={p.images[0]} alt={p.name} className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
+                                  ) : (
+                                    <div className="w-10 h-10 rounded-lg bg-neutral-200 flex items-center justify-center flex-shrink-0">
+                                      <ImageIcon className="w-4 h-4 text-neutral-400" />
+                                    </div>
+                                  )}
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-medium text-neutral-900 truncate">{p.name}</p>
+                                    {p.sizes && p.sizes.length > 0 && (
+                                      <p className="text-xs text-neutral-400">Taglie: {p.sizes.join(", ")}</p>
+                                    )}
+                                  </div>
+                                  {p.stock === 0 ? (
+                                    <Badge className="bg-red-100 text-red-700 border-red-200 hover:bg-red-100 text-xs">Esaurito</Badge>
+                                  ) : (
+                                    <Badge className="bg-orange-100 text-orange-700 border-orange-200 hover:bg-orange-100 text-xs">{p.stock} rimasti</Badge>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                            <Button
+                              className="mt-4 w-full bg-orange-600 hover:bg-orange-700 text-white rounded-xl gap-2 text-sm"
+                              onClick={async () => {
+                                if (isSendingRef.current) return;
+                                isSendingRef.current = true;
+                                try {
+                                  const webhookUrl = (import.meta as any).env?.VITE_N8N_STOCK_WEBHOOK_URL;
+                                  if (webhookUrl) {
+                                    await fetch(webhookUrl, {
+                                      method: "POST",
+                                      headers: { "Content-Type": "application/json" },
+                                      body: JSON.stringify({
+                                        products: alertProducts.map((p) => ({
+                                          name: p.name,
+                                          stock: p.stock,
+                                          sizes: p.sizes,
+                                        })),
+                                      }),
+                                    });
+                                  }
+                                  toast.success("Notifica di rifornimento inviata!");
+                                } catch {
+                                  toast.error("Errore nell'invio della notifica");
+                                } finally {
+                                  isSendingRef.current = false;
+                                }
+                              }}
+                            >
+                              <Send className="w-4 h-4" /> Notifica Necessità Rifornimento
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    );
+                  })()}
+
                   {/* Chart */}
                   <div className="bg-white rounded-2xl border border-neutral-100 p-6 shadow-sm">
                     <div className="flex items-center justify-between mb-4">
