@@ -10,7 +10,7 @@ import {
   TrendingUp, DollarSign, ChevronRight, Edit2, Trash2, Eye, EyeOff,
   Lock, GripVertical, ImageIcon, Mail, Download, Users, Archive, Send, Loader2,
   Code, Type, Layers, Settings, Palette, ScanSearch, Tag, Percent, Copy,
-  BarChart3, MousePointerClick,
+  BarChart3, MousePointerClick, RotateCcw, ExternalLink, AlertTriangle,
 } from "lucide-react";
 import { FULL_HTML_TEMPLATES } from "@/data/emailTemplates";
 import {
@@ -51,6 +51,8 @@ interface Order {
   items?: any;
   tracking_number?: string;
   tracking_url?: string;
+  return_status?: string;
+  return_label_url?: string;
 }
 
 interface Subscriber {
@@ -1547,7 +1549,83 @@ ${bodyContent}
                             Salva e Notifica Cliente
                           </Button>
                         </div>
+
+                        {/* Return management */}
+                        <div className="border-t border-orange-200 pt-6">
+                          <h3 className="text-base font-semibold text-neutral-900 mb-4 flex items-center gap-2">
+                            <RotateCcw className="w-4 h-4 text-orange-600" />
+                            Gestione Reso
+                          </h3>
+                          {(!selectedOrder.return_status || selectedOrder.return_status === "none") ? (
+                            <div className="bg-orange-50 border border-orange-200 rounded-xl p-4">
+                              <p className="text-sm text-orange-700 mb-3">Nessuna procedura di reso avviata per questo ordine.</p>
+                              <Button
+                                variant="outline"
+                                className="rounded-xl border-orange-300 text-orange-700 hover:bg-orange-100 gap-2"
+                                onClick={async () => {
+                                  if (!confirm("Sei sicuro di voler avviare il reso per questo ordine?")) return;
+                                  try {
+                                    const { error } = await supabase
+                                      .from("orders")
+                                      .update({ return_status: "requested" } as any)
+                                      .eq("id", selectedOrder.id);
+                                    if (error) throw error;
+
+                                    const webhookUrl = (import.meta as any).env?.VITE_N8N_RETURN_WEBHOOK_URL;
+                                    if (webhookUrl) {
+                                      await fetch(webhookUrl, {
+                                        method: "POST",
+                                        headers: { "Content-Type": "application/json" },
+                                        body: JSON.stringify({
+                                          order_id: selectedOrder.id,
+                                          customer_email: selectedOrder.customer_email,
+                                          total_amount: selectedOrder.total_amount,
+                                          items: selectedOrder.items,
+                                        }),
+                                      });
+                                    }
+
+                                    setSelectedOrder({ ...selectedOrder, return_status: "requested" });
+                                    setOrders((prev) => prev.map((o) => o.id === selectedOrder.id ? { ...o, return_status: "requested" } : o));
+                                    toast.success("Procedura di reso avviata e notifica inviata");
+                                  } catch (err: any) {
+                                    toast.error("Errore: " + (err.message || "Operazione fallita"));
+                                  }
+                                }}
+                              >
+                                <AlertTriangle className="w-4 h-4" />
+                                Avvia Procedura Reso
+                              </Button>
+                            </div>
+                          ) : (
+                            <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 space-y-3">
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs text-orange-500 uppercase tracking-wider font-medium">Stato Reso:</span>
+                                <span className={`inline-flex items-center text-xs px-2.5 py-1 rounded-full font-medium ${
+                                  selectedOrder.return_status === "requested" ? "bg-orange-100 text-orange-700" :
+                                  selectedOrder.return_status === "approved" ? "bg-blue-100 text-blue-700" :
+                                  selectedOrder.return_status === "completed" ? "bg-green-100 text-green-700" :
+                                  "bg-neutral-100 text-neutral-600"
+                                }`}>
+                                  {selectedOrder.return_status}
+                                </span>
+                              </div>
+                              {selectedOrder.return_label_url && (
+                                <a
+                                  href={selectedOrder.return_label_url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-2 text-sm text-orange-700 hover:text-orange-900 underline"
+                                >
+                                  <ExternalLink className="w-3.5 h-3.5" />
+                                  Scarica Etichetta Reso
+                                </a>
+                              )}
+                            </div>
+                          )}
+                        </div>
                       </div>
+                    </div>
                     </div>
                   ) : (
                     <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm overflow-hidden">
