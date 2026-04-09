@@ -33,6 +33,7 @@ interface Product {
   stock: number;
   status: string;
   category: string;
+  collection_id: string | null;
   images: string[];
   sizes: string[] | null;
   fabric_details: string | null;
