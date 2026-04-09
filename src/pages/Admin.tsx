@@ -275,6 +275,7 @@ export default function Admin() {
       if (s.page_images) setPageImages(s.page_images);
       if (s.branding) setBranding(s.branding);
     }
+    setScannerRequests((scans as unknown as ScannerRequest[]) || []);
   }
 
   // ── Newsletter helpers ──────────────────────────────────────────────────────
