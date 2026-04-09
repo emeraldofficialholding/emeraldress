@@ -438,18 +438,19 @@ ${bodyContent}
         ? form.sizes.split(",").map((s) => s.trim()).filter(Boolean)
         : [];
 
-      const payload = {
+      const payload: Record<string, unknown> = {
         name: form.name,
         description: form.description || null,
         price: parseFloat(form.price),
         sale_price: form.sale_price ? parseFloat(form.sale_price) : null,
         stock: parseInt(form.stock) || 0,
         category: form.category,
+        collection_id: form.collection_id || null,
         fabric_details: form.fabric_details || null,
         shipping_info: form.shipping_info || null,
-        sizes: sizesArray,       // native JS array, never JSON string
+        sizes: sizesArray,
         status: form.status,
-        images: finalUrls,       // native JS array, never JSON string
+        images: finalUrls,
       };
 
       if (editingProduct) {
