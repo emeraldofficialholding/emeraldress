@@ -391,30 +391,30 @@ ${bodyContent}
   }
 
   async function handleSendNewsletter() {
-    if (!emailSubject || selectedSubscribers.length === 0) return;
+    const tpl = emailTemplates.find((t) => t.id === selectedTemplate);
+    if (!tpl || selectedSubscribers.length === 0) return;
     setSending(true);
     try {
       const recipients = subscribers.filter((s) => selectedSubscribers.includes(s.email)).map((s) => ({
         email: s.email,
         name: s.name || "",
       }));
+      const htmlContent = tpl.body_html.trim().toLowerCase().startsWith("<!doctype") || tpl.body_html.trim().toLowerCase().startsWith("<html")
+        ? tpl.body_html
+        : generateFinalHTML(tpl.body_html);
       const res = await fetch("https://n8n.kreareweb.com/webhook/email-send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          subject: emailSubject,
-          html: isFullHtmlTemplate ? emailBody : generateFinalHTML(emailBody),
+          subject: tpl.subject,
+          html: htmlContent,
           recipients,
         }),
       });
       if (!res.ok) throw new Error(`Errore webhook: ${res.status}`);
       toast.success(`Newsletter inviata a ${recipients.length} destinatari`);
       setSelectedSubscribers([]);
-      setEmailSubject("");
-      setEmailBody("");
       setSelectedTemplate("");
-      setIsFullHtmlTemplate(false);
-      setEditorMode("richtext");
     } catch (e: unknown) {
       toast.error((e as Error).message || "Errore durante l'invio");
     } finally {
