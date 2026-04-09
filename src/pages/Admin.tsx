@@ -202,6 +202,19 @@ export default function Admin() {
   });
   const [couponSubmitting, setCouponSubmitting] = useState(false);
 
+  // reviews
+  interface Review {
+    id: string;
+    product_id: string;
+    customer_name: string;
+    rating: number;
+    comment: string | null;
+    is_approved: boolean;
+    created_at: string;
+    product_name?: string;
+  }
+  const [reviews, setReviews] = useState<Review[]>([]);
+
   // email templates
   const [emailTemplates, setEmailTemplates] = useState<EmailTemplate[]>([]);
   const [etEditing, setEtEditing] = useState<EmailTemplate | null>(null);
