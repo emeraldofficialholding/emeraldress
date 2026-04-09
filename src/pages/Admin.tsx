@@ -3252,12 +3252,7 @@ ${bodyContent}
           </div>
           </>)}
         </div>
-
-        {/* Bottom home indicator */}
-        <div className="flex items-center justify-center mt-3">
-          <div className="w-32 h-1 rounded-full bg-neutral-700" />
-        </div>
-      </motion.div>
+      </div>
 
       {/* ══ Product Drawer (rendered outside iPad, overlays it) ════════════════ */}
       <AnimatePresence>
