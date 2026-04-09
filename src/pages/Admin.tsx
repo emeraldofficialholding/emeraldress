@@ -456,12 +456,12 @@ ${bodyContent}
       if (editingProduct) {
         const { error } = await supabase
           .from("products")
-          .update(payload)
+          .update(payload as any)
           .eq("id", editingProduct.id);
         if (error) throw error;
         toast.success("Prodotto aggiornato");
       } else {
-        const { error } = await supabase.from("products").insert(payload);
+        const { error } = await supabase.from("products").insert(payload as any);
         if (error) throw error;
         toast.success("Prodotto creato");
       }
