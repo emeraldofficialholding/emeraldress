@@ -567,6 +567,46 @@ ${bodyContent}
     fetchAll();
   }
 
+  // ── Settings helpers ──────────────────────────────────────────────────────────
+  async function saveSettings() {
+    setSettingsSaving(true);
+    try {
+      const { error } = await supabase.from("app_settings" as any).upsert({
+        id: 1,
+        page_content: pageContent,
+        page_images: pageImages,
+        branding,
+      } as any);
+      if (error) throw error;
+      toast.success("Impostazioni salvate");
+    } catch (e: unknown) {
+      toast.error((e as Error).message || "Errore nel salvataggio");
+    } finally {
+      setSettingsSaving(false);
+    }
+  }
+
+  async function handleSettingsImageUpload(key: string, file: File) {
+    setSettingsUploadingKey(key);
+    try {
+      const ext = file.name.split(".").pop();
+      const path = `site/${key}-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("emerald-asset")
+        .upload(path, file, { upsert: true });
+      if (upErr) throw upErr;
+      const { data: { publicUrl } } = supabase.storage
+        .from("emerald-asset")
+        .getPublicUrl(path);
+      setPageImages((prev) => ({ ...prev, [key]: publicUrl }));
+      toast.success(`Immagine "${key}" caricata`);
+    } catch (e: unknown) {
+      toast.error((e as Error).message || "Errore upload");
+    } finally {
+      setSettingsUploadingKey(null);
+    }
+  }
+
   // ── Sidebar nav items ────────────────────────────────────────────────────────
   const nav = [
     { id: "dashboard" as AdminSection, icon: LayoutDashboard, label: "Dashboard" },
