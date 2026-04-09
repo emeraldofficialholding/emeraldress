@@ -276,7 +276,7 @@ export default function Admin() {
 
   // ── Data fetching ────────────────────────────────────────────────────────────
   async function fetchAll() {
-    const [
+     const [
       { data: prods, error: prodsError },
       { data: ords, error: ordsError },
       { data: subs, error: subscribersError },
@@ -284,6 +284,7 @@ export default function Admin() {
       { data: settingsRows, error: settingsError },
       { data: scans, error: scansError },
       { data: cpns, error: cpnsError },
+      { data: ets, error: etsError },
     ] = await Promise.all([
       supabase.from("products").select("*").order("created_at", { ascending: false }),
       supabase.from("orders").select("*").order("created_at", { ascending: false }),
@@ -292,6 +293,7 @@ export default function Admin() {
       supabase.from("app_settings" as any).select("*").eq("id", 1).maybeSingle(),
       supabase.from("scanner_requests").select("*").order("created_at", { ascending: false }).limit(100),
       supabase.from("coupons" as any).select("*").order("code"),
+      supabase.from("email_templates" as any).select("*").order("updated_at", { ascending: false }),
     ]);
 
     if (prodsError) toast.error("Errore nel caricamento prodotti");
@@ -300,6 +302,7 @@ export default function Admin() {
     if (settingsError) toast.error("Errore nel caricamento impostazioni");
     if (scansError) toast.error("Errore nel caricamento scansioni");
     if (cpnsError) toast.error("Errore nel caricamento coupon");
+    if (etsError) toast.error("Errore nel caricamento template email");
 
     setProducts((prods as Product[]) || []);
     const ordList = (ords as Order[]) || [];
@@ -316,6 +319,7 @@ export default function Admin() {
     }
     setScannerRequests((scans as unknown as ScannerRequest[]) || []);
     setCoupons((cpns as unknown as Coupon[]) || []);
+    setEmailTemplates((ets as unknown as EmailTemplate[]) || []);
   }
 
   // ── Newsletter helpers ──────────────────────────────────────────────────────
