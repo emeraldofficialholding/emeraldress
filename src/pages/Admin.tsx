@@ -48,6 +48,16 @@ interface Order {
   created_at: string;
 }
 
+interface Subscriber {
+  id: string;
+  name: string | null;
+  email: string;
+  phone: string | null;
+  source: string | null;
+  active: boolean;
+  created_at: string;
+}
+
 interface Collection {
   id: string;
   name: string;
