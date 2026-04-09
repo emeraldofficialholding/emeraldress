@@ -669,6 +669,50 @@ ${bodyContent}
     }
   }
 
+  // ── Email Template CRUD ────────────────────────────────────────────────────
+  function openNewTemplate() {
+    setEtEditing(null);
+    setEtForm({ name: "", subject: "", body_html: "" });
+    setEtShowEditor(true);
+  }
+  function openEditTemplate(t: EmailTemplate) {
+    setEtEditing(t);
+    setEtForm({ name: t.name, subject: t.subject, body_html: t.body_html });
+    setEtShowEditor(true);
+  }
+  async function handleSaveTemplate() {
+    if (!etForm.name.trim()) { toast.error("Inserisci un nome per il template"); return; }
+    setEtSaving(true);
+    try {
+      if (etEditing) {
+        const { error } = await supabase.from("email_templates" as any).update({
+          name: etForm.name, subject: etForm.subject, body_html: etForm.body_html, updated_at: new Date().toISOString(),
+        } as any).eq("id", etEditing.id);
+        if (error) throw error;
+        toast.success("Template aggiornato");
+      } else {
+        const { error } = await supabase.from("email_templates" as any).insert({
+          name: etForm.name, subject: etForm.subject, body_html: etForm.body_html,
+        } as any);
+        if (error) throw error;
+        toast.success("Template creato");
+      }
+      setEtShowEditor(false);
+      fetchAll();
+    } catch (e: unknown) { toast.error((e as Error).message); }
+    finally { setEtSaving(false); }
+  }
+  async function deleteTemplate(id: string) {
+    if (!confirm("Eliminare questo template?")) return;
+    const { error } = await supabase.from("email_templates" as any).delete().eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Template eliminato");
+    fetchAll();
+  }
+  function insertVariableIntoEditor(variable: string) {
+    setEtForm((prev) => ({ ...prev, body_html: prev.body_html + variable }));
+  }
+
   // ── Coupon CRUD ──────────────────────────────────────────────────────────────
   function generateCouponCode() {
     const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -748,6 +792,7 @@ ${bodyContent}
     { id: "orders" as AdminSection, icon: ShoppingBag, label: "Ordini" },
     { id: "marketing" as AdminSection, icon: Tag, label: "Marketing" },
     { id: "newsletter" as AdminSection, icon: Mail, label: "Newsletter" },
+    { id: "email_templates" as AdminSection, icon: Code, label: "Template Email" },
     { id: "scanner" as AdminSection, icon: ScanSearch, label: "Scanner" },
     { id: "settings" as AdminSection, icon: Settings, label: "Impostazioni" },
   ];
