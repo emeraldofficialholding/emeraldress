@@ -1636,130 +1636,220 @@ ${bodyContent}
                     ))}
                   </div>
 
-                  <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm p-6">
+                   <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm p-6">
 
                     {/* ── Tab Testi ── */}
                     {settingsTab === "texts" && (
-                      <div className="space-y-5">
-                        <p className="text-sm text-neutral-500 mb-4">Modifica i testi principali delle pagine del sito.</p>
-                        {[
-                          { key: "home_title", label: "Titolo Homepage", placeholder: "es. Lusso Consapevole" },
-                          { key: "home_subtitle", label: "Sottotitolo Homepage", placeholder: "es. Moda sostenibile, eleganza senza tempo" },
-                          { key: "about_title", label: "Titolo Chi Siamo", placeholder: "es. La Nostra Storia" },
-                          { key: "about_description", label: "Descrizione Chi Siamo", placeholder: "Racconta la storia del brand...", multiline: true },
-                          { key: "sustainability_title", label: "Titolo Sostenibilità", placeholder: "es. Il Nostro Impegno" },
-                          { key: "sustainability_description", label: "Descrizione Sostenibilità", placeholder: "Descrivi l'impegno green...", multiline: true },
-                          { key: "footer_tagline", label: "Tagline Footer", placeholder: "es. Emeraldress — Lusso Consapevole" },
-                        ].map(({ key, label, placeholder, multiline }) => (
-                          <div key={key}>
-                            <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">{label}</Label>
-                            {multiline ? (
-                              <Textarea
-                                value={pageContent[key] || ""}
-                                onChange={(e) => setPageContent((prev) => ({ ...prev, [key]: e.target.value }))}
-                                placeholder={placeholder}
-                                rows={3}
-                                className="rounded-xl border-neutral-200 resize-none focus:ring-emerald-600"
-                              />
-                            ) : (
+                      <div className="space-y-8">
+                        {/* Sezione Home */}
+                        <div>
+                          <h3 className="text-sm font-semibold text-neutral-800 mb-1 flex items-center gap-2">
+                            <LayoutDashboard className="w-4 h-4 text-emerald-700" /> Sezione Home
+                          </h3>
+                          <p className="text-xs text-neutral-400 mb-3">Testi visibili nella homepage principale.</p>
+                          <div className="space-y-4 pl-6 border-l-2 border-emerald-100">
+                            {[
+                              { key: "home_title", label: "Titolo Hero", placeholder: "Lusso Consapevole" },
+                              { key: "home_subtitle", label: "Sottotitolo Hero", placeholder: "Moda sostenibile, eleganza senza tempo" },
+                              { key: "home_cta", label: "Testo CTA", placeholder: "Scopri la Collezione" },
+                            ].map(({ key, label, placeholder }) => (
+                              <div key={key}>
+                                <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">{label}</Label>
+                                <Input
+                                  value={pageContent[key] || ""}
+                                  onChange={(e) => setPageContent((prev) => ({ ...prev, [key]: e.target.value }))}
+                                  placeholder={placeholder}
+                                  className="rounded-xl border-neutral-200 focus:ring-emerald-600"
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Sezione Chi Siamo */}
+                        <div>
+                          <h3 className="text-sm font-semibold text-neutral-800 mb-1 flex items-center gap-2">
+                            <Users className="w-4 h-4 text-emerald-700" /> Sezione Chi Siamo
+                          </h3>
+                          <p className="text-xs text-neutral-400 mb-3">Testi della pagina "Chi Siamo".</p>
+                          <div className="space-y-4 pl-6 border-l-2 border-emerald-100">
+                            <div>
+                              <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">Titolo</Label>
                               <Input
-                                value={pageContent[key] || ""}
-                                onChange={(e) => setPageContent((prev) => ({ ...prev, [key]: e.target.value }))}
-                                placeholder={placeholder}
+                                value={pageContent["about_title"] || ""}
+                                onChange={(e) => setPageContent((prev) => ({ ...prev, about_title: e.target.value }))}
+                                placeholder="La Nostra Storia"
                                 className="rounded-xl border-neutral-200 focus:ring-emerald-600"
                               />
-                            )}
+                            </div>
+                            <div>
+                              <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">Descrizione</Label>
+                              <Textarea
+                                value={pageContent["about_description"] || ""}
+                                onChange={(e) => setPageContent((prev) => ({ ...prev, about_description: e.target.value }))}
+                                placeholder="Racconta la storia del brand..."
+                                rows={4}
+                                className="rounded-xl border-neutral-200 resize-none focus:ring-emerald-600"
+                              />
+                            </div>
                           </div>
-                        ))}
+                        </div>
+
+                        {/* Sezione Sostenibilità */}
+                        <div>
+                          <h3 className="text-sm font-semibold text-neutral-800 mb-1 flex items-center gap-2">
+                            <Layers className="w-4 h-4 text-emerald-700" /> Sezione Sostenibilità
+                          </h3>
+                          <p className="text-xs text-neutral-400 mb-3">Testi della pagina "Sostenibilità".</p>
+                          <div className="space-y-4 pl-6 border-l-2 border-emerald-100">
+                            <div>
+                              <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">Titolo</Label>
+                              <Input
+                                value={pageContent["sustainability_title"] || ""}
+                                onChange={(e) => setPageContent((prev) => ({ ...prev, sustainability_title: e.target.value }))}
+                                placeholder="Il Nostro Impegno"
+                                className="rounded-xl border-neutral-200 focus:ring-emerald-600"
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">Descrizione</Label>
+                              <Textarea
+                                value={pageContent["sustainability_description"] || ""}
+                                onChange={(e) => setPageContent((prev) => ({ ...prev, sustainability_description: e.target.value }))}
+                                placeholder="Descrivi l'impegno green del brand..."
+                                rows={4}
+                                className="rounded-xl border-neutral-200 resize-none focus:ring-emerald-600"
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Footer */}
+                        <div>
+                          <h3 className="text-sm font-semibold text-neutral-800 mb-1 flex items-center gap-2">
+                            <Code className="w-4 h-4 text-emerald-700" /> Footer
+                          </h3>
+                          <div className="space-y-4 pl-6 border-l-2 border-emerald-100">
+                            <div>
+                              <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">Tagline</Label>
+                              <Input
+                                value={pageContent["footer_tagline"] || ""}
+                                onChange={(e) => setPageContent((prev) => ({ ...prev, footer_tagline: e.target.value }))}
+                                placeholder="Emeraldress — Lusso Consapevole"
+                                className="rounded-xl border-neutral-200 focus:ring-emerald-600"
+                              />
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     )}
 
                     {/* ── Tab Immagini ── */}
                     {settingsTab === "images" && (
-                      <div className="space-y-5">
-                        <p className="text-sm text-neutral-500 mb-4">Carica e gestisci le immagini principali del sito.</p>
-                        {[
-                          { key: "hero_bg", label: "Immagine Hero Homepage" },
-                          { key: "logo_url", label: "Logo del Sito" },
-                          { key: "about_image", label: "Immagine Chi Siamo" },
-                          { key: "sustainability_image", label: "Immagine Sostenibilità" },
-                          { key: "og_image", label: "Immagine OG / Social" },
-                        ].map(({ key, label }) => (
-                          <div key={key}>
-                            <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">{label}</Label>
-                            <div className="flex items-center gap-3">
-                              {pageImages[key] && (
-                                <div className="w-16 h-16 rounded-lg overflow-hidden border border-neutral-200 bg-neutral-100 shrink-0">
+                      <div className="space-y-6">
+                        <p className="text-sm text-neutral-500 mb-2">Carica e gestisci le immagini principali del sito. Ogni slot mostra l'immagine attualmente online.</p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                          {[
+                            { key: "hero_bg", label: "Hero Homepage" },
+                            { key: "logo_url", label: "Logo Sito" },
+                            { key: "about_image", label: "Chi Siamo" },
+                            { key: "sustainability_image", label: "Sostenibilità" },
+                            { key: "og_image", label: "OG / Social" },
+                          ].map(({ key, label }) => (
+                            <div key={key} className="border border-neutral-200 rounded-xl p-4 bg-neutral-50/50">
+                              <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-2 block">{label}</Label>
+                              {/* Preview */}
+                              <div className="w-full aspect-video rounded-lg overflow-hidden border border-neutral-200 bg-neutral-100 mb-3 flex items-center justify-center">
+                                {pageImages[key] ? (
                                   <img src={pageImages[key]} alt={label} className="w-full h-full object-cover" />
-                                </div>
-                              )}
-                              <div className="flex-1">
-                                <Input
-                                  value={pageImages[key] || ""}
-                                  onChange={(e) => setPageImages((prev) => ({ ...prev, [key]: e.target.value }))}
-                                  placeholder="URL immagine o carica file..."
-                                  className="rounded-xl border-neutral-200 focus:ring-emerald-600 mb-1.5"
-                                />
-                                <Button
-                                  type="button"
-                                  variant="outline"
-                                  size="sm"
-                                  disabled={settingsUploadingKey === key}
-                                  onClick={() => {
-                                    const input = document.createElement("input");
-                                    input.type = "file";
-                                    input.accept = "image/*";
-                                    input.onchange = (e) => {
-                                      const file = (e.target as HTMLInputElement).files?.[0];
-                                      if (file) handleSettingsImageUpload(key, file);
-                                    };
-                                    input.click();
-                                  }}
-                                  className="rounded-lg border-neutral-200 text-neutral-600 hover:bg-neutral-50 gap-1.5 text-xs"
-                                >
-                                  {settingsUploadingKey === key ? (
-                                    <><Loader2 className="w-3 h-3 animate-spin" /> Caricamento...</>
-                                  ) : (
-                                    <><Upload className="w-3 h-3" /> Carica File</>
-                                  )}
-                                </Button>
+                                ) : (
+                                  <div className="flex flex-col items-center gap-1 text-neutral-400">
+                                    <ImageIcon className="w-8 h-8" />
+                                    <span className="text-xs">Nessuna immagine</span>
+                                  </div>
+                                )}
                               </div>
+                              <Input
+                                value={pageImages[key] || ""}
+                                onChange={(e) => setPageImages((prev) => ({ ...prev, [key]: e.target.value }))}
+                                placeholder="URL immagine..."
+                                className="rounded-lg border-neutral-200 focus:ring-emerald-600 text-xs mb-2"
+                              />
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                disabled={settingsUploadingKey === key}
+                                onClick={() => {
+                                  const input = document.createElement("input");
+                                  input.type = "file";
+                                  input.accept = "image/*";
+                                  input.onchange = (e) => {
+                                    const file = (e.target as HTMLInputElement).files?.[0];
+                                    if (file) handleSettingsImageUpload(key, file);
+                                  };
+                                  input.click();
+                                }}
+                                className="w-full rounded-lg border-neutral-200 text-neutral-600 hover:bg-neutral-50 gap-1.5 text-xs"
+                              >
+                                {settingsUploadingKey === key ? (
+                                  <><Loader2 className="w-3 h-3 animate-spin" /> Caricamento...</>
+                                ) : (
+                                  <><Upload className="w-3 h-3" /> Sostituisci Immagine</>
+                                )}
+                              </Button>
                             </div>
-                          </div>
-                        ))}
+                          ))}
+                        </div>
                       </div>
                     )}
 
                     {/* ── Tab Branding ── */}
                     {settingsTab === "branding" && (
-                      <div className="space-y-5">
-                        <p className="text-sm text-neutral-500 mb-4">Personalizza i colori principali del brand.</p>
+                      <div className="space-y-6">
+                        <p className="text-sm text-neutral-500 mb-2">Personalizza i colori principali del brand.</p>
                         {[
-                          { key: "primary_color", label: "Colore Primario" },
-                          { key: "secondary_color", label: "Colore Secondario" },
-                        ].map(({ key, label }) => (
-                          <div key={key}>
-                            <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">{label}</Label>
-                            <div className="flex items-center gap-3">
-                              <input
-                                type="color"
-                                value={branding[key] || "#000000"}
-                                onChange={(e) => setBranding((prev) => ({ ...prev, [key]: e.target.value }))}
-                                className="w-12 h-10 rounded-lg border border-neutral-200 cursor-pointer p-0.5"
-                              />
+                          { key: "primary_color", label: "Colore Primario", defaultVal: "#004d40" },
+                          { key: "secondary_color", label: "Colore Secondario", defaultVal: "#a7f3d0" },
+                          { key: "accent_color", label: "Colore Accento", defaultVal: "#065f46" },
+                        ].map(({ key, label, defaultVal }) => (
+                          <div key={key} className="flex items-center gap-4 p-4 border border-neutral-200 rounded-xl bg-neutral-50/50">
+                            <input
+                              type="color"
+                              value={branding[key] || defaultVal}
+                              onChange={(e) => setBranding((prev) => ({ ...prev, [key]: e.target.value }))}
+                              className="w-14 h-14 rounded-xl border border-neutral-200 cursor-pointer p-1 shrink-0"
+                            />
+                            <div className="flex-1">
+                              <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1 block">{label}</Label>
                               <Input
                                 value={branding[key] || ""}
                                 onChange={(e) => setBranding((prev) => ({ ...prev, [key]: e.target.value }))}
-                                placeholder="#004d40"
-                                className="rounded-xl border-neutral-200 focus:ring-emerald-600 font-mono text-sm max-w-[180px]"
-                              />
-                              <div
-                                className="w-10 h-10 rounded-lg border border-neutral-200"
-                                style={{ backgroundColor: branding[key] || "#000" }}
+                                placeholder={defaultVal}
+                                className="rounded-xl border-neutral-200 focus:ring-emerald-600 font-mono text-sm max-w-[200px]"
                               />
                             </div>
+                            <div
+                              className="w-20 h-14 rounded-xl border border-neutral-200 shrink-0"
+                              style={{ backgroundColor: branding[key] || defaultVal }}
+                            />
                           </div>
                         ))}
+                        {/* Live preview */}
+                        <div className="mt-4 p-4 rounded-xl border border-neutral-200 bg-white">
+                          <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-3 block">Anteprima</Label>
+                          <div className="flex gap-3 items-center">
+                            <div className="px-5 py-2.5 rounded-lg text-sm font-medium text-white" style={{ backgroundColor: branding.primary_color || "#004d40" }}>
+                              Bottone Primario
+                            </div>
+                            <div className="px-5 py-2.5 rounded-lg text-sm font-medium border" style={{ backgroundColor: branding.secondary_color || "#a7f3d0", borderColor: branding.primary_color || "#004d40", color: branding.primary_color || "#004d40" }}>
+                              Bottone Secondario
+                            </div>
+                            <div className="px-4 py-2.5 rounded-lg text-sm font-medium text-white" style={{ backgroundColor: branding.accent_color || "#065f46" }}>
+                              Accento
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     )}
                   </div>
