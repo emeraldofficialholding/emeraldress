@@ -500,9 +500,58 @@ ${bodyContent}
   // The iPad frame handles all states (loading, login, not-admin, admin)
   // so we don't early-return here.
 
+  // ── Collections CRUD ──────────────────────────────────────────────────────────
+  function openNewCollection() {
+    setEditingCollection(null);
+    setCollectionForm({ name: "", description: "", is_active: true });
+    setCollectionDrawerOpen(true);
+  }
+
+  function openEditCollection(c: Collection) {
+    setEditingCollection(c);
+    setCollectionForm({ name: c.name, description: c.description || "", is_active: c.is_active });
+    setCollectionDrawerOpen(true);
+  }
+
+  async function handleCollectionSubmit() {
+    if (!collectionForm.name) { toast.error("Il nome è obbligatorio"); return; }
+    setCollectionSubmitting(true);
+    try {
+      const payload = {
+        name: collectionForm.name,
+        description: collectionForm.description || null,
+        is_active: collectionForm.is_active,
+      };
+      if (editingCollection) {
+        const { error } = await supabase.from("collections" as any).update(payload as any).eq("id", editingCollection.id);
+        if (error) throw error;
+        toast.success("Collezione aggiornata");
+      } else {
+        const { error } = await supabase.from("collections" as any).insert(payload as any);
+        if (error) throw error;
+        toast.success("Collezione creata");
+      }
+      setCollectionDrawerOpen(false);
+      fetchAll();
+    } catch (e: unknown) {
+      toast.error((e as Error).message || "Errore");
+    } finally {
+      setCollectionSubmitting(false);
+    }
+  }
+
+  async function deleteCollection(id: string) {
+    if (!confirm("Eliminare questa collezione?")) return;
+    const { error } = await supabase.from("collections" as any).delete().eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Collezione eliminata");
+    fetchAll();
+  }
+
   // ── Sidebar nav items ────────────────────────────────────────────────────────
   const nav = [
     { id: "dashboard" as AdminSection, icon: LayoutDashboard, label: "Dashboard" },
+    { id: "collections" as AdminSection, icon: Layers, label: "Collezioni" },
     { id: "products" as AdminSection, icon: Package, label: "Prodotti" },
     { id: "orders" as AdminSection, icon: ShoppingBag, label: "Ordini" },
     { id: "newsletter" as AdminSection, icon: Mail, label: "Newsletter" },
