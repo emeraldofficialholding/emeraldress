@@ -144,6 +144,21 @@ export default function Admin() {
   const settingsFileRef = useRef<HTMLInputElement>(null);
   const [settingsUploadingKey, setSettingsUploadingKey] = useState<string | null>(null);
 
+  // scanner hub
+  interface ScannerRequest {
+    id: string;
+    image_url: string | null;
+    input_type: string;
+    diagnosis_result: any;
+    sustainability_score: number | null;
+    material: string | null;
+    brand: string | null;
+    garment_type: string | null;
+    created_at: string;
+  }
+  const [scannerRequests, setScannerRequests] = useState<ScannerRequest[]>([]);
+  const [selectedScan, setSelectedScan] = useState<ScannerRequest | null>(null);
+
   // product drawer
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
