@@ -632,7 +632,17 @@ ${bodyContent}
     { id: "products" as AdminSection, icon: Package, label: "Prodotti" },
     { id: "orders" as AdminSection, icon: ShoppingBag, label: "Ordini" },
     { id: "newsletter" as AdminSection, icon: Mail, label: "Newsletter" },
+    { id: "scanner" as AdminSection, icon: ScanSearch, label: "Scanner" },
     { id: "settings" as AdminSection, icon: Settings, label: "Impostazioni" },
+  ];
+
+  // Mobile bottom bar items (subset)
+  const mobileNav = [
+    { id: "dashboard" as AdminSection, icon: LayoutDashboard, label: "Home" },
+    { id: "products" as AdminSection, icon: Package, label: "Prodotti" },
+    { id: "scanner" as AdminSection, icon: ScanSearch, label: "Scanner" },
+    { id: "newsletter" as AdminSection, icon: Mail, label: "News" },
+    { id: "settings" as AdminSection, icon: Settings, label: "Altro" },
   ];
 
   const statusColor: Record<string, string> = {
