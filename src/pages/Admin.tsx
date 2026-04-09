@@ -126,6 +126,13 @@ export default function Admin() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [chartData, setChartData] = useState<{ date: string; revenue: number }[]>([]);
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
+  const [collections, setCollections] = useState<Collection[]>([]);
+
+  // collection form
+  const [collectionDrawerOpen, setCollectionDrawerOpen] = useState(false);
+  const [editingCollection, setEditingCollection] = useState<Collection | null>(null);
+  const [collectionForm, setCollectionForm] = useState({ name: "", description: "", is_active: true });
+  const [collectionSubmitting, setCollectionSubmitting] = useState(false);
 
   // product drawer
   const [drawerOpen, setDrawerOpen] = useState(false);
