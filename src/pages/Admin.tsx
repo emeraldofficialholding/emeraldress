@@ -928,35 +928,18 @@ ${bodyContent}
     <Helmet>
       <meta name="robots" content="noindex, nofollow" />
     </Helmet>
-    <div className="min-h-screen bg-neutral-950 flex items-center justify-center p-4 lg:p-8" style={{ fontFamily: "var(--font-sans)" }}>
-      {/* ── iPad Frame ── */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.97, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-        className="w-full max-w-6xl"
-        style={{
-          background: "#1a1a1a",
-          borderRadius: "2.5rem",
-          padding: "clamp(12px, 2vw, 20px)",
-          boxShadow: "0 0 0 1px #333, 0 40px 120px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.08)",
-          minHeight: "85vh",
-        }}
-      >
-        {/* Notch bar */}
-        <div className="flex items-center justify-center mb-3">
-          <div className="w-24 h-1 rounded-full bg-neutral-700" />
-        </div>
+    <div className="min-h-screen w-full bg-neutral-50 flex flex-col" style={{ fontFamily: "var(--font-sans)" }}>
+      {/* ── Mobile Header ── */}
+      <header className="lg:hidden sticky top-0 z-50 bg-white border-b border-neutral-200 flex items-center justify-between h-14 px-4">
+        <button onClick={() => navigate("/")} className="flex items-center gap-2 text-neutral-500 hover:text-emerald-700 transition-colors">
+          <ArrowLeft className="w-4 h-4" />
+          <span className="text-xs font-medium">Sito</span>
+        </button>
+        <h1 style={{ fontFamily: "var(--font-serif)" }} className="text-base font-semibold text-neutral-900">Admin</h1>
+        <div className="w-14" />
+      </header>
 
-        {/* Screen */}
-        <div
-          className="rounded-2xl overflow-hidden flex"
-          style={{
-            background: "#f9fafb",
-            minHeight: "78vh",
-            boxShadow: "inset 0 1px 3px rgba(0,0,0,0.15)",
-          }}
-        >
+      <div className="flex flex-1 min-h-0">
           {/* ── Loading state ── */}
           {authState === "loading" && (
             <div className="flex-1 flex items-center justify-center">
