@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_settings: {
+        Row: {
+          branding: Json
+          created_at: string
+          id: number
+          page_content: Json
+          page_images: Json
+          updated_at: string
+        }
+        Insert: {
+          branding?: Json
+          created_at?: string
+          id?: number
+          page_content?: Json
+          page_images?: Json
+          updated_at?: string
+        }
+        Update: {
+          branding?: Json
+          created_at?: string
+          id?: number
+          page_content?: Json
+          page_images?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       email_templates: {
         Row: {
           body_html: string
