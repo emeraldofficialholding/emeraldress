@@ -2509,6 +2509,90 @@ ${bodyContent}
                         </div>
                       </div>
                     )}
+
+                    {/* ── Tab Banner Top ── */}
+                    {settingsTab === "banner" && (
+                      <div className="space-y-6">
+                        <p className="text-sm text-neutral-500 mb-2">Configura la striscia promozionale visibile in cima a tutte le pagine del sito.</p>
+
+                        <div className="flex items-center gap-3">
+                          <Switch
+                            checked={promoBanner.is_active}
+                            onCheckedChange={(v) => setPromoBanner((p) => ({ ...p, is_active: v }))}
+                          />
+                          <Label className="text-sm font-medium">{promoBanner.is_active ? "Banner attivo" : "Banner disattivato"}</Label>
+                        </div>
+
+                        <div>
+                          <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">Testo del Banner</Label>
+                          <Input
+                            value={promoBanner.text}
+                            onChange={(e) => setPromoBanner((p) => ({ ...p, text: e.target.value }))}
+                            placeholder="Es. Spedizione Gratuita sopra i 50€"
+                            className="rounded-xl border-neutral-200 focus:ring-emerald-600"
+                          />
+                        </div>
+
+                        <div>
+                          <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">Link opzionale</Label>
+                          <div className="relative">
+                            <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                            <Input
+                              value={promoBanner.link}
+                              onChange={(e) => setPromoBanner((p) => ({ ...p, link: e.target.value }))}
+                              placeholder="Es. /collezioni"
+                              className="rounded-xl border-neutral-200 focus:ring-emerald-600 pl-9"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">Colore Sfondo</Label>
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="color"
+                                value={promoBanner.bg_color}
+                                onChange={(e) => setPromoBanner((p) => ({ ...p, bg_color: e.target.value }))}
+                                className="w-10 h-10 rounded-lg border border-neutral-200 cursor-pointer p-0.5"
+                              />
+                              <Input
+                                value={promoBanner.bg_color}
+                                onChange={(e) => setPromoBanner((p) => ({ ...p, bg_color: e.target.value }))}
+                                className="rounded-xl border-neutral-200 focus:ring-emerald-600 font-mono text-sm"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">Colore Testo</Label>
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="color"
+                                value={promoBanner.text_color}
+                                onChange={(e) => setPromoBanner((p) => ({ ...p, text_color: e.target.value }))}
+                                className="w-10 h-10 rounded-lg border border-neutral-200 cursor-pointer p-0.5"
+                              />
+                              <Input
+                                value={promoBanner.text_color}
+                                onChange={(e) => setPromoBanner((p) => ({ ...p, text_color: e.target.value }))}
+                                className="rounded-xl border-neutral-200 focus:ring-emerald-600 font-mono text-sm"
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Live preview */}
+                        <div>
+                          <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">Anteprima</Label>
+                          <div
+                            className="rounded-xl overflow-hidden text-center py-2.5 px-4 text-sm font-medium tracking-wide"
+                            style={{ backgroundColor: promoBanner.bg_color, color: promoBanner.text_color }}
+                          >
+                            {promoBanner.text || "Testo del banner..."}
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Save button */}
