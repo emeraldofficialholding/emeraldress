@@ -391,30 +391,30 @@ ${bodyContent}
   }
 
   async function handleSendNewsletter() {
-    const tpl = emailTemplates.find((t) => t.id === selectedTemplate);
-    if (!tpl || selectedSubscribers.length === 0) return;
+    if (!emailSubject || selectedSubscribers.length === 0) return;
     setSending(true);
     try {
       const recipients = subscribers.filter((s) => selectedSubscribers.includes(s.email)).map((s) => ({
         email: s.email,
         name: s.name || "",
       }));
-      const htmlContent = tpl.body_html.trim().toLowerCase().startsWith("<!doctype") || tpl.body_html.trim().toLowerCase().startsWith("<html")
-        ? tpl.body_html
-        : generateFinalHTML(tpl.body_html);
       const res = await fetch("https://n8n.kreareweb.com/webhook/email-send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          subject: tpl.subject,
-          html: htmlContent,
+          subject: emailSubject,
+          html: isFullHtmlTemplate ? emailBody : generateFinalHTML(emailBody),
           recipients,
         }),
       });
       if (!res.ok) throw new Error(`Errore webhook: ${res.status}`);
       toast.success(`Newsletter inviata a ${recipients.length} destinatari`);
       setSelectedSubscribers([]);
+      setEmailSubject("");
+      setEmailBody("");
       setSelectedTemplate("");
+      setIsFullHtmlTemplate(false);
+      setEditorMode("richtext");
     } catch (e: unknown) {
       toast.error((e as Error).message || "Errore durante l'invio");
     } finally {
@@ -1545,49 +1545,96 @@ ${bodyContent}
                     </div>
                   </div>
 
-                   {/* ── Template Selector + Preview + Send ────────────── */}
+                  {/* ── Email Composer ────────────────────────────────── */}
                   <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm p-6">
                     <h3 style={{ fontFamily: "var(--font-serif)" }} className="text-lg font-semibold text-neutral-900 mb-5 flex items-center gap-2">
-                      <Send className="w-5 h-5 text-emerald-700" />
-                      Invio Campagna
+                      <Mail className="w-5 h-5 text-emerald-700" />
+                      Composizione Email
                     </h3>
 
-                    <div className="mb-4">
-                      <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">Scegli il Template da inviare</Label>
-                      <select
-                        value={selectedTemplate}
-                        onChange={(e) => setSelectedTemplate(e.target.value)}
-                        className="w-full h-10 rounded-xl border border-neutral-200 bg-white px-3 text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-emerald-600"
-                      >
-                        <option value="">— Seleziona un template —</option>
-                        {emailTemplates.map((t) => (
-                          <option key={t.id} value={t.id}>{t.name}</option>
-                        ))}
-                      </select>
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                      <div>
+                        <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">Oggetto *</Label>
+                        <Input
+                          value={emailSubject}
+                          onChange={(e) => setEmailSubject(e.target.value)}
+                          placeholder="Oggetto dell'email..."
+                          className="rounded-xl border-neutral-200 focus:ring-emerald-600"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">Template</Label>
+                        <select
+                          value={selectedTemplate}
+                          onChange={(e) => handleTemplateChange(e.target.value)}
+                          className="w-full h-10 rounded-xl border border-neutral-200 bg-white px-3 text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-emerald-600"
+                        >
+                          <option value="">Nuova Email Vuota</option>
+                          <option value="teaser">Teaser Lancio</option>
+                          <option value="launch">Lancio Ufficiale</option>
+                        </select>
+                      </div>
                     </div>
 
-                    {/* Preview */}
-                    {(() => {
-                      const tpl = emailTemplates.find((t) => t.id === selectedTemplate);
-                      if (!tpl) return null;
-                      return (
-                        <div className="mb-5 space-y-3">
-                          <div className="flex items-center gap-2 text-sm">
-                            <span className="text-neutral-400 font-medium">Oggetto:</span>
-                            <span className="text-neutral-800 font-semibold">{tpl.subject || "(nessun oggetto)"}</span>
-                          </div>
-                          <div className="border border-neutral-200 rounded-xl overflow-hidden bg-neutral-50">
-                            <div className="px-4 py-2 bg-neutral-100 border-b border-neutral-200 text-xs text-neutral-400 uppercase tracking-wider">
-                              Anteprima HTML
-                            </div>
-                            <div
-                              className="p-4 prose prose-sm max-w-none text-neutral-700 overflow-auto max-h-[320px]"
-                              dangerouslySetInnerHTML={{ __html: tpl.body_html }}
-                            />
-                          </div>
-                        </div>
-                      );
-                    })()}
+                    {/* Editor mode toggle */}
+                    <div className="flex items-center gap-2 mb-3">
+                      <button
+                        type="button"
+                        onClick={() => setEditorMode("richtext")}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                          editorMode === "richtext"
+                            ? "bg-emerald-100 text-emerald-800"
+                            : "bg-neutral-100 text-neutral-500 hover:bg-neutral-200"
+                        }`}
+                      >
+                        <Type className="w-3.5 h-3.5" />
+                        Testo
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setEditorMode("html")}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                          editorMode === "html"
+                            ? "bg-emerald-100 text-emerald-800"
+                            : "bg-neutral-100 text-neutral-500 hover:bg-neutral-200"
+                        }`}
+                      >
+                        <Code className="w-3.5 h-3.5" />
+                        HTML
+                      </button>
+                      {isFullHtmlTemplate && (
+                        <span className="ml-auto text-[10px] text-amber-600 bg-amber-50 px-2 py-1 rounded-full font-medium">
+                          Template completo — inviato senza wrapper
+                        </span>
+                      )}
+                    </div>
+
+                    {editorMode === "richtext" ? (
+                      <div className="mb-5 [&_.ql-toolbar]:rounded-t-xl [&_.ql-toolbar]:border-neutral-200 [&_.ql-container]:rounded-b-xl [&_.ql-container]:border-neutral-200 [&_.ql-editor]:min-h-[180px]">
+                        <ReactQuill
+                          theme="snow"
+                          value={emailBody}
+                          onChange={setEmailBody}
+                          modules={quillModules}
+                          placeholder="Scrivi il contenuto della tua newsletter..."
+                        />
+                      </div>
+                    ) : (
+                      <div className="mb-5">
+                        <textarea
+                          value={emailBody}
+                          onChange={(e) => {
+                            setEmailBody(e.target.value);
+                            if (!FULL_HTML_TEMPLATES[selectedTemplate]) {
+                              setIsFullHtmlTemplate(e.target.value.trim().toLowerCase().startsWith("<!doctype") || e.target.value.trim().toLowerCase().startsWith("<html"));
+                            }
+                          }}
+                          placeholder="Incolla qui il codice HTML della tua email..."
+                          className="w-full min-h-[250px] rounded-xl border border-neutral-200 bg-neutral-950 text-emerald-300 font-mono text-xs p-4 focus:outline-none focus:ring-2 focus:ring-emerald-600 resize-y"
+                          spellCheck={false}
+                        />
+                      </div>
+                    )}
 
                     <div className="flex items-center justify-between pt-4 border-t border-neutral-100">
                       <p className="text-sm text-neutral-400">
@@ -1597,7 +1644,7 @@ ${bodyContent}
                       </p>
                       <Button
                         onClick={handleSendNewsletter}
-                        disabled={sending || selectedSubscribers.length === 0 || !selectedTemplate}
+                        disabled={sending || selectedSubscribers.length === 0 || !emailSubject}
                         className="bg-emerald-950 hover:bg-emerald-900 text-white rounded-xl gap-2 px-6"
                       >
                         {sending ? (
