@@ -66,7 +66,7 @@ interface Collection {
   is_active: boolean;
 }
 
-type AdminSection = "dashboard" | "products" | "orders" | "newsletter" | "collections";
+type AdminSection = "dashboard" | "products" | "orders" | "newsletter" | "collections" | "settings";
 
 // ── Sales chart mock data helper ───────────────────────────────────────────────
 function buildChartData(orders: Order[]) {
