@@ -1170,24 +1170,24 @@ ${bodyContent}
                   </div>
 
                   {/* Analytics Widgets */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-                    <div className="bg-white rounded-2xl border border-neutral-100 p-5 shadow-sm">
-                      <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center mb-4">
-                        <BarChart3 className="w-5 h-5 text-emerald-700" />
+                  <div className="grid grid-cols-2 gap-2 lg:gap-4 mb-4 lg:mb-8">
+                    <div className="bg-white rounded-xl lg:rounded-2xl border border-neutral-100 p-3 lg:p-5 shadow-sm">
+                      <div className="w-8 h-8 lg:w-10 lg:h-10 bg-emerald-50 rounded-lg lg:rounded-xl flex items-center justify-center mb-2 lg:mb-4">
+                        <BarChart3 className="w-4 h-4 lg:w-5 lg:h-5 text-emerald-700" />
                       </div>
-                      <p className="text-xs text-neutral-400 uppercase tracking-wider font-sans">Visite Oggi</p>
-                      <p style={{ fontFamily: "var(--font-serif)" }} className="text-2xl font-semibold text-neutral-900 mt-1">{visitsToday}</p>
-                      <p className="text-xs text-neutral-400 mt-0.5">ultime 24 ore</p>
+                      <p className="text-[10px] lg:text-xs text-neutral-400 uppercase tracking-wider font-sans">Visite Oggi</p>
+                      <p style={{ fontFamily: "var(--font-serif)" }} className="text-lg lg:text-2xl font-semibold text-neutral-900">{visitsToday}</p>
+                      <p className="text-[10px] lg:text-xs text-neutral-400">ultime 24 ore</p>
                     </div>
-                    <div className="bg-white rounded-2xl border border-neutral-100 p-5 shadow-sm">
-                      <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center mb-4">
-                        <MousePointerClick className="w-5 h-5 text-emerald-700" />
+                    <div className="bg-white rounded-xl lg:rounded-2xl border border-neutral-100 p-3 lg:p-5 shadow-sm">
+                      <div className="w-8 h-8 lg:w-10 lg:h-10 bg-emerald-50 rounded-lg lg:rounded-xl flex items-center justify-center mb-2 lg:mb-4">
+                        <MousePointerClick className="w-4 h-4 lg:w-5 lg:h-5 text-emerald-700" />
                       </div>
-                      <p className="text-xs text-neutral-400 uppercase tracking-wider font-sans">Tasso di Conversione</p>
-                      <p style={{ fontFamily: "var(--font-serif)" }} className="text-2xl font-semibold text-neutral-900 mt-1">
+                      <p className="text-[10px] lg:text-xs text-neutral-400 uppercase tracking-wider font-sans">Conversione</p>
+                      <p style={{ fontFamily: "var(--font-serif)" }} className="text-lg lg:text-2xl font-semibold text-neutral-900">
                         {uniqueVisitors > 0 ? ((orders.length / uniqueVisitors) * 100).toFixed(1) : "0.0"}%
                       </p>
-                      <p className="text-xs text-neutral-400 mt-0.5">{orders.length} ordini / {uniqueVisitors} visitatori unici</p>
+                      <p className="text-[10px] lg:text-xs text-neutral-400">{orders.length} ordini / {uniqueVisitors} visitatori</p>
                     </div>
                   </div>
 
