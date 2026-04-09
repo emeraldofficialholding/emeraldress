@@ -1664,6 +1664,166 @@ ${bodyContent}
                 </motion.div>
               )}
 
+              {/* ══ EMAIL TEMPLATES ═══════════════════════════════════════════ */}
+              {section === "email_templates" && (
+                <motion.div
+                  key="email_templates"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.25 }}
+                >
+                  {!etShowEditor ? (
+                    <>
+                      <div className="flex items-center justify-between mb-6">
+                        <div>
+                          <h2 style={{ fontFamily: "var(--font-serif)" }} className="text-2xl font-semibold text-neutral-900">Template Email</h2>
+                          <p className="text-sm text-neutral-400 mt-0.5">Crea e gestisci i template per le campagne newsletter</p>
+                        </div>
+                        <Button onClick={openNewTemplate} className="bg-emerald-950 hover:bg-emerald-900 text-white rounded-xl gap-2">
+                          <Plus className="w-4 h-4" /> Nuovo Template
+                        </Button>
+                      </div>
+                      {emailTemplates.length === 0 ? (
+                        <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm p-12 text-center">
+                          <Mail className="w-12 h-12 text-neutral-300 mx-auto mb-3" />
+                          <p className="text-neutral-500">Nessun template salvato. Creane uno!</p>
+                        </div>
+                      ) : (
+                        <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm overflow-hidden">
+                          <table className="w-full text-sm">
+                            <thead>
+                              <tr className="border-b border-neutral-100 text-left text-xs text-neutral-500 uppercase tracking-wider">
+                                <th className="px-5 py-3">Nome</th>
+                                <th className="px-5 py-3">Oggetto</th>
+                                <th className="px-5 py-3">Ultima Modifica</th>
+                                <th className="px-5 py-3 text-right">Azioni</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {emailTemplates.map((t) => (
+                                <tr key={t.id} className="border-b border-neutral-50 hover:bg-neutral-50/50 transition-colors">
+                                  <td className="px-5 py-3 font-medium text-neutral-800">{t.name}</td>
+                                  <td className="px-5 py-3 text-neutral-500 truncate max-w-[200px]">{t.subject || "—"}</td>
+                                  <td className="px-5 py-3 text-neutral-400">{new Date(t.updated_at).toLocaleDateString("it-IT", { day: "2-digit", month: "short", year: "numeric" })}</td>
+                                  <td className="px-5 py-3 text-right">
+                                    <div className="flex items-center justify-end gap-1">
+                                      <Button variant="ghost" size="icon" onClick={() => openEditTemplate(t)} className="h-8 w-8 text-neutral-500 hover:text-emerald-700">
+                                        <Edit2 className="w-3.5 h-3.5" />
+                                      </Button>
+                                      <Button variant="ghost" size="icon" onClick={() => deleteTemplate(t.id)} className="h-8 w-8 text-neutral-500 hover:text-red-600">
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                      </Button>
+                                    </div>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex items-center justify-between mb-6">
+                        <div>
+                          <button onClick={() => setEtShowEditor(false)} className="text-xs text-neutral-400 hover:text-neutral-600 mb-1 flex items-center gap-1">
+                            ← Torna alla lista
+                          </button>
+                          <h2 style={{ fontFamily: "var(--font-serif)" }} className="text-2xl font-semibold text-neutral-900">
+                            {etEditing ? "Modifica Template" : "Nuovo Template"}
+                          </h2>
+                        </div>
+                      </div>
+                      <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm p-6 space-y-5">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">Nome Template</Label>
+                            <Input
+                              value={etForm.name}
+                              onChange={(e) => setEtForm((p) => ({ ...p, name: e.target.value }))}
+                              placeholder="es. Benvenuto, Promo Estiva..."
+                              className="rounded-xl border-neutral-200 focus:ring-emerald-600"
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">Oggetto Email</Label>
+                            <Input
+                              value={etForm.subject}
+                              onChange={(e) => setEtForm((p) => ({ ...p, subject: e.target.value }))}
+                              placeholder="es. La tua offerta esclusiva 🌿"
+                              className="rounded-xl border-neutral-200 focus:ring-emerald-600"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Variable Inserter */}
+                        <div>
+                          <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">Inserisci Variabile</Label>
+                          <div className="flex flex-wrap gap-2">
+                            <Button
+                              type="button" variant="outline" size="sm"
+                              onClick={() => insertVariableIntoEditor("{{nome}}")}
+                              className="rounded-lg border-neutral-200 text-neutral-600 hover:bg-emerald-50 hover:border-emerald-300 gap-1 text-xs"
+                            >
+                              <Users className="w-3 h-3" /> {"{{nome}}"}
+                            </Button>
+                            <Button
+                              type="button" variant="outline" size="sm"
+                              onClick={() => insertVariableIntoEditor("{{email}}")}
+                              className="rounded-lg border-neutral-200 text-neutral-600 hover:bg-emerald-50 hover:border-emerald-300 gap-1 text-xs"
+                            >
+                              <Mail className="w-3 h-3" /> {"{{email}}"}
+                            </Button>
+                            {coupons.filter((c) => c.is_active).length > 0 && (
+                              <div className="flex items-center gap-1 ml-2 border-l border-neutral-200 pl-3">
+                                <Tag className="w-3 h-3 text-neutral-400" />
+                                <span className="text-xs text-neutral-400 mr-1">Coupon:</span>
+                                {coupons.filter((c) => c.is_active).map((c) => (
+                                  <Button
+                                    key={c.id} type="button" variant="outline" size="sm"
+                                    onClick={() => insertVariableIntoEditor(`{{coupon:${c.code}}}`)}
+                                    className="rounded-lg border-emerald-200 text-emerald-700 hover:bg-emerald-50 gap-1 text-xs font-mono"
+                                  >
+                                    <Percent className="w-3 h-3" /> {c.code}
+                                  </Button>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Editor */}
+                        <div>
+                          <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">Corpo Email (HTML)</Label>
+                          <ReactQuill
+                            ref={etQuillRef}
+                            theme="snow"
+                            value={etForm.body_html}
+                            onChange={(val) => setEtForm((p) => ({ ...p, body_html: val }))}
+                            className="rounded-xl overflow-hidden border border-neutral-200"
+                            style={{ minHeight: 250 }}
+                          />
+                        </div>
+
+                        <div className="flex justify-end gap-3 pt-2">
+                          <Button variant="outline" onClick={() => setEtShowEditor(false)} className="rounded-xl border-neutral-200">
+                            Annulla
+                          </Button>
+                          <Button
+                            onClick={handleSaveTemplate}
+                            disabled={etSaving}
+                            className="bg-emerald-950 hover:bg-emerald-900 text-white rounded-xl gap-2 px-8"
+                          >
+                            {etSaving ? <><Loader2 className="w-4 h-4 animate-spin" /> Salvataggio...</> : "Salva Template"}
+                          </Button>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </motion.div>
+              )}
+
               {/* ══ SETTINGS ════════════════════════════════════════════════════ */}
               {section === "settings" && (
                 <motion.div
