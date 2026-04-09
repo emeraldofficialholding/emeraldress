@@ -387,6 +387,7 @@ ${bodyContent}
       sale_price: p.sale_price ? String(p.sale_price) : "",
       stock: String(p.stock ?? 0),
       category: p.category,
+      collection_id: p.collection_id || "",
       fabric_details: p.fabric_details || "",
       shipping_info: p.shipping_info || "",
       sizes: (p.sizes || []).join(","),
