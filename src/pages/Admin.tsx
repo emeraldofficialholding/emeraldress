@@ -1043,8 +1043,15 @@ ${bodyContent}
               ))}
             </nav>
 
-            {/* Sign out */}
-            <div className="px-2 mt-4">
+            {/* Back to site */}
+            <div className="px-2 mt-4 space-y-1">
+              <button
+                onClick={() => navigate("/")}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-neutral-400 hover:text-emerald-700 hover:bg-emerald-50 transition-all duration-200"
+              >
+                <Home className="w-4 h-4 shrink-0" />
+                <span className="text-sm">Torna al Sito</span>
+              </button>
               <button
                 onClick={handleSignOut}
                 className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-neutral-400 hover:text-red-500 hover:bg-red-50 transition-all duration-200"
