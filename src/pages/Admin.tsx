@@ -156,7 +156,8 @@ export default function Admin() {
   const [collectionSubmitting, setCollectionSubmitting] = useState(false);
 
   // site settings
-  const [settingsTab, setSettingsTab] = useState<"texts" | "images" | "branding" | "seo">("texts");
+  const [settingsTab, setSettingsTab] = useState<"texts" | "images" | "branding" | "seo" | "banner">("texts");
+  const [promoBanner, setPromoBanner] = useState({ is_active: false, text: "", link: "", bg_color: "#065f46", text_color: "#ffffff" });
   const [seoSettings, setSeoSettings] = useState<Record<string, string>>({ meta_title: "", meta_description: "", og_image_url: "" });
   const [seoUploading, setSeoUploading] = useState(false);
   const [pageContent, setPageContent] = useState<Record<string, string>>({});
