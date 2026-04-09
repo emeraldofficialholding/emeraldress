@@ -1999,6 +1999,7 @@ ${bodyContent}
                 </motion.div>
               )}
 
+              {section === "newsletter" && (
                 <motion.div
                   key="newsletter"
                   initial={{ opacity: 0, y: 10 }}
