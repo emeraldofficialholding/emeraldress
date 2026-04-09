@@ -11,7 +11,7 @@ import {
   Lock, GripVertical, ImageIcon, Mail, Download, Users, Archive, Send, Loader2,
   Code, Type, Layers, Settings, Palette, ScanSearch, Tag, Percent, Copy,
   BarChart3, MousePointerClick, RotateCcw, ExternalLink, AlertTriangle, Megaphone, Link as LinkIcon,
-  Star, MessageSquare,
+  Star, MessageSquare, Home, ArrowLeft,
 } from "lucide-react";
 import { FULL_HTML_TEMPLATES } from "@/data/emailTemplates";
 import {
@@ -928,35 +928,18 @@ ${bodyContent}
     <Helmet>
       <meta name="robots" content="noindex, nofollow" />
     </Helmet>
-    <div className="min-h-screen bg-neutral-950 flex items-center justify-center p-4 lg:p-8" style={{ fontFamily: "var(--font-sans)" }}>
-      {/* ── iPad Frame ── */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.97, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-        className="w-full max-w-6xl"
-        style={{
-          background: "#1a1a1a",
-          borderRadius: "2.5rem",
-          padding: "clamp(12px, 2vw, 20px)",
-          boxShadow: "0 0 0 1px #333, 0 40px 120px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.08)",
-          minHeight: "85vh",
-        }}
-      >
-        {/* Notch bar */}
-        <div className="flex items-center justify-center mb-3">
-          <div className="w-24 h-1 rounded-full bg-neutral-700" />
-        </div>
+    <div className="min-h-screen w-full bg-neutral-50 flex flex-col" style={{ fontFamily: "var(--font-sans)" }}>
+      {/* ── Mobile Header ── */}
+      <header className="lg:hidden sticky top-0 z-50 bg-white border-b border-neutral-200 flex items-center justify-between h-14 px-4">
+        <button onClick={() => navigate("/")} className="flex items-center gap-2 text-neutral-500 hover:text-emerald-700 transition-colors">
+          <ArrowLeft className="w-4 h-4" />
+          <span className="text-xs font-medium">Sito</span>
+        </button>
+        <h1 style={{ fontFamily: "var(--font-serif)" }} className="text-base font-semibold text-neutral-900">Admin</h1>
+        <div className="w-14" />
+      </header>
 
-        {/* Screen */}
-        <div
-          className="rounded-2xl overflow-hidden flex"
-          style={{
-            background: "#f9fafb",
-            minHeight: "78vh",
-            boxShadow: "inset 0 1px 3px rgba(0,0,0,0.15)",
-          }}
-        >
+      <div className="flex flex-1 min-h-0">
           {/* ── Loading state ── */}
           {authState === "loading" && (
             <div className="flex-1 flex items-center justify-center">
@@ -1060,8 +1043,15 @@ ${bodyContent}
               ))}
             </nav>
 
-            {/* Sign out */}
-            <div className="px-2 mt-4">
+            {/* Back to site */}
+            <div className="px-2 mt-4 space-y-1">
+              <button
+                onClick={() => navigate("/")}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-neutral-400 hover:text-emerald-700 hover:bg-emerald-50 transition-all duration-200"
+              >
+                <Home className="w-4 h-4 shrink-0" />
+                <span className="text-sm">Torna al Sito</span>
+              </button>
               <button
                 onClick={handleSignOut}
                 className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-neutral-400 hover:text-red-500 hover:bg-red-50 transition-all duration-200"
@@ -3242,7 +3232,7 @@ ${bodyContent}
           </main>
 
           {/* ── Mobile Bottom Tab Bar ── */}
-          <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-neutral-200 safe-area-pb">
+          <div className="lg:hidden fixed bottom-0 left-0 w-full z-50 bg-white border-t border-neutral-200">
             <nav className="flex items-center justify-around h-16 px-2">
               {mobileNav.map(({ id, icon: Icon, label }) => (
                 <button
@@ -3262,12 +3252,7 @@ ${bodyContent}
           </div>
           </>)}
         </div>
-
-        {/* Bottom home indicator */}
-        <div className="flex items-center justify-center mt-3">
-          <div className="w-32 h-1 rounded-full bg-neutral-700" />
-        </div>
-      </motion.div>
+      </div>
 
       {/* ══ Product Drawer (rendered outside iPad, overlays it) ════════════════ */}
       <AnimatePresence>
@@ -3532,6 +3517,5 @@ ${bodyContent}
         )}
       </AnimatePresence>
     </div>
-    </>
   );
 }

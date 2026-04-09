@@ -27,7 +27,7 @@ import Login from "./pages/Login";
 const queryClient = new QueryClient();
 
 // Routes that should NOT show the Navbar/Footer (standalone pages)
-const STANDALONE_ROUTES = ["/coming-soon", "/login"];
+const STANDALONE_ROUTES = ["/coming-soon", "/login", "/admin"];
 
 function AppShell() {
   const location = useLocation();
