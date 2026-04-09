@@ -72,7 +72,7 @@ interface Collection {
   is_active: boolean;
 }
 
-type AdminSection = "dashboard" | "products" | "orders" | "newsletter" | "collections" | "settings" | "scanner" | "marketing" | "email_templates";
+type AdminSection = "dashboard" | "products" | "orders" | "clients" | "newsletter" | "collections" | "settings" | "scanner" | "marketing" | "email_templates";
 
 interface EmailTemplate {
   id: string;
@@ -872,6 +872,7 @@ ${bodyContent}
     { id: "collections" as AdminSection, icon: Layers, label: "Collezioni" },
     { id: "products" as AdminSection, icon: Package, label: "Prodotti" },
     { id: "orders" as AdminSection, icon: ShoppingBag, label: "Ordini" },
+    { id: "clients" as AdminSection, icon: Users, label: "Clienti" },
     { id: "marketing" as AdminSection, icon: Tag, label: "Marketing" },
     { id: "newsletter" as AdminSection, icon: Mail, label: "Newsletter" },
     { id: "email_templates" as AdminSection, icon: Code, label: "Template Email" },
@@ -1762,7 +1763,114 @@ ${bodyContent}
                 </motion.div>
               )}
 
-              {/* ══ NEWSLETTER ══════════════════════════════════════════════════ */}
+              {/* ══ CLIENTI CRM ═══════════════════════════════════════════════ */}
+              {section === "clients" && (() => {
+                // Group orders by customer_email
+                const clientMap = new Map<string, { email: string; orderCount: number; totalSpent: number; lastOrderDate: string }>();
+                orders.forEach((o) => {
+                  const existing = clientMap.get(o.customer_email);
+                  if (existing) {
+                    existing.orderCount += 1;
+                    existing.totalSpent += Number(o.total_amount);
+                    if (o.created_at > existing.lastOrderDate) existing.lastOrderDate = o.created_at;
+                  } else {
+                    clientMap.set(o.customer_email, {
+                      email: o.customer_email,
+                      orderCount: 1,
+                      totalSpent: Number(o.total_amount),
+                      lastOrderDate: o.created_at,
+                    });
+                  }
+                });
+                const clients = Array.from(clientMap.values()).sort((a, b) => b.totalSpent - a.totalSpent);
+
+                return (
+                  <motion.div
+                    key="clients"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <div className="mb-6">
+                      <h2 style={{ fontFamily: "var(--font-serif)" }} className="text-2xl font-semibold text-neutral-900">
+                        Clienti
+                      </h2>
+                      <p className="text-sm text-neutral-400 mt-0.5">{clients.length} clienti unici &middot; {clients.filter(c => c.totalSpent >= 500).length} VIP</p>
+                    </div>
+
+                    {clients.length === 0 ? (
+                      <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm p-12 text-center">
+                        <Users className="w-10 h-10 text-neutral-300 mx-auto mb-3" />
+                        <p className="text-neutral-500">Nessun cliente trovato. I clienti appariranno qui dopo il primo ordine.</p>
+                      </div>
+                    ) : (
+                      <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm overflow-hidden">
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-sm">
+                            <thead>
+                              <tr className="border-b border-neutral-100 bg-neutral-50/50">
+                                <th className="text-left py-3 px-4 font-medium text-neutral-500 text-xs uppercase tracking-wider">Cliente</th>
+                                <th className="text-center py-3 px-4 font-medium text-neutral-500 text-xs uppercase tracking-wider">Ordini</th>
+                                <th className="text-right py-3 px-4 font-medium text-neutral-500 text-xs uppercase tracking-wider">Lifetime Value</th>
+                                <th className="text-right py-3 px-4 font-medium text-neutral-500 text-xs uppercase tracking-wider">Ultimo Ordine</th>
+                                <th className="text-center py-3 px-4 font-medium text-neutral-500 text-xs uppercase tracking-wider">Azioni</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {clients.map((c) => (
+                                <tr key={c.email} className="border-b border-neutral-50 hover:bg-neutral-50/50 transition-colors">
+                                  <td className="py-3 px-4">
+                                    <div className="flex items-center gap-2">
+                                      <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-bold uppercase">
+                                        {c.email.charAt(0)}
+                                      </div>
+                                      <div>
+                                        <p className="font-medium text-neutral-900 text-sm">{c.email}</p>
+                                        {c.totalSpent >= 500 && (
+                                          <Badge className="bg-amber-100 text-amber-800 border-amber-200 text-[10px] px-1.5 py-0 mt-0.5">
+                                            ⭐ VIP
+                                          </Badge>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </td>
+                                  <td className="py-3 px-4 text-center">
+                                    <span className="inline-flex items-center justify-center bg-neutral-100 text-neutral-700 rounded-full w-7 h-7 text-xs font-semibold">
+                                      {c.orderCount}
+                                    </span>
+                                  </td>
+                                  <td className="py-3 px-4 text-right font-semibold text-neutral-900">
+                                    €{c.totalSpent.toFixed(2)}
+                                  </td>
+                                  <td className="py-3 px-4 text-right text-neutral-500 text-xs">
+                                    {new Date(c.lastOrderDate).toLocaleDateString("it-IT", { day: "2-digit", month: "short", year: "numeric" })}
+                                  </td>
+                                  <td className="py-3 px-4 text-center">
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="rounded-lg text-xs gap-1.5 border-neutral-200 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200"
+                                      onClick={() => {
+                                        navigator.clipboard.writeText(c.email);
+                                        toast.success(`Email "${c.email}" copiata negli appunti`);
+                                      }}
+                                    >
+                                      <Mail className="w-3.5 h-3.5" />
+                                      Invia Email
+                                    </Button>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    )}
+                  </motion.div>
+                );
+              })()}
+
               {section === "newsletter" && (
                 <motion.div
                   key="newsletter"
