@@ -10,7 +10,7 @@ import {
   TrendingUp, DollarSign, ChevronRight, Edit2, Trash2, Eye, EyeOff,
   Lock, GripVertical, ImageIcon, Mail, Download, Users, Archive, Send, Loader2,
   Code, Type, Layers, Settings, Palette, ScanSearch, Tag, Percent, Copy,
-  BarChart3, MousePointerClick, RotateCcw, ExternalLink, AlertTriangle,
+  BarChart3, MousePointerClick, RotateCcw, ExternalLink, AlertTriangle, Megaphone, Link as LinkIcon,
 } from "lucide-react";
 import { FULL_HTML_TEMPLATES } from "@/data/emailTemplates";
 import {
@@ -2185,6 +2185,7 @@ ${bodyContent}
                       { id: "images" as const, label: "Immagini", icon: ImageIcon },
                       { id: "branding" as const, label: "Branding", icon: Palette },
                       { id: "seo" as const, label: "SEO", icon: ScanSearch },
+                      { id: "banner" as const, label: "Banner Top", icon: Megaphone },
                     ]).map(({ id, label, icon: Icon }) => (
                       <button
                         key={id}
