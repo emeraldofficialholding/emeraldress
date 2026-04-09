@@ -3252,6 +3252,7 @@ ${bodyContent}
           </div>
           </>)}
         </div>
+      </div>
 
       {/* ══ Product Drawer (rendered outside iPad, overlays it) ════════════════ */}
       <AnimatePresence>
