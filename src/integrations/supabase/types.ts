@@ -188,6 +188,27 @@ export type Database = {
         }
         Relationships: []
       }
+      site_analytics: {
+        Row: {
+          created_at: string
+          id: string
+          page_path: string
+          visitor_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          page_path: string
+          visitor_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          page_path?: string
+          visitor_id?: string
+        }
+        Relationships: []
+      }
       subscribers: {
         Row: {
           active: boolean
