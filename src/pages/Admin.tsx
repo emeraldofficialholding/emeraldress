@@ -102,6 +102,7 @@ const emptyForm = {
   sale_price: "",
   stock: "0",
   category: "classics",
+  collection_id: "",
   fabric_details: "",
   shipping_info: "",
   sizes: "S,M,L",
