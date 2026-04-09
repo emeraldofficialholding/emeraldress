@@ -438,6 +438,7 @@ ${bodyContent}
     }
   }
 
+  async function handleSendNewsletter() {
     const tpl = emailTemplates.find((t) => t.id === selectedTemplate);
     if (!tpl || selectedSubscribers.length === 0) return;
     setSending(true);
