@@ -9,7 +9,7 @@ import {
   LayoutDashboard, Package, ShoppingBag, LogOut, Plus, X, Upload,
   TrendingUp, DollarSign, ChevronRight, Edit2, Trash2, Eye, EyeOff,
   Lock, GripVertical, ImageIcon, Mail, Download, Users, Archive, Send, Loader2,
-  Code, Type, Layers, Settings, Palette, ScanSearch,
+  Code, Type, Layers, Settings, Palette, ScanSearch, Tag, Percent, Copy,
 } from "lucide-react";
 import { FULL_HTML_TEMPLATES } from "@/data/emailTemplates";
 import {
@@ -66,7 +66,7 @@ interface Collection {
   is_active: boolean;
 }
 
-type AdminSection = "dashboard" | "products" | "orders" | "newsletter" | "collections" | "settings" | "scanner";
+type AdminSection = "dashboard" | "products" | "orders" | "newsletter" | "collections" | "settings" | "scanner" | "marketing";
 
 // ── Sales chart mock data helper ───────────────────────────────────────────────
 function buildChartData(orders: Order[]) {
@@ -159,6 +159,25 @@ export default function Admin() {
   const [scannerRequests, setScannerRequests] = useState<ScannerRequest[]>([]);
   const [selectedScan, setSelectedScan] = useState<ScannerRequest | null>(null);
 
+  // coupons
+  interface Coupon {
+    id: string;
+    code: string;
+    discount_type: "percentage" | "fixed";
+    value: number;
+    is_active: boolean;
+    valid_until: string | null;
+    usage_limit: number | null;
+    used_count: number;
+  }
+  const [coupons, setCoupons] = useState<Coupon[]>([]);
+  const [couponDrawerOpen, setCouponDrawerOpen] = useState(false);
+  const [editingCoupon, setEditingCoupon] = useState<Coupon | null>(null);
+  const [couponForm, setCouponForm] = useState({
+    code: "", discount_type: "percentage" as "percentage" | "fixed", value: "", is_active: true, valid_until: "", usage_limit: "",
+  });
+  const [couponSubmitting, setCouponSubmitting] = useState(false);
+
   // product drawer
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -247,6 +266,7 @@ export default function Admin() {
       { data: cols, error: colsError },
       { data: settingsRows, error: settingsError },
       { data: scans, error: scansError },
+      { data: cpns, error: cpnsError },
     ] = await Promise.all([
       supabase.from("products").select("*").order("created_at", { ascending: false }),
       supabase.from("orders").select("*").order("created_at", { ascending: false }),
@@ -254,6 +274,7 @@ export default function Admin() {
       supabase.from("collections" as any).select("*").order("name"),
       supabase.from("app_settings" as any).select("*").eq("id", 1).maybeSingle(),
       supabase.from("scanner_requests").select("*").order("created_at", { ascending: false }).limit(100),
+      supabase.from("coupons" as any).select("*").order("code"),
     ]);
 
     if (prodsError) toast.error("Errore nel caricamento prodotti");
@@ -261,6 +282,7 @@ export default function Admin() {
     if (subscribersError) toast.error("Errore nel caricamento iscritti newsletter");
     if (settingsError) toast.error("Errore nel caricamento impostazioni");
     if (scansError) toast.error("Errore nel caricamento scansioni");
+    if (cpnsError) toast.error("Errore nel caricamento coupon");
 
     setProducts((prods as Product[]) || []);
     const ordList = (ords as Order[]) || [];
@@ -276,6 +298,7 @@ export default function Admin() {
       if (s.branding) setBranding(s.branding);
     }
     setScannerRequests((scans as unknown as ScannerRequest[]) || []);
+    setCoupons((cpns as unknown as Coupon[]) || []);
   }
 
   // ── Newsletter helpers ──────────────────────────────────────────────────────
@@ -625,12 +648,84 @@ ${bodyContent}
     }
   }
 
+  // ── Coupon CRUD ──────────────────────────────────────────────────────────────
+  function generateCouponCode() {
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    let code = "EM-";
+    for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
+    return code;
+  }
+
+  function openNewCoupon() {
+    setEditingCoupon(null);
+    setCouponForm({ code: generateCouponCode(), discount_type: "percentage", value: "", is_active: true, valid_until: "", usage_limit: "" });
+    setCouponDrawerOpen(true);
+  }
+
+  function openEditCoupon(c: Coupon) {
+    setEditingCoupon(c);
+    setCouponForm({
+      code: c.code,
+      discount_type: c.discount_type,
+      value: String(c.value),
+      is_active: c.is_active,
+      valid_until: c.valid_until ? c.valid_until.slice(0, 10) : "",
+      usage_limit: c.usage_limit != null ? String(c.usage_limit) : "",
+    });
+    setCouponDrawerOpen(true);
+  }
+
+  async function handleCouponSubmit() {
+    if (!couponForm.code || !couponForm.value) { toast.error("Codice e valore sono obbligatori"); return; }
+    setCouponSubmitting(true);
+    try {
+      const payload = {
+        code: couponForm.code.toUpperCase(),
+        discount_type: couponForm.discount_type,
+        value: parseFloat(couponForm.value),
+        is_active: couponForm.is_active,
+        valid_until: couponForm.valid_until || null,
+        usage_limit: couponForm.usage_limit ? parseInt(couponForm.usage_limit) : null,
+      };
+      if (editingCoupon) {
+        const { error } = await supabase.from("coupons" as any).update(payload as any).eq("id", editingCoupon.id);
+        if (error) throw error;
+        toast.success("Coupon aggiornato");
+      } else {
+        const { error } = await supabase.from("coupons" as any).insert(payload as any);
+        if (error) throw error;
+        toast.success("Coupon creato");
+      }
+      setCouponDrawerOpen(false);
+      fetchAll();
+    } catch (e: unknown) {
+      toast.error((e as Error).message || "Errore");
+    } finally {
+      setCouponSubmitting(false);
+    }
+  }
+
+  async function deleteCoupon(id: string) {
+    if (!confirm("Eliminare questo coupon?")) return;
+    const { error } = await supabase.from("coupons" as any).delete().eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Coupon eliminato");
+    fetchAll();
+  }
+
+  async function toggleCouponActive(c: Coupon) {
+    const { error } = await supabase.from("coupons" as any).update({ is_active: !c.is_active } as any).eq("id", c.id);
+    if (error) { toast.error(error.message); return; }
+    fetchAll();
+  }
+
   // ── Sidebar nav items ────────────────────────────────────────────────────────
   const nav = [
     { id: "dashboard" as AdminSection, icon: LayoutDashboard, label: "Dashboard" },
     { id: "collections" as AdminSection, icon: Layers, label: "Collezioni" },
     { id: "products" as AdminSection, icon: Package, label: "Prodotti" },
     { id: "orders" as AdminSection, icon: ShoppingBag, label: "Ordini" },
+    { id: "marketing" as AdminSection, icon: Tag, label: "Marketing" },
     { id: "newsletter" as AdminSection, icon: Mail, label: "Newsletter" },
     { id: "scanner" as AdminSection, icon: ScanSearch, label: "Scanner" },
     { id: "settings" as AdminSection, icon: Settings, label: "Impostazioni" },
@@ -1686,7 +1781,234 @@ ${bodyContent}
                 </motion.div>
               )}
 
-              {/* ══ SCANNER HUB ════════════════════════════════════════════════ */}
+              {/* ══ MARKETING / COUPON ══════════════════════════════════════════ */}
+              {section === "marketing" && (
+                <motion.div
+                  key="marketing"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.25 }}
+                >
+                  <div className="flex items-center justify-between mb-6">
+                    <div>
+                      <h2 style={{ fontFamily: "var(--font-serif)" }} className="text-2xl font-semibold text-neutral-900">
+                        Coupon & Marketing
+                      </h2>
+                      <p className="text-sm text-neutral-400 mt-0.5">{coupons.length} coupon totali · {coupons.filter(c => c.is_active).length} attivi</p>
+                    </div>
+                    <Button onClick={openNewCoupon} className="bg-emerald-950 hover:bg-emerald-900 text-white rounded-xl gap-2 text-sm">
+                      <Plus className="w-4 h-4" /> Nuovo Coupon
+                    </Button>
+                  </div>
+
+                  <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm overflow-hidden">
+                    <div className="overflow-x-auto">
+                      <table className="w-full">
+                        <thead>
+                          <tr className="border-b border-neutral-100">
+                            {["Codice", "Tipo", "Valore", "Utilizzi", "Scadenza", "Stato", "Azioni"].map((h) => (
+                              <th key={h} className="text-left px-4 py-3 text-xs font-medium text-neutral-400 uppercase tracking-wider">{h}</th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-neutral-50">
+                          {coupons.map((c) => {
+                            const expired = c.valid_until && new Date(c.valid_until) < new Date();
+                            return (
+                              <tr key={c.id} className="hover:bg-neutral-50 transition-colors">
+                                <td className="px-4 py-3">
+                                  <div className="flex items-center gap-2">
+                                    <code className="text-sm font-mono font-semibold text-neutral-900 bg-neutral-100 px-2 py-0.5 rounded">{c.code}</code>
+                                    <button
+                                      onClick={() => { navigator.clipboard.writeText(c.code); toast.success("Codice copiato"); }}
+                                      className="p-1 text-neutral-300 hover:text-neutral-600 transition-colors"
+                                    >
+                                      <Copy className="w-3 h-3" />
+                                    </button>
+                                  </div>
+                                </td>
+                                <td className="px-4 py-3">
+                                  <span className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full font-medium ${
+                                    c.discount_type === "percentage" ? "bg-purple-50 text-purple-700" : "bg-blue-50 text-blue-700"
+                                  }`}>
+                                    {c.discount_type === "percentage" ? <Percent className="w-3 h-3" /> : <DollarSign className="w-3 h-3" />}
+                                    {c.discount_type === "percentage" ? "Percentuale" : "Fisso"}
+                                  </span>
+                                </td>
+                                <td className="px-4 py-3 text-sm font-medium text-neutral-900">
+                                  {c.discount_type === "percentage" ? `${c.value}%` : `€${c.value.toFixed(2)}`}
+                                </td>
+                                <td className="px-4 py-3 text-sm text-neutral-600">
+                                  {c.used_count}{c.usage_limit != null ? ` / ${c.usage_limit}` : ""}
+                                </td>
+                                <td className="px-4 py-3 text-sm text-neutral-500">
+                                  {c.valid_until ? (
+                                    <span className={expired ? "text-red-500" : ""}>
+                                      {new Date(c.valid_until).toLocaleDateString("it-IT", { day: "2-digit", month: "short", year: "numeric" })}
+                                      {expired && " (scaduto)"}
+                                    </span>
+                                  ) : "—"}
+                                </td>
+                                <td className="px-4 py-3">
+                                  <button onClick={() => toggleCouponActive(c)}>
+                                    <span className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium cursor-pointer ${
+                                      c.is_active ? "bg-emerald-50 text-emerald-700" : "bg-neutral-100 text-neutral-500"
+                                    }`}>
+                                      <span className={`w-1.5 h-1.5 rounded-full ${c.is_active ? "bg-emerald-500" : "bg-neutral-400"}`} />
+                                      {c.is_active ? "Attivo" : "Inattivo"}
+                                    </span>
+                                  </button>
+                                </td>
+                                <td className="px-4 py-3">
+                                  <div className="flex items-center gap-1">
+                                    <button onClick={() => openEditCoupon(c)} className="p-1.5 text-neutral-400 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors">
+                                      <Edit2 className="w-3.5 h-3.5" />
+                                    </button>
+                                    <button onClick={() => deleteCoupon(c.id)} className="p-1.5 text-neutral-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                          {coupons.length === 0 && (
+                            <tr>
+                              <td colSpan={7} className="px-4 py-12 text-center text-sm text-neutral-400">
+                                Nessun coupon. Crea il tuo primo coupon!
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  {/* Coupon Drawer */}
+                  <AnimatePresence>
+                    {couponDrawerOpen && (
+                      <>
+                        <motion.div
+                          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
+                          onClick={() => setCouponDrawerOpen(false)}
+                        />
+                        <motion.div
+                          initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }}
+                          transition={{ type: "spring", damping: 30, stiffness: 300 }}
+                          className="fixed right-0 top-0 bottom-0 z-50 w-full max-w-sm bg-white shadow-2xl flex flex-col"
+                        >
+                          <div className="flex items-center justify-between px-6 py-5 border-b border-neutral-100">
+                            <h3 style={{ fontFamily: "var(--font-serif)" }} className="text-lg font-semibold text-neutral-900">
+                              {editingCoupon ? "Modifica Coupon" : "Nuovo Coupon"}
+                            </h3>
+                            <button onClick={() => setCouponDrawerOpen(false)} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-neutral-100 transition-colors">
+                              <X className="w-4 h-4 text-neutral-500" />
+                            </button>
+                          </div>
+                          <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+                            {/* Code */}
+                            <div>
+                              <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">Codice *</Label>
+                              <div className="flex gap-2">
+                                <Input
+                                  value={couponForm.code}
+                                  onChange={(e) => setCouponForm((f) => ({ ...f, code: e.target.value.toUpperCase() }))}
+                                  placeholder="es. EM-SUMMER25"
+                                  className="rounded-xl border-neutral-200 focus:ring-emerald-600 font-mono uppercase flex-1"
+                                />
+                                <Button type="button" variant="outline" size="icon" onClick={() => setCouponForm((f) => ({ ...f, code: generateCouponCode() }))} className="rounded-xl border-neutral-200 shrink-0" title="Genera codice">
+                                  <Tag className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </div>
+
+                            {/* Type */}
+                            <div>
+                              <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">Tipo Sconto</Label>
+                              <div className="grid grid-cols-2 gap-2">
+                                {(["percentage", "fixed"] as const).map((t) => (
+                                  <button
+                                    key={t}
+                                    type="button"
+                                    onClick={() => setCouponForm((f) => ({ ...f, discount_type: t }))}
+                                    className={`flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium border transition-all ${
+                                      couponForm.discount_type === t
+                                        ? "border-emerald-600 bg-emerald-50 text-emerald-800"
+                                        : "border-neutral-200 text-neutral-500 hover:border-neutral-300"
+                                    }`}
+                                  >
+                                    {t === "percentage" ? <><Percent className="w-4 h-4" /> Percentuale</> : <><DollarSign className="w-4 h-4" /> Fisso (€)</>}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+
+                            {/* Value */}
+                            <div>
+                              <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">
+                                Valore * {couponForm.discount_type === "percentage" ? "(%)" : "(€)"}
+                              </Label>
+                              <Input
+                                type="number"
+                                value={couponForm.value}
+                                onChange={(e) => setCouponForm((f) => ({ ...f, value: e.target.value }))}
+                                placeholder={couponForm.discount_type === "percentage" ? "es. 15" : "es. 10.00"}
+                                className="rounded-xl border-neutral-200 focus:ring-emerald-600"
+                              />
+                            </div>
+
+                            {/* Valid until */}
+                            <div>
+                              <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">Scadenza (opzionale)</Label>
+                              <Input
+                                type="date"
+                                value={couponForm.valid_until}
+                                onChange={(e) => setCouponForm((f) => ({ ...f, valid_until: e.target.value }))}
+                                className="rounded-xl border-neutral-200 focus:ring-emerald-600"
+                              />
+                            </div>
+
+                            {/* Usage limit */}
+                            <div>
+                              <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">Limite Utilizzi (opzionale)</Label>
+                              <Input
+                                type="number"
+                                value={couponForm.usage_limit}
+                                onChange={(e) => setCouponForm((f) => ({ ...f, usage_limit: e.target.value }))}
+                                placeholder="Illimitato"
+                                className="rounded-xl border-neutral-200 focus:ring-emerald-600"
+                              />
+                            </div>
+
+                            {/* Active toggle */}
+                            <div className="flex items-center justify-between py-3 px-4 bg-neutral-50 rounded-xl">
+                              <div>
+                                <p className="text-sm font-medium text-neutral-900">Coupon Attivo</p>
+                                <p className="text-xs text-neutral-400">Utilizzabile dai clienti</p>
+                              </div>
+                              <Switch
+                                checked={couponForm.is_active}
+                                onCheckedChange={(v) => setCouponForm((f) => ({ ...f, is_active: v }))}
+                                className="data-[state=checked]:bg-emerald-700"
+                              />
+                            </div>
+                          </div>
+                          <div className="px-6 py-4 border-t border-neutral-100 flex gap-3">
+                            <Button variant="outline" onClick={() => setCouponDrawerOpen(false)} className="flex-1 rounded-xl border-neutral-200">Annulla</Button>
+                            <Button onClick={handleCouponSubmit} disabled={couponSubmitting} className="flex-1 bg-emerald-950 hover:bg-emerald-900 text-white rounded-xl">
+                              {couponSubmitting ? "Salvataggio..." : editingCoupon ? "Aggiorna" : "Crea Coupon"}
+                            </Button>
+                          </div>
+                        </motion.div>
+                      </>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              )}
+
+
               {section === "scanner" && (
                 <motion.div
                   key="scanner"
