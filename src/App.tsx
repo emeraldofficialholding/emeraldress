@@ -11,6 +11,7 @@ import Footer from "@/components/Footer";
 import CartSheet from "@/components/CartSheet";
 import GatekeeperRoute from "@/components/GatekeeperRoute";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import { usePageTracking } from "@/hooks/usePageTracking";
 import Index from "./pages/Index";
 import ProductDetail from "./pages/ProductDetail";
 import EmeraldScanner from "./pages/EmeraldScanner";
@@ -32,6 +33,9 @@ function AppShell() {
   const isStandalone = STANDALONE_ROUTES.some(
     (r) => location.pathname === r || location.pathname.startsWith(r + "/")
   );
+
+  // Track page views
+  usePageTracking();
 
   // Scroll to top on route change
   useEffect(() => {

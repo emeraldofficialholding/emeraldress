@@ -10,6 +10,7 @@ import {
   TrendingUp, DollarSign, ChevronRight, Edit2, Trash2, Eye, EyeOff,
   Lock, GripVertical, ImageIcon, Mail, Download, Users, Archive, Send, Loader2,
   Code, Type, Layers, Settings, Palette, ScanSearch, Tag, Percent, Copy,
+  BarChart3, MousePointerClick,
 } from "lucide-react";
 import { FULL_HTML_TEMPLATES } from "@/data/emailTemplates";
 import {
@@ -476,6 +477,30 @@ ${bodyContent}
   // ── KPIs ─────────────────────────────────────────────────────────────────────
   const totalRevenue = orders.reduce((s, o) => s + Number(o.total_amount), 0);
   const totalStock = products.reduce((s, p) => s + (p.stock || 0), 0);
+
+  // analytics
+  const [visitsToday, setVisitsToday] = useState(0);
+  const [uniqueVisitors, setUniqueVisitors] = useState(0);
+
+  useEffect(() => {
+    if (authState !== "admin") return;
+    (async () => {
+      const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+      const { count } = await supabase
+        .from("site_analytics" as any)
+        .select("*", { count: "exact", head: true })
+        .gte("created_at", since);
+      setVisitsToday(count || 0);
+
+      const { data: allRows } = await supabase
+        .from("site_analytics" as any)
+        .select("visitor_id");
+      if (allRows) {
+        const unique = new Set((allRows as any[]).map((r: any) => r.visitor_id));
+        setUniqueVisitors(unique.size);
+      }
+    })();
+  }, [authState]);
 
   // ── Image helpers ─────────────────────────────────────────────────────────────
   const addFiles = useCallback((files: FileList | File[]) => {
@@ -1073,6 +1098,28 @@ ${bodyContent}
                         <p className="text-xs text-neutral-400 mt-0.5">{sub}</p>
                       </div>
                     ))}
+                  </div>
+
+                  {/* Analytics Widgets */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+                    <div className="bg-white rounded-2xl border border-neutral-100 p-5 shadow-sm">
+                      <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center mb-4">
+                        <BarChart3 className="w-5 h-5 text-emerald-700" />
+                      </div>
+                      <p className="text-xs text-neutral-400 uppercase tracking-wider font-sans">Visite Oggi</p>
+                      <p style={{ fontFamily: "var(--font-serif)" }} className="text-2xl font-semibold text-neutral-900 mt-1">{visitsToday}</p>
+                      <p className="text-xs text-neutral-400 mt-0.5">ultime 24 ore</p>
+                    </div>
+                    <div className="bg-white rounded-2xl border border-neutral-100 p-5 shadow-sm">
+                      <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center mb-4">
+                        <MousePointerClick className="w-5 h-5 text-emerald-700" />
+                      </div>
+                      <p className="text-xs text-neutral-400 uppercase tracking-wider font-sans">Tasso di Conversione</p>
+                      <p style={{ fontFamily: "var(--font-serif)" }} className="text-2xl font-semibold text-neutral-900 mt-1">
+                        {uniqueVisitors > 0 ? ((orders.length / uniqueVisitors) * 100).toFixed(1) : "0.0"}%
+                      </p>
+                      <p className="text-xs text-neutral-400 mt-0.5">{orders.length} ordini / {uniqueVisitors} visitatori unici</p>
+                    </div>
                   </div>
 
                   {/* Chart */}
