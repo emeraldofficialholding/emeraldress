@@ -47,6 +47,9 @@ interface Order {
   total_amount: number;
   status: string;
   created_at: string;
+  items?: any;
+  tracking_number?: string;
+  tracking_url?: string;
 }
 
 interface Subscriber {
@@ -137,6 +140,11 @@ export default function Admin() {
   const [chartData, setChartData] = useState<{ date: string; revenue: number }[]>([]);
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [collections, setCollections] = useState<Collection[]>([]);
+
+  // order detail & shipping
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [shippingForm, setShippingForm] = useState({ tracking_number: "", tracking_url: "" });
+  const [shippingSaving, setShippingSaving] = useState(false);
 
   // collection form
   const [collectionDrawerOpen, setCollectionDrawerOpen] = useState(false);
@@ -388,6 +396,45 @@ ${bodyContent}
       setEmailSubject("");
       setEmailBody("");
       setIsFullHtmlTemplate(false);
+    }
+  }
+
+  async function handleSaveShipping() {
+    if (!selectedOrder) return;
+    setShippingSaving(true);
+    try {
+      const { error } = await supabase
+        .from("orders")
+        .update({
+          tracking_number: shippingForm.tracking_number || null,
+          tracking_url: shippingForm.tracking_url || null,
+          status: "shipped",
+        } as any)
+        .eq("id", selectedOrder.id);
+      if (error) throw error;
+
+      const webhookUrl = import.meta.env.VITE_N8N_SHIPPING_WEBHOOK_URL;
+      if (webhookUrl) {
+        await fetch(webhookUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            order_id: selectedOrder.id,
+            customer_email: selectedOrder.customer_email,
+            customer_name: selectedOrder.customer_email.split("@")[0],
+            tracking_number: shippingForm.tracking_number,
+            tracking_url: shippingForm.tracking_url,
+          }),
+        });
+      }
+
+      setSelectedOrder({ ...selectedOrder, tracking_number: shippingForm.tracking_number, tracking_url: shippingForm.tracking_url, status: "shipped" });
+      setOrders((prev) => prev.map((o) => o.id === selectedOrder.id ? { ...o, tracking_number: shippingForm.tracking_number, tracking_url: shippingForm.tracking_url, status: "shipped" } : o));
+      toast.success("Dati spedizione salvati e notifica inviata a n8n");
+    } catch (err: any) {
+      toast.error("Errore: " + (err.message || "Salvataggio fallito"));
+    } finally {
+      setShippingSaving(false);
     }
   }
 
@@ -1367,46 +1414,135 @@ ${bodyContent}
                     <p className="text-sm text-neutral-400 mt-0.5">{orders.length} ordini totali</p>
                   </div>
 
-                  <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm overflow-hidden">
-                    <div className="overflow-x-auto">
-                      <table className="w-full">
-                        <thead>
-                          <tr className="border-b border-neutral-100">
-                            {["Data", "Cliente", "Totale", "Stato"].map((h) => (
-                              <th key={h} className="text-left px-4 py-3 text-xs font-medium text-neutral-400 uppercase tracking-wider">
-                                {h}
-                              </th>
-                            ))}
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-neutral-50">
-                          {orders.map((o) => (
-                            <tr key={o.id} className="hover:bg-neutral-50 transition-colors">
-                              <td className="px-4 py-3 text-sm text-neutral-600">
-                                {new Date(o.created_at).toLocaleDateString("it-IT")}
-                              </td>
-                              <td className="px-4 py-3 text-sm text-neutral-900">{o.customer_email}</td>
-                              <td className="px-4 py-3 text-sm font-medium text-neutral-900">
-                                €{Number(o.total_amount).toFixed(2)}
-                              </td>
-                              <td className="px-4 py-3">
-                                <span className={`inline-flex items-center text-xs px-2.5 py-1 rounded-full font-medium ${statusColor[o.status] || "bg-neutral-100 text-neutral-600"}`}>
-                                  {o.status}
-                                </span>
-                              </td>
-                            </tr>
-                          ))}
-                          {orders.length === 0 && (
-                            <tr>
-                              <td colSpan={4} className="px-4 py-12 text-center text-sm text-neutral-400">
-                                Nessun ordine ancora
-                              </td>
-                            </tr>
-                          )}
-                        </tbody>
-                      </table>
+                  {/* Order detail view */}
+                  {selectedOrder ? (
+                    <div className="space-y-4">
+                      <Button variant="ghost" size="sm" onClick={() => setSelectedOrder(null)} className="gap-2 text-neutral-500 hover:text-neutral-900">
+                        <ChevronRight className="w-4 h-4 rotate-180" /> Torna alla lista
+                      </Button>
+                      <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm p-6 space-y-6">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                          <div>
+                            <p className="text-xs text-neutral-400 mb-1">ID Ordine</p>
+                            <p className="text-sm font-mono text-neutral-700 truncate">{selectedOrder.id}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-neutral-400 mb-1">Cliente</p>
+                            <p className="text-sm text-neutral-900">{selectedOrder.customer_email}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-neutral-400 mb-1">Totale</p>
+                            <p className="text-sm font-medium text-neutral-900">€{Number(selectedOrder.total_amount).toFixed(2)}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-neutral-400 mb-1">Stato</p>
+                            <span className={`inline-flex items-center text-xs px-2.5 py-1 rounded-full font-medium ${statusColor[selectedOrder.status] || "bg-neutral-100 text-neutral-600"}`}>
+                              {selectedOrder.status}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Items */}
+                        {selectedOrder.items && Array.isArray(selectedOrder.items) && selectedOrder.items.length > 0 && (
+                          <div>
+                            <p className="text-xs text-neutral-400 mb-2 uppercase tracking-wider font-medium">Articoli</p>
+                            <div className="space-y-2">
+                              {(selectedOrder.items as any[]).map((item: any, i: number) => (
+                                <div key={i} className="flex items-center justify-between bg-neutral-50 rounded-xl px-4 py-2.5 text-sm">
+                                  <span className="text-neutral-800">{item.name || item.product_name || `Articolo ${i + 1}`}</span>
+                                  <div className="flex gap-4 text-neutral-500">
+                                    {item.quantity && <span>x{item.quantity}</span>}
+                                    {item.size && <span>Taglia: {item.size}</span>}
+                                    {item.price && <span>€{Number(item.price).toFixed(2)}</span>}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Shipping management */}
+                        <div className="border-t border-neutral-100 pt-6">
+                          <h3 className="text-base font-semibold text-neutral-900 mb-4 flex items-center gap-2">
+                            <Package className="w-4 h-4 text-emerald-700" />
+                            Gestione Spedizione
+                          </h3>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                              <Label className="text-xs text-neutral-500 mb-1.5 block">Numero Tracking</Label>
+                              <Input
+                                placeholder="es. 1Z999AA10123456784"
+                                value={shippingForm.tracking_number}
+                                onChange={(e) => setShippingForm((p) => ({ ...p, tracking_number: e.target.value }))}
+                                className="rounded-xl border-neutral-200"
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-xs text-neutral-500 mb-1.5 block">URL Tracking</Label>
+                              <Input
+                                placeholder="https://tracking.corriere.it/..."
+                                value={shippingForm.tracking_url}
+                                onChange={(e) => setShippingForm((p) => ({ ...p, tracking_url: e.target.value }))}
+                                className="rounded-xl border-neutral-200"
+                              />
+                            </div>
+                          </div>
+                          <Button
+                            onClick={handleSaveShipping}
+                            disabled={shippingSaving || (!shippingForm.tracking_number && !shippingForm.tracking_url)}
+                            className="rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white gap-2"
+                          >
+                            {shippingSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                            Salva e Notifica Cliente
+                          </Button>
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm overflow-hidden">
+                      <div className="overflow-x-auto">
+                        <table className="w-full">
+                          <thead>
+                            <tr className="border-b border-neutral-100">
+                              {["Data", "Cliente", "Totale", "Stato", ""].map((h) => (
+                                <th key={h} className="text-left px-4 py-3 text-xs font-medium text-neutral-400 uppercase tracking-wider">
+                                  {h}
+                                </th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-neutral-50">
+                            {orders.map((o) => (
+                              <tr key={o.id} className="hover:bg-neutral-50 transition-colors cursor-pointer" onClick={() => { setSelectedOrder(o); setShippingForm({ tracking_number: o.tracking_number || "", tracking_url: o.tracking_url || "" }); }}>
+                                <td className="px-4 py-3 text-sm text-neutral-600">
+                                  {new Date(o.created_at).toLocaleDateString("it-IT")}
+                                </td>
+                                <td className="px-4 py-3 text-sm text-neutral-900">{o.customer_email}</td>
+                                <td className="px-4 py-3 text-sm font-medium text-neutral-900">
+                                  €{Number(o.total_amount).toFixed(2)}
+                                </td>
+                                <td className="px-4 py-3">
+                                  <span className={`inline-flex items-center text-xs px-2.5 py-1 rounded-full font-medium ${statusColor[o.status] || "bg-neutral-100 text-neutral-600"}`}>
+                                    {o.status}
+                                  </span>
+                                </td>
+                                <td className="px-4 py-3 text-right">
+                                  <ChevronRight className="w-4 h-4 text-neutral-300" />
+                                </td>
+                              </tr>
+                            ))}
+                            {orders.length === 0 && (
+                              <tr>
+                                <td colSpan={5} className="px-4 py-12 text-center text-sm text-neutral-400">
+                                  Nessun ordine ancora
+                                </td>
+                              </tr>
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
                 </motion.div>
               )}
 
