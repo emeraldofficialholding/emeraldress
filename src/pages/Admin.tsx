@@ -314,6 +314,7 @@ export default function Admin() {
       { data: scans, error: scansError },
       { data: cpns, error: cpnsError },
       { data: ets, error: etsError },
+      { data: revs, error: revsError },
     ] = await Promise.all([
       supabase.from("products").select("*").order("created_at", { ascending: false }),
       supabase.from("orders").select("*").order("created_at", { ascending: false }),
@@ -353,6 +354,13 @@ export default function Admin() {
     setScannerRequests((scans as unknown as ScannerRequest[]) || []);
     setCoupons((cpns as unknown as Coupon[]) || []);
     setEmailTemplates((ets as unknown as EmailTemplate[]) || []);
+
+    // Map reviews with product names
+    const reviewsList = ((revs as unknown as Review[]) || []).map((r) => ({
+      ...r,
+      product_name: prodList.find((p) => p.id === r.product_id)?.name || "Prodotto rimosso",
+    }));
+    setReviews(reviewsList);
   }
 
   // ── Newsletter helpers ──────────────────────────────────────────────────────
@@ -889,6 +897,7 @@ ${bodyContent}
     { id: "products" as AdminSection, icon: Package, label: "Prodotti" },
     { id: "orders" as AdminSection, icon: ShoppingBag, label: "Ordini" },
     { id: "clients" as AdminSection, icon: Users, label: "Clienti" },
+    { id: "reviews" as AdminSection, icon: MessageSquare, label: "Recensioni" },
     { id: "marketing" as AdminSection, icon: Tag, label: "Marketing" },
     { id: "newsletter" as AdminSection, icon: Mail, label: "Newsletter" },
     { id: "email_templates" as AdminSection, icon: Code, label: "Template Email" },
