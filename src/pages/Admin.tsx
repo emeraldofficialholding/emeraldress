@@ -3517,6 +3517,5 @@ ${bodyContent}
         )}
       </AnimatePresence>
     </div>
-    </>
   );
 }
