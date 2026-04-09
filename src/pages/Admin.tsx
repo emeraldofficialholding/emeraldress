@@ -135,6 +135,15 @@ export default function Admin() {
   const [collectionForm, setCollectionForm] = useState({ name: "", description: "", is_active: true });
   const [collectionSubmitting, setCollectionSubmitting] = useState(false);
 
+  // site settings
+  const [settingsTab, setSettingsTab] = useState<"texts" | "images" | "branding">("texts");
+  const [pageContent, setPageContent] = useState<Record<string, string>>({});
+  const [pageImages, setPageImages] = useState<Record<string, string>>({});
+  const [branding, setBranding] = useState<Record<string, string>>({ primary_color: "#004d40", secondary_color: "#a7f3d0" });
+  const [settingsSaving, setSettingsSaving] = useState(false);
+  const settingsFileRef = useRef<HTMLInputElement>(null);
+  const [settingsUploadingKey, setSettingsUploadingKey] = useState<string | null>(null);
+
   // product drawer
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
