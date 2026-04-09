@@ -1129,7 +1129,7 @@ ${bodyContent}
                   </div>
 
                   {/* KPI Cards */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 lg:gap-4 mb-4 lg:mb-8">
                     {[
                       {
                         icon: ShoppingBag,
@@ -1156,13 +1156,15 @@ ${bodyContent}
                         bg: "bg-emerald-50",
                       },
                     ].map(({ icon: Icon, label, value, sub, color, bg }) => (
-                      <div key={label} className="bg-white rounded-2xl border border-neutral-100 p-5 shadow-sm">
-                        <div className={`w-10 h-10 ${bg} rounded-xl flex items-center justify-center mb-4`}>
-                          <Icon className={`w-5 h-5 ${color}`} />
+                      <div key={label} className="bg-white rounded-xl lg:rounded-2xl border border-neutral-100 p-3 lg:p-5 shadow-sm flex items-center gap-3 sm:block">
+                        <div className={`w-8 h-8 lg:w-10 lg:h-10 ${bg} rounded-lg lg:rounded-xl flex items-center justify-center sm:mb-3`}>
+                          <Icon className={`w-4 h-4 lg:w-5 lg:h-5 ${color}`} />
                         </div>
-                        <p className="text-xs text-neutral-400 uppercase tracking-wider font-sans">{label}</p>
-                        <p style={{ fontFamily: "var(--font-serif)" }} className="text-2xl font-semibold text-neutral-900 mt-1">{value}</p>
-                        <p className="text-xs text-neutral-400 mt-0.5">{sub}</p>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[10px] lg:text-xs text-neutral-400 uppercase tracking-wider font-sans">{label}</p>
+                          <p style={{ fontFamily: "var(--font-serif)" }} className="text-lg lg:text-2xl font-semibold text-neutral-900">{value}</p>
+                          <p className="text-[10px] lg:text-xs text-neutral-400">{sub}</p>
+                        </div>
                       </div>
                     ))}
                   </div>
