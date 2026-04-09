@@ -1626,7 +1626,6 @@ ${bodyContent}
                         </div>
                       </div>
                     </div>
-                    </div>
                   ) : (
                     <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm overflow-hidden">
                       <div className="overflow-x-auto">
