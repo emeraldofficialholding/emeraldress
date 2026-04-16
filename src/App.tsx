@@ -71,7 +71,7 @@ function AppShell() {
         <Route path="/product/:id" element={<GatekeeperRoute><ProductDetail /></GatekeeperRoute>} />
         <Route path="*" element={<GatekeeperRoute><NotFound /></GatekeeperRoute>} />
       </Routes>
-      {!isStandalone && <Footer />}
+      {!hideFooter && <Footer />}
       </WishlistProvider>
     </CartProvider>
   );
