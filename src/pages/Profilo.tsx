@@ -343,8 +343,8 @@ function SectionHeader({
   initials: string;
 }) {
   return (
-    <div className="flex items-center gap-5">
-      <div className="hidden sm:block">
+    <div className="flex items-center gap-4 sm:gap-5">
+      <div className="block">
         <Avatar avatarUrl={avatarUrl} initials={initials} size="lg" />
       </div>
       <div>
