@@ -29,11 +29,15 @@ import Profilo from "./pages/Profilo";
 const queryClient = new QueryClient();
 
 // Routes that should NOT show the Navbar/Footer (standalone pages)
-const STANDALONE_ROUTES = ["/coming-soon", "/login", "/admin", "/profilo"];
+const STANDALONE_ROUTES = ["/coming-soon", "/login", "/admin"];
+const NO_FOOTER_ROUTES = ["/profilo"];
 
 function AppShell() {
   const location = useLocation();
   const isStandalone = STANDALONE_ROUTES.some(
+    (r) => location.pathname === r || location.pathname.startsWith(r + "/")
+  );
+  const hideFooter = isStandalone || NO_FOOTER_ROUTES.some(
     (r) => location.pathname === r || location.pathname.startsWith(r + "/")
   );
 
@@ -67,7 +71,7 @@ function AppShell() {
         <Route path="/product/:id" element={<GatekeeperRoute><ProductDetail /></GatekeeperRoute>} />
         <Route path="*" element={<GatekeeperRoute><NotFound /></GatekeeperRoute>} />
       </Routes>
-      {!isStandalone && <Footer />}
+      {!hideFooter && <Footer />}
       </WishlistProvider>
     </CartProvider>
   );
