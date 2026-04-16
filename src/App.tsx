@@ -37,6 +37,9 @@ function AppShell() {
   const isStandalone = STANDALONE_ROUTES.some(
     (r) => location.pathname === r || location.pathname.startsWith(r + "/")
   );
+  const hideFooter = isStandalone || NO_FOOTER_ROUTES.some(
+    (r) => location.pathname === r || location.pathname.startsWith(r + "/")
+  );
 
   // Track page views
   usePageTracking();
