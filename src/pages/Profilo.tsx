@@ -197,7 +197,7 @@ export default function Profilo() {
       </Helmet>
 
       <div className="min-h-screen w-full max-w-full overflow-x-hidden" style={{ backgroundColor: "#f7fdf9" }}>
-        <div className="mx-auto max-w-6xl flex">
+        <div className="mx-auto flex w-full max-w-6xl pt-20 sm:pt-24">
           {/* Desktop sidebar */}
           <aside className="hidden lg:flex w-72 shrink-0 min-h-screen border-r border-emerald-100 bg-white/60">
             <ProfileSidebar
