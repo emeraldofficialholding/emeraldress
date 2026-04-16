@@ -197,41 +197,6 @@ export default function Profilo() {
       </Helmet>
 
       <div className="min-h-screen w-full max-w-full overflow-x-hidden" style={{ backgroundColor: "#f7fdf9" }}>
-        {/* Mobile header */}
-        <header className="lg:hidden sticky top-0 z-30 bg-white/80 backdrop-blur border-b border-emerald-100 px-4 h-14 flex items-center justify-between">
-          <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-            <SheetTrigger asChild>
-              <button className="p-2 -ml-2 text-emerald-900" aria-label="Apri menu">
-                <Menu className="w-5 h-5" />
-              </button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-72 p-0 bg-white">
-              <ProfileSidebar
-                displayName={displayName}
-                initials={initials}
-                avatarUrl={profile?.avatar_url ?? null}
-                email={email}
-                NavList={NavList}
-                onLogout={handleLogout}
-                onClose={() => setMobileOpen(false)}
-              />
-            </SheetContent>
-          </Sheet>
-          <p
-            className="text-sm tracking-[0.25em] uppercase text-emerald-900"
-            style={{ fontFamily: "'Playfair Display', serif" }}
-          >
-            Profilo
-          </p>
-          <button
-            onClick={() => navigate("/")}
-            className="p-2 -mr-2 text-emerald-900"
-            aria-label="Torna al sito"
-          >
-            <Home className="w-5 h-5" />
-          </button>
-        </header>
-
         <div className="mx-auto max-w-6xl flex">
           {/* Desktop sidebar */}
           <aside className="hidden lg:flex w-72 shrink-0 min-h-screen border-r border-emerald-100 bg-white/60">
@@ -246,7 +211,7 @@ export default function Profilo() {
           </aside>
 
           {/* Main */}
-          <main className="flex-1 w-full max-w-full overflow-x-hidden p-4 lg:p-10">
+          <main className="flex-1 w-full max-w-full overflow-x-hidden p-4 lg:p-10 pb-24 lg:pb-10">
             <SectionHeader displayName={displayName} avatarUrl={profile?.avatar_url ?? null} initials={initials} />
 
             <AnimatePresence mode="wait">
@@ -276,6 +241,39 @@ export default function Profilo() {
             </AnimatePresence>
           </main>
         </div>
+
+        {/* Mobile bottom nav (app-style) */}
+        <nav
+          className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur border-t border-emerald-100 px-1 pb-[env(safe-area-inset-bottom)]"
+          aria-label="Navigazione profilo"
+        >
+          <ul className="flex items-stretch justify-between">
+            {SECTIONS.map(({ id, label, icon: Icon }) => {
+              const active = section === id;
+              return (
+                <li key={id} className="flex-1">
+                  <button
+                    onClick={() => setSection(id)}
+                    className={`w-full flex flex-col items-center justify-center gap-1 py-2.5 transition-colors ${
+                      active ? "text-emerald-900" : "text-emerald-900/50"
+                    }`}
+                  >
+                    <span
+                      className={`flex items-center justify-center w-9 h-9 rounded-full transition-all ${
+                        active ? "bg-emerald-900 text-emerald-50" : ""
+                      }`}
+                    >
+                      <Icon className="w-[18px] h-[18px]" />
+                    </span>
+                    <span className="text-[9px] tracking-wide truncate max-w-full px-1">
+                      {label.replace("I Miei ", "").replace("Le Mie ", "")}
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
       </div>
     </>
   );
