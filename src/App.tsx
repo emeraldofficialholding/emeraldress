@@ -29,7 +29,8 @@ import Profilo from "./pages/Profilo";
 const queryClient = new QueryClient();
 
 // Routes that should NOT show the Navbar/Footer (standalone pages)
-const STANDALONE_ROUTES = ["/coming-soon", "/login", "/admin", "/profilo"];
+const STANDALONE_ROUTES = ["/coming-soon", "/login", "/admin"];
+const NO_FOOTER_ROUTES = ["/profilo"];
 
 function AppShell() {
   const location = useLocation();
