@@ -211,7 +211,7 @@ export default function Profilo() {
           </aside>
 
           {/* Main */}
-          <main className="flex-1 w-full max-w-full overflow-x-hidden p-4 lg:p-10 pb-24 lg:pb-10">
+          <main className="flex-1 w-full max-w-full overflow-x-hidden p-4 lg:p-10 pb-32 lg:pb-10">
             <SectionHeader displayName={displayName} avatarUrl={profile?.avatar_url ?? null} initials={initials} />
 
             <AnimatePresence mode="wait">
