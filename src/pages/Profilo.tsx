@@ -278,9 +278,6 @@ export default function Profilo() {
     </>
   );
 }
-    </>
-  );
-}
 
 // ── Sidebar ────────────────────────────────────────────────────────────────
 function ProfileSidebar({
