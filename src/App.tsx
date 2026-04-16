@@ -23,11 +23,12 @@ import NotFound from "./pages/NotFound";
 import Admin from "./pages/Admin";
 import ComingSoon from "./pages/ComingSoon";
 import Login from "./pages/Login";
+import Profilo from "./pages/Profilo";
 
 const queryClient = new QueryClient();
 
 // Routes that should NOT show the Navbar/Footer (standalone pages)
-const STANDALONE_ROUTES = ["/coming-soon", "/login", "/admin"];
+const STANDALONE_ROUTES = ["/coming-soon", "/login", "/admin", "/profilo"];
 
 function AppShell() {
   const location = useLocation();
@@ -53,6 +54,7 @@ function AppShell() {
         <Route path="/coming-soon" element={<ComingSoon />} />
         <Route path="/login" element={<Login />} />
         <Route path="/admin" element={<Admin />} />
+        <Route path="/profilo" element={<Profilo />} />
 
         {/* ── Gated routes (admin only while coming soon is active) ── */}
         <Route path="/" element={<GatekeeperRoute><Index /></GatekeeperRoute>} />
