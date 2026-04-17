@@ -1,6 +1,6 @@
 import { Helmet } from "react-helmet-async";
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/external-client";
 import HeroSection from "@/components/HeroSection";
 import EmeraldTouchSection from "@/components/EmeraldTouchSection";
 import ClassicsSection from "@/components/ClassicsSection";
