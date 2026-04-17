@@ -244,7 +244,7 @@ export default function ComingSoon() {
 
           </p>
           <a
-            href="/login"
+            href="/admin"
             className="text-[9px] tracking-[0.2em] uppercase text-emerald-900/20 hover:text-emerald-900/50 transition-colors duration-300">
 
             Admin Access
