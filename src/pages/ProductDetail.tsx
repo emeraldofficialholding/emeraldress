@@ -424,21 +424,15 @@ const ProductDetail = () => {
                   );
                 })()
               ) : (
-              <motion.button
-                onClick={handleAddToCart}
-                disabled={!selectedSize}
-                whileHover={selectedSize ? { scale: 1.01 } : {}}
-                whileTap={selectedSize ? { scale: 0.99 } : {}}
+              <div
                 className={cn(
-                  "w-full py-4 flex items-center justify-center gap-2.5 font-sans text-xs tracking-[0.25em] uppercase transition-all duration-400 mb-3",
-                  selectedSize
-                    ? "bg-foreground text-background hover:bg-primary hover:text-primary-foreground cursor-pointer"
-                    : "bg-muted text-muted-foreground cursor-not-allowed"
+                  "w-full py-4 flex items-center justify-center gap-2.5 font-sans text-xs tracking-[0.25em] uppercase mb-3",
+                  "bg-muted text-muted-foreground cursor-not-allowed"
                 )}
               >
                 <ShoppingBag size={14} />
-                {selectedSize ? "Aggiungi al carrello" : "Seleziona una taglia"}
-              </motion.button>
+                Non disponibile
+              </div>
               )}
 
               {/* Trust note */}
