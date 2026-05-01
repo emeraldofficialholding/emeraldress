@@ -47,7 +47,7 @@ type Profile = {
   first_name: string | null;
   last_name: string | null;
   avatar_url: string | null;
-  phone: string | null;
+  phone_number: string | null;
   newsletter_opt_in: boolean;
 };
 
@@ -116,18 +116,18 @@ export default function Profilo() {
 
       const { data: p } = await supabase
         .from("profiles")
-        .select("id, first_name, last_name, avatar_url, phone, newsletter_opt_in")
+        .select("id, first_name, last_name, avatar_url, phone_number, newsletter_opt_in")
         .eq("id", session.user.id)
         .maybeSingle();
 
       if (!active) return;
       setProfile(
-        p ?? {
+        (p as Profile) ?? {
           id: session.user.id,
           first_name: null,
           last_name: null,
           avatar_url: null,
-          phone: null,
+          phone_number: null,
           newsletter_opt_in: false,
         }
       );
@@ -436,10 +436,18 @@ function OrdersSection({ email }: { email: string | null }) {
     (async () => {
       const { data } = await supabase
         .from("orders")
-        .select("id, created_at, status, total_amount, items, customer_email")
-        .eq("customer_email", email)
+        .select("id, created_at, status, total_amount, guest_email")
+        .eq("guest_email", email)
         .order("created_at", { ascending: false });
-      setOrders((data as any) ?? []);
+      const mapped: Order[] = ((data as any[]) ?? []).map((o) => ({
+        id: o.id,
+        created_at: o.created_at,
+        status: o.status,
+        total_amount: Number(o.total_amount ?? 0),
+        items: [],
+        customer_email: o.guest_email ?? "",
+      }));
+      setOrders(mapped);
     })();
   }, [email]);
 
@@ -644,7 +652,7 @@ function SettingsSection({
 }) {
   const [firstName, setFirstName] = useState(profile.first_name ?? "");
   const [lastName, setLastName] = useState(profile.last_name ?? "");
-  const [phone, setPhone] = useState(profile.phone ?? "");
+  const [phone, setPhone] = useState(profile.phone_number ?? "");
   const [savingProfile, setSavingProfile] = useState(false);
 
   const [newPassword, setNewPassword] = useState("");
@@ -665,13 +673,13 @@ function SettingsSection({
     setSavingProfile(true);
     const { error } = await supabase
       .from("profiles")
-      .upsert({ id: userId, first_name: firstName || null, last_name: lastName || null, phone: phone || null });
+      .upsert({ id: userId, first_name: firstName || null, last_name: lastName || null, phone_number: phone || null });
     setSavingProfile(false);
     if (error) {
       toast({ title: "Errore", description: error.message, variant: "destructive" });
       return;
     }
-    onProfileUpdate({ ...profile, first_name: firstName, last_name: lastName, phone });
+    onProfileUpdate({ ...profile, first_name: firstName, last_name: lastName, phone_number: phone });
     toast({ title: "Profilo aggiornato" });
   };
 
