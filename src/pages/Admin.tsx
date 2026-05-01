@@ -643,6 +643,7 @@ ${bodyContent}
         sizes: sizesArray,
         status: form.status,
         images: finalUrls,
+        stripe_payment_link: form.stripe_payment_link || null,
       };
 
       if (editingProduct) {
