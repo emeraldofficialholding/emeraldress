@@ -22,6 +22,7 @@ export interface Product {
   shipping_info: string | null;
   stock: number;
   created_at: string;
+  stripe_payment_link?: string | null;
 }
 
 export const useProducts = (category?: string) =>
