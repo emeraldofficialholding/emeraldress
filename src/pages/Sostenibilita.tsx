@@ -155,8 +155,13 @@ const FabricFeatures = () => {
 
 // --- COLLEZIONI: dati dinamici da DB (Emerald Touch) ---
 const LatestCollectionShowcase = () => {
-  const { data: products, isLoading } = useProducts("emerald-touch");
-  const emeraldProducts = (products ?? []).slice(0, 3);
+  const { data: allProducts, isLoading } = useProducts();
+  const emeraldFiltered = (allProducts ?? []).filter((p) => {
+    const cat = (p.category || "").toLowerCase().replace(/\s|-/g, "");
+    return cat === "emeraldtouch";
+  });
+  const emeraldProducts =
+    emeraldFiltered.length > 0 ? emeraldFiltered.slice(0, 3) : (allProducts ?? []).slice(0, 3);
 
   return (
     <section className="py-32 relative bg-white overflow-hidden">
