@@ -402,6 +402,22 @@ const ProductDetail = () => {
               </div>
 
               {/* Add to cart */}
+              {product.stripe_payment_link ? (
+                <motion.a
+                  href={product.stripe_payment_link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.99 }}
+                  className={cn(
+                    "w-full py-4 flex items-center justify-center gap-2.5 font-sans text-xs tracking-[0.25em] uppercase transition-all duration-400 mb-3",
+                    "bg-foreground text-background hover:bg-primary hover:text-primary-foreground cursor-pointer"
+                  )}
+                >
+                  <ShoppingBag size={14} />
+                  Acquista ora
+                </motion.a>
+              ) : (
               <motion.button
                 onClick={handleAddToCart}
                 disabled={!selectedSize}
@@ -417,6 +433,7 @@ const ProductDetail = () => {
                 <ShoppingBag size={14} />
                 {selectedSize ? "Aggiungi al carrello" : "Seleziona una taglia"}
               </motion.button>
+              )}
 
               {/* Trust note */}
               <p className="text-center text-[10px] font-sans tracking-widest uppercase text-muted-foreground mb-8">

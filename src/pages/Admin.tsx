@@ -38,12 +38,13 @@ interface Product {
   stock: number;
   status: string;
   category: string;
-  collection_id: string | null;
+  collection_id?: string | null;
   images: string[];
   sizes: string[] | null;
   fabric_details: string | null;
   shipping_info: string | null;
   created_at: string;
+  stripe_payment_link?: string | null;
 }
 
 interface Order {
@@ -127,6 +128,7 @@ const emptyForm = {
   shipping_info: "",
   sizes: "S,M,L",
   status: "active" as "active" | "draft",
+  stripe_payment_link: "",
 };
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -585,6 +587,7 @@ ${bodyContent}
       shipping_info: p.shipping_info || "",
       sizes: (p.sizes || []).join(","),
       status: (p.status === "draft" ? "draft" : "active") as "active" | "draft",
+      stripe_payment_link: p.stripe_payment_link || "",
     });
     // Flatten in case DB has nested arrays like [["url"]] instead of ["url"]
     const flatImages: string[] = (p.images || [])
@@ -640,6 +643,7 @@ ${bodyContent}
         sizes: sizesArray,
         status: form.status,
         images: finalUrls,
+        stripe_payment_link: form.stripe_payment_link || null,
       };
 
       if (editingProduct) {
@@ -3507,6 +3511,18 @@ ${bodyContent}
                     placeholder="es. Spedizione gratuita in 2-3 giorni"
                     className="rounded-xl border-neutral-200"
                   />
+                </div>
+
+                {/* Stripe Payment Link */}
+                <div>
+                  <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">Link Pagamento Stripe</Label>
+                  <Input
+                    value={form.stripe_payment_link}
+                    onChange={(e) => setForm((f) => ({ ...f, stripe_payment_link: e.target.value }))}
+                    placeholder="https://buy.stripe.com/..."
+                    className="rounded-xl border-neutral-200"
+                  />
+                  <p className="text-[10px] text-neutral-400 mt-1.5">Se presente, sostituisce il carrello con il bottone "Acquista ora" che porta direttamente al checkout Stripe.</p>
                 </div>
 
                 {/* Active toggle */}
