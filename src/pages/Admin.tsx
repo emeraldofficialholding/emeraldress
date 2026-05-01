@@ -38,12 +38,13 @@ interface Product {
   stock: number;
   status: string;
   category: string;
-  collection_id: string | null;
+  collection_id?: string | null;
   images: string[];
   sizes: string[] | null;
   fabric_details: string | null;
   shipping_info: string | null;
   created_at: string;
+  stripe_payment_link?: string | null;
 }
 
 interface Order {
