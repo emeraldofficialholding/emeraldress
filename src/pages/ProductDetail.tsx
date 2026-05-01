@@ -2,7 +2,6 @@ import { useParams, Link } from "react-router-dom";
 import { useState, useRef, useCallback } from "react";
 import { Helmet } from "react-helmet-async";
 import { useProduct } from "@/hooks/useProducts";
-import { useCart } from "@/contexts/CartContext";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import GemLoader from "@/components/GemLoader";
 import ImageFallback from "@/components/ImageFallback";
@@ -211,7 +210,6 @@ const MobileCarousel = ({
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { data: product, isLoading } = useProduct(id || "");
-  const { addItem } = useCart();
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [activeImage, setActiveImage] = useState(0);
   const [sizeGuideOpen, setSizeGuideOpen] = useState(false);
@@ -243,20 +241,6 @@ const ProductDetail = () => {
     .map((s) => s.trim())
     .filter(Boolean);
   const images = product.images?.length ? product.images : ["https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/faviconemeraldress.svg"];
-
-  const handleAddToCart = () => {
-    if (!selectedSize) return;
-    addItem({
-      id: product.id,
-      name: product.name,
-      price: Number(product.price),
-      size: selectedSize,
-      image: images[0],
-    });
-    toast.success("Aggiunto al carrello", {
-      description: `${product.name} — Taglia ${selectedSize}`,
-    });
-  };
 
   return (
     <>
@@ -440,21 +424,15 @@ const ProductDetail = () => {
                   );
                 })()
               ) : (
-              <motion.button
-                onClick={handleAddToCart}
-                disabled={!selectedSize}
-                whileHover={selectedSize ? { scale: 1.01 } : {}}
-                whileTap={selectedSize ? { scale: 0.99 } : {}}
+              <div
                 className={cn(
-                  "w-full py-4 flex items-center justify-center gap-2.5 font-sans text-xs tracking-[0.25em] uppercase transition-all duration-400 mb-3",
-                  selectedSize
-                    ? "bg-foreground text-background hover:bg-primary hover:text-primary-foreground cursor-pointer"
-                    : "bg-muted text-muted-foreground cursor-not-allowed"
+                  "w-full py-4 flex items-center justify-center gap-2.5 font-sans text-xs tracking-[0.25em] uppercase mb-3",
+                  "bg-muted text-muted-foreground cursor-not-allowed"
                 )}
               >
                 <ShoppingBag size={14} />
-                {selectedSize ? "Aggiungi al carrello" : "Seleziona una taglia"}
-              </motion.button>
+                Non disponibile
+              </div>
               )}
 
               {/* Trust note */}

@@ -1,8 +1,7 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { User, ShoppingBag, Menu, X, ChevronDown } from "lucide-react";
-import { useCart } from "@/contexts/CartContext";
-import { motion, AnimatePresence, useAnimation } from "framer-motion";
+import { User, Menu, X, ChevronDown } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 const logoET = "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/emeraldress-logo-touch-collection.svg";
 
 const links = [
@@ -17,9 +16,6 @@ const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collezioniOpen, setCollezioniOpen] = useState(false);
-  const cartControls = useAnimation();
-  const { totalItems, setIsOpen } = useCart();
-  const prevTotal = useRef(totalItems);
   const location = useLocation();
   const isHome = location.pathname === "/";
 
@@ -28,16 +24,6 @@ const Navbar = () => {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-
-  useEffect(() => {
-    if (totalItems > prevTotal.current) {
-      cartControls.start({
-        scale: [1, 1.35, 0.88, 1.12, 1],
-        transition: { duration: 0.45, ease: "easeInOut" },
-      });
-    }
-    prevTotal.current = totalItems;
-  }, [totalItems, cartControls]);
 
   useEffect(() => {
     setMobileOpen(false);
@@ -95,18 +81,6 @@ const Navbar = () => {
 
           <div className="flex items-center gap-4">
             <Link to="/admin" className="hover:opacity-70 transition-opacity"><User className="w-5 h-5" /></Link>
-            <motion.button
-              className="hover:opacity-70 transition-opacity relative"
-              onClick={() => setIsOpen(true)}
-              animate={cartControls}
-            >
-              <ShoppingBag className="w-5 h-5" />
-              {totalItems > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-primary text-primary-foreground text-[10px] flex items-center justify-center font-sans">
-                  {totalItems}
-                </span>
-              )}
-            </motion.button>
             <button className="lg:hidden hover:opacity-70" onClick={() => setMobileOpen(!mobileOpen)}>
               {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
