@@ -3513,6 +3513,18 @@ ${bodyContent}
                   />
                 </div>
 
+                {/* Stripe Payment Link */}
+                <div>
+                  <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">Link Pagamento Stripe</Label>
+                  <Input
+                    value={form.stripe_payment_link}
+                    onChange={(e) => setForm((f) => ({ ...f, stripe_payment_link: e.target.value }))}
+                    placeholder="https://buy.stripe.com/..."
+                    className="rounded-xl border-neutral-200"
+                  />
+                  <p className="text-[10px] text-neutral-400 mt-1.5">Se presente, sostituisce il carrello con il bottone "Acquista ora" che porta direttamente al checkout Stripe.</p>
+                </div>
+
                 {/* Active toggle */}
                 <div className="flex items-center justify-between py-3 px-4 bg-neutral-50 rounded-xl">
                   <div>
