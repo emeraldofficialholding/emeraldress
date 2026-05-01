@@ -66,8 +66,16 @@ const CollectionCard = ({ product, index }: { product: any; index: number }) => 
 const Collezioni = () => {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc" | "none">("none");
 
-  // Carica solo prodotti Emerald Touch
-  const { data: products, isLoading } = useProducts("emerald-touch");
+  // Carica tutti i prodotti e filtra lato client (categoria nel DB = "Emerald Touch")
+  const { data: allProducts, isLoading } = useProducts();
+  const products = useMemo(
+    () =>
+      (allProducts || []).filter((p) => {
+        const cat = (p.category || "").toLowerCase().replace(/\s|-/g, "");
+        return cat === "emeraldtouch";
+      }),
+    [allProducts],
+  );
 
   const sortedProducts = useMemo(() => {
     if (!products) return [];

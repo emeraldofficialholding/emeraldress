@@ -13,8 +13,11 @@ const EmeraldTouchSection = () => {
   const { data: allProducts, isLoading } = useProducts();
 
   // Logica intelligente:
-  // 1. Cerca prodotti specifici "emerald-touch"
-  const emeraldProducts = allProducts?.filter((p) => p.category === "emerald-touch");
+  // 1. Cerca prodotti "Emerald Touch" (case + spazi/trattini insensitive)
+  const emeraldProducts = allProducts?.filter((p) => {
+    const cat = (p.category || "").toLowerCase().replace(/\s|-/g, "");
+    return cat === "emeraldtouch";
+  });
 
   // 2. Se non ne trova, usa i primi 4 prodotti generici (Fallback) per non lasciare il buco vuoto
   const displayProducts =
