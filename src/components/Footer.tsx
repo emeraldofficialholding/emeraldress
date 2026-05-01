@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Instagram, Youtube, Mail } from "lucide-react";
+import NewsletterSignup from "@/components/NewsletterSignup";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -67,15 +68,21 @@ const Footer = () => {
               <div className="flex items-center gap-3 group cursor-pointer">
                 <Mail className="w-5 h-5 text-emerald-700 group-hover:text-emerald-500 transition-colors" />
                 <a
-                  href="mailto:emeraldress@gmail.com"
+                  href="mailto:emeraldresshop@gmail.com"
                   className="text-sm text-emerald-800/80 font-sans group-hover:text-emerald-950 transition-colors"
                 >
-                  emeraldress@gmail.com
+                  emeraldresshop@gmail.com
                 </a>
               </div>
               <p className="text-[10px] text-emerald-700/60 font-sans italic">
                 Disponibili per consulenze online e assistenza esclusiva.
               </p>
+              <div className="pt-4 border-t border-emerald-900/10">
+                <h5 className="text-xs tracking-[0.2em] uppercase font-bold text-emerald-900 mb-3">
+                  Newsletter
+                </h5>
+                <NewsletterSignup />
+              </div>
             </div>
           </div>
         </div>

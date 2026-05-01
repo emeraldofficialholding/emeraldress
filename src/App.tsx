@@ -27,6 +27,7 @@ import Faq from "./pages/legal/Faq";
 import Resi from "./pages/legal/Resi";
 import Privacy from "./pages/legal/Privacy";
 import Termini from "./pages/legal/Termini";
+import CookieBanner from "@/components/CookieBanner";
 
 const queryClient = new QueryClient();
 
@@ -76,6 +77,7 @@ function AppShell() {
         <Route path="*" element={<GatekeeperRoute><NotFound /></GatekeeperRoute>} />
       </Routes>
       {!hideFooter && <Footer />}
+      {!isStandalone && <CookieBanner />}
     </WishlistProvider>
   );
 }
