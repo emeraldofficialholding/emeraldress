@@ -587,6 +587,7 @@ ${bodyContent}
       shipping_info: p.shipping_info || "",
       sizes: (p.sizes || []).join(","),
       status: (p.status === "draft" ? "draft" : "active") as "active" | "draft",
+      stripe_payment_link: p.stripe_payment_link || "",
     });
     // Flatten in case DB has nested arrays like [["url"]] instead of ["url"]
     const flatImages: string[] = (p.images || [])
