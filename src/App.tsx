@@ -23,6 +23,10 @@ import Admin from "./pages/Admin";
 import ComingSoon from "./pages/ComingSoon";
 import Login from "./pages/Login";
 import Profilo from "./pages/Profilo";
+import Faq from "./pages/legal/Faq";
+import Resi from "./pages/legal/Resi";
+import Privacy from "./pages/legal/Privacy";
+import Termini from "./pages/legal/Termini";
 
 const queryClient = new QueryClient();
 
@@ -65,6 +69,10 @@ function AppShell() {
         <Route path="/sostenibilita" element={<GatekeeperRoute><Sostenibilita /></GatekeeperRoute>} />
         <Route path="/emeraldscanner" element={<GatekeeperRoute><EmeraldScanner /></GatekeeperRoute>} />
         <Route path="/product/:id" element={<GatekeeperRoute><ProductDetail /></GatekeeperRoute>} />
+        <Route path="/faq" element={<GatekeeperRoute><Faq /></GatekeeperRoute>} />
+        <Route path="/resi" element={<GatekeeperRoute><Resi /></GatekeeperRoute>} />
+        <Route path="/privacy" element={<GatekeeperRoute><Privacy /></GatekeeperRoute>} />
+        <Route path="/termini" element={<GatekeeperRoute><Termini /></GatekeeperRoute>} />
         <Route path="*" element={<GatekeeperRoute><NotFound /></GatekeeperRoute>} />
       </Routes>
       {!hideFooter && <Footer />}
