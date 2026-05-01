@@ -121,3 +121,38 @@
 }
 
 body { overflow-x: hidden; }
+
+/* Legal/policy pages typography */
+.legal-content h2 {
+  font-family: ui-serif, Georgia, "Times New Roman", serif;
+  font-size: 1.6rem;
+  line-height: 1.2;
+  color: hsl(152 60% 14%);
+  margin-top: 3rem;
+  margin-bottom: 1rem;
+  letter-spacing: -0.01em;
+}
+.legal-content h2:first-child { margin-top: 0; }
+.legal-content h3 {
+  font-family: ui-serif, Georgia, "Times New Roman", serif;
+  font-size: 1.15rem;
+  color: hsl(152 60% 18%);
+  margin-top: 2rem;
+  margin-bottom: 0.5rem;
+}
+.legal-content p { margin-bottom: 1.1rem; }
+.legal-content ul, .legal-content ol {
+  margin: 0.5rem 0 1.4rem 1.25rem;
+  padding-left: 0.5rem;
+}
+.legal-content ul { list-style: disc; }
+.legal-content ol { list-style: decimal; }
+.legal-content li { margin-bottom: 0.5rem; }
+.legal-content strong { color: hsl(152 60% 18%); font-weight: 600; }
+.legal-content a { color: hsl(152 60% 28%); text-decoration: underline; text-underline-offset: 4px; }
+.legal-content a:hover { color: hsl(152 60% 14%); }
+.legal-content hr {
+  border: 0;
+  border-top: 1px solid hsl(140 40% 90%);
+  margin: 2.5rem 0;
+}
