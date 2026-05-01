@@ -47,54 +47,54 @@ export type Database = {
         }
         Relationships: []
       }
-      discount_codes: {
+      coupons: {
         Row: {
           code: string
           created_at: string
           description: string | null
           discount_type: string
-          discount_value: number
           id: string
           is_active: boolean
-          max_uses: number | null
           stripe_coupon_id: string | null
           stripe_promotion_code_id: string | null
           updated_at: string
-          uses_count: number
+          usage_limit: number | null
+          used_count: number
           valid_from: string
           valid_until: string | null
+          value: number
         }
         Insert: {
           code: string
           created_at?: string
           description?: string | null
           discount_type?: string
-          discount_value?: number
           id?: string
           is_active?: boolean
-          max_uses?: number | null
           stripe_coupon_id?: string | null
           stripe_promotion_code_id?: string | null
           updated_at?: string
-          uses_count?: number
+          usage_limit?: number | null
+          used_count?: number
           valid_from?: string
           valid_until?: string | null
+          value?: number
         }
         Update: {
           code?: string
           created_at?: string
           description?: string | null
           discount_type?: string
-          discount_value?: number
           id?: string
           is_active?: boolean
-          max_uses?: number | null
           stripe_coupon_id?: string | null
           stripe_promotion_code_id?: string | null
           updated_at?: string
-          uses_count?: number
+          usage_limit?: number | null
+          used_count?: number
           valid_from?: string
           valid_until?: string | null
+          value?: number
         }
         Relationships: []
       }
