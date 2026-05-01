@@ -6,6 +6,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import GemLoader from "@/components/GemLoader";
 import ImageFallback from "@/components/ImageFallback";
 import RelatedProducts from "@/components/RelatedProducts";
+import ProductReviews from "@/components/ProductReviews";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, ChevronLeft, ChevronRight, Ruler, ShoppingBag } from "lucide-react";
@@ -482,6 +483,7 @@ const ProductDetail = () => {
 
           {/* Related products carousel */}
           <RelatedProducts currentProductId={product.id} category={product.category} />
+          <ProductReviews productId={product.id} />
         </div>
       </main>
     </>
