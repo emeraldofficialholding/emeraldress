@@ -343,7 +343,19 @@ export default function Admin() {
 
     const prodList = (prods as Product[]) || [];
     setProducts(prodList);
-    const ordList = (ords as Order[]) || [];
+    // orders schema migrated: map guest_email -> customer_email and load items from order_items if present
+    const ordList: Order[] = ((ords as any[]) || []).map((o) => ({
+      id: o.id,
+      customer_email: o.guest_email ?? o.customer_email ?? "",
+      total_amount: Number(o.total_amount ?? 0),
+      status: o.status ?? "pending",
+      created_at: o.created_at,
+      items: o.items ?? [],
+      tracking_number: o.tracking_number ?? undefined,
+      tracking_url: o.tracking_url ?? undefined,
+      return_status: o.return_status ?? undefined,
+      return_label_url: o.return_label_url ?? undefined,
+    }));
     setOrders(ordList);
     setChartData(buildChartData(ordList));
     setSubscribers((subs as Subscriber[]) || []);
