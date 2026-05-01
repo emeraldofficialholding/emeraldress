@@ -224,7 +224,8 @@ const EmeraldScanner = () => {
         .single();
 
       const dbScore = typeof dbRow?.sustainability_score === "number" ? dbRow.sustainability_score : null;
-      const dbDiagnosis = dbRow?.diagnosis_result || null;
+      const rawDiag = dbRow?.diagnosis_result;
+      const dbDiagnosis = rawDiag == null ? null : (typeof rawDiag === "string" ? rawDiag : JSON.stringify(rawDiag));
 
       if (dbScore !== null && dbScore > 0) {
         setResultScore(dbScore);
@@ -250,7 +251,8 @@ const EmeraldScanner = () => {
             .single();
           if (dbRow?.sustainability_score && dbRow.sustainability_score > 0) {
             setResultScore(dbRow.sustainability_score);
-            setResultDiagnosis(dbRow.diagnosis_result);
+            const r = dbRow.diagnosis_result;
+            setResultDiagnosis(r == null ? null : (typeof r === "string" ? r : JSON.stringify(r)));
             setPhase("result");
             return;
           }
