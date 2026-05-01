@@ -2,7 +2,6 @@ import { useParams, Link } from "react-router-dom";
 import { useState, useRef, useCallback } from "react";
 import { Helmet } from "react-helmet-async";
 import { useProduct } from "@/hooks/useProducts";
-import { useCart } from "@/contexts/CartContext";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import GemLoader from "@/components/GemLoader";
 import ImageFallback from "@/components/ImageFallback";
@@ -211,7 +210,6 @@ const MobileCarousel = ({
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { data: product, isLoading } = useProduct(id || "");
-  const { addItem } = useCart();
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [activeImage, setActiveImage] = useState(0);
   const [sizeGuideOpen, setSizeGuideOpen] = useState(false);
@@ -243,20 +241,6 @@ const ProductDetail = () => {
     .map((s) => s.trim())
     .filter(Boolean);
   const images = product.images?.length ? product.images : ["https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/faviconemeraldress.svg"];
-
-  const handleAddToCart = () => {
-    if (!selectedSize) return;
-    addItem({
-      id: product.id,
-      name: product.name,
-      price: Number(product.price),
-      size: selectedSize,
-      image: images[0],
-    });
-    toast.success("Aggiunto al carrello", {
-      description: `${product.name} — Taglia ${selectedSize}`,
-    });
-  };
 
   return (
     <>
