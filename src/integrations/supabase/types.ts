@@ -119,6 +119,7 @@ export type Database = {
           sizes: string[] | null
           status: string
           stock: number
+          stripe_payment_link: string | null
         }
         Insert: {
           category: string
@@ -134,6 +135,7 @@ export type Database = {
           sizes?: string[] | null
           status?: string
           stock?: number
+          stripe_payment_link?: string | null
         }
         Update: {
           category?: string
@@ -149,6 +151,7 @@ export type Database = {
           sizes?: string[] | null
           status?: string
           stock?: number
+          stripe_payment_link?: string | null
         }
         Relationships: []
       }
