@@ -233,7 +233,7 @@ const ProductDetail = () => {
     );
 
   // Robust size cleaning: handles Postgres {S,M,L} format, stray braces on any element
-  const rawSizes = product.sizes?.length ? product.sizes : ["XS", "S", "M", "L", "XL"];
+  const rawSizes = product.sizes?.length ? product.sizes : ["XS/S", "S/M", "M/L"];
   const sizes = rawSizes
     .flatMap((s) => {
       const cleaned = String(s).replace(/[{}]/g, "").trim();
@@ -403,20 +403,42 @@ const ProductDetail = () => {
 
               {/* Add to cart */}
               {product.stripe_payment_link ? (
-                <motion.a
-                  href={product.stripe_payment_link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.99 }}
-                  className={cn(
-                    "w-full py-4 flex items-center justify-center gap-2.5 font-sans text-xs tracking-[0.25em] uppercase transition-all duration-400 mb-3",
-                    "bg-foreground text-background hover:bg-primary hover:text-primary-foreground cursor-pointer"
-                  )}
-                >
-                  <ShoppingBag size={14} />
-                  Acquista ora
-                </motion.a>
+                (() => {
+                  const sep = product.stripe_payment_link.includes("?") ? "&" : "?";
+                  const sizeParam = selectedSize
+                    ? `${sep}client_reference_id=${encodeURIComponent(`size_${selectedSize}_${product.id}`)}&prefilled_email=`
+                    : "";
+                  const href = selectedSize
+                    ? `${product.stripe_payment_link}${sep}client_reference_id=${encodeURIComponent(`size-${selectedSize}`)}`
+                    : "#";
+                  return (
+                    <motion.a
+                      href={href}
+                      onClick={(e) => {
+                        if (!selectedSize) {
+                          e.preventDefault();
+                          toast.error("Seleziona una taglia", {
+                            description: "Scegli una taglia prima di procedere all'acquisto.",
+                          });
+                        }
+                      }}
+                      target={selectedSize ? "_blank" : undefined}
+                      rel="noopener noreferrer"
+                      whileHover={selectedSize ? { scale: 1.01 } : {}}
+                      whileTap={selectedSize ? { scale: 0.99 } : {}}
+                      className={cn(
+                        "w-full py-4 flex items-center justify-center gap-2.5 font-sans text-xs tracking-[0.25em] uppercase transition-all duration-400 mb-3",
+                        selectedSize
+                          ? "bg-foreground text-background hover:bg-primary hover:text-primary-foreground cursor-pointer"
+                          : "bg-muted text-muted-foreground cursor-not-allowed pointer-events-auto"
+                      )}
+                      aria-disabled={!selectedSize}
+                    >
+                      <ShoppingBag size={14} />
+                      {selectedSize ? `Acquista ora — Taglia ${selectedSize}` : "Seleziona una taglia"}
+                    </motion.a>
+                  );
+                })()
               ) : (
               <motion.button
                 onClick={handleAddToCart}
