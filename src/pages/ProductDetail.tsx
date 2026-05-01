@@ -233,7 +233,7 @@ const ProductDetail = () => {
     );
 
   // Robust size cleaning: handles Postgres {S,M,L} format, stray braces on any element
-  const rawSizes = product.sizes?.length ? product.sizes : ["XS", "S", "M", "L", "XL"];
+  const rawSizes = product.sizes?.length ? product.sizes : ["XS/S", "S/M", "M/L"];
   const sizes = rawSizes
     .flatMap((s) => {
       const cleaned = String(s).replace(/[{}]/g, "").trim();
