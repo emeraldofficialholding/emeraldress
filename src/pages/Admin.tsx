@@ -128,6 +128,7 @@ const emptyForm = {
   shipping_info: "",
   sizes: "S,M,L",
   status: "active" as "active" | "draft",
+  stripe_payment_link: "",
 };
 
 // ══════════════════════════════════════════════════════════════════════════════
