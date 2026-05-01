@@ -270,6 +270,15 @@ const ProductDetail = () => {
             "availability": product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
           }
         })}</script>
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.emeraldress.com/" },
+            { "@type": "ListItem", "position": 2, "name": "Collezioni", "item": "https://www.emeraldress.com/collezioni" },
+            { "@type": "ListItem", "position": 3, "name": product.name, "item": `https://www.emeraldress.com/product/${product.id}` }
+          ]
+        })}</script>
       </Helmet>
       <SizeGuideModal open={sizeGuideOpen} onClose={() => setSizeGuideOpen(false)} />
 

@@ -90,6 +90,19 @@ const Collezioni = () => {
       <Helmet>
         <title>Le Collezioni | Emeraldress Luxury Fashion</title>
         <meta name="description" content="Esplora le collezioni Emeraldress: abbigliamento luxury sostenibile in fibra riciclata, manifattura italiana." />
+        <link rel="canonical" href="https://www.emeraldress.com/collezioni" />
+        <meta property="og:title" content="Le Collezioni | Emeraldress" />
+        <meta property="og:description" content="Abiti luxury italiani con tessuti sostenibili rigenerati. Scopri Emerald Touch." />
+        <meta property="og:url" content="https://www.emeraldress.com/collezioni" />
+        <meta property="og:type" content="website" />
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.emeraldress.com/" },
+            { "@type": "ListItem", "position": 2, "name": "Collezioni", "item": "https://www.emeraldress.com/collezioni" }
+          ]
+        })}</script>
       </Helmet>
       {/* Header */}
       <div className="text-center mb-16 container mx-auto px-4">
