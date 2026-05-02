@@ -11,15 +11,7 @@ const STATIC_CACHE = `emeraldress-static-${VERSION}`;
 const HTML_CACHE = `emeraldress-html-${VERSION}`;
 
 const STATIC_PATHS = [
-  "/favicon.ico",
-  "/favicon-16x16.png",
-  "/favicon-32x32.png",
-  "/apple-touch-icon.png",
-  "/android-chrome-192x192.png",
-  "/android-chrome-512x512.png",
   "/manifest.json",
-  "/og-image.jpg",
-  "/og-image-square.jpg",
 ];
 
 self.addEventListener("install", (event) => {
