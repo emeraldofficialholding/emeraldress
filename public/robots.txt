@@ -60,6 +60,8 @@ Disallow: /admin/
 Disallow: /login
 Disallow: /coming-soon
 Disallow: /private/
+Disallow: /profilo
+Disallow: /profilo/
 
 # Pulizia URL (Impedisce a Google di indicizzare link "sporchi" provenienti da Ads o Social, salvando la SEO)
 Disallow: /*?utm_*
