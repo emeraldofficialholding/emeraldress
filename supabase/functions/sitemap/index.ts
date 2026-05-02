@@ -33,7 +33,7 @@ Deno.serve(async (req) => {
 
     const { data: products } = await supabase
       .from("products")
-      .select("id, created_at, status")
+      .select("id, name, created_at, status, images")
       .neq("status", "draft");
 
     const escapeXml = (s: string) =>
@@ -44,19 +44,29 @@ Deno.serve(async (req) => {
     const urls: string[] = [];
 
     for (const u of STATIC_URLS) {
+      const imageBlock = u.loc === "/"
+        ? `\n    <image:image>\n      <image:loc>${BASE}/og-image.jpg</image:loc>\n      <image:title>Emeraldress — Sustainable Mediterranean Luxury</image:title>\n    </image:image>`
+        : "";
       urls.push(
-        `  <url>\n    <loc>${BASE}${u.loc}</loc>\n    <changefreq>${u.changefreq}</changefreq>\n    <priority>${u.priority}</priority>\n  </url>`,
+        `  <url>\n    <loc>${BASE}${u.loc}</loc>\n    <changefreq>${u.changefreq}</changefreq>\n    <priority>${u.priority}</priority>${imageBlock}\n  </url>`,
       );
     }
 
     for (const p of products ?? []) {
       const lastmod = new Date(p.created_at).toISOString().split("T")[0];
+      const imgs = (Array.isArray(p.images) ? p.images : [])
+        .slice(0, 5)
+        .map(
+          (img: string) =>
+            `\n    <image:image>\n      <image:loc>${escapeXml(img)}</image:loc>\n      <image:title>${escapeXml(p.name ?? "Emeraldress product")}</image:title>\n    </image:image>`,
+        )
+        .join("");
       urls.push(
-        `  <url>\n    <loc>${BASE}/product/${escapeXml(p.id)}</loc>\n    <lastmod>${lastmod}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>`,
+        `  <url>\n    <loc>${BASE}/product/${escapeXml(p.id)}</loc>\n    <lastmod>${lastmod}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>${imgs}\n  </url>`,
       );
     }
 
-    const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join("\n")}\n</urlset>`;
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n${urls.join("\n")}\n</urlset>`;
 
     return new Response(xml, {
       headers: {

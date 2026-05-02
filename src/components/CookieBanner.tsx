@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { X } from "lucide-react";
+import { grantAnalyticsConsent, denyAnalyticsConsent } from "@/lib/analytics";
 
 const STORAGE_KEY = "emeraldress_cookie_consent_v1";
 
@@ -24,6 +25,8 @@ const CookieBanner = () => {
 
   const setChoice = (v: Exclude<Consent, null>) => {
     localStorage.setItem(STORAGE_KEY, v);
+    if (v === "accepted") grantAnalyticsConsent();
+    else denyAnalyticsConsent();
     setVisible(false);
   };
 
