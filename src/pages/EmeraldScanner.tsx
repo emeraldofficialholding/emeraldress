@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { ContainerScroll } from "@/components/ui/container-scroll-animation";
 import GemLoader from "@/components/GemLoader";
+import RelatedLinks from "@/components/RelatedLinks";
 
 type ScannerPhase = "input" | "uploading" | "waiting" | "result";
 
@@ -330,6 +331,7 @@ const EmeraldScanner = () => {
           name="description"
           content="Usa lo scanner AI di Emeraldress per analizzare la sostenibilità dei tuoi capi di abbigliamento."
         />
+        <link rel="canonical" href="https://www.emeraldress.com/emeraldscanner" />
       </Helmet>
       {/* TEXTURE BACKGROUND */}
       <div
@@ -842,6 +844,17 @@ const EmeraldScanner = () => {
           </motion.div>
         </div>
       </section>
+
+      <RelatedLinks
+        title="Dopo l'analisi, l'azione"
+        intro="Hai scoperto l'impatto del tuo capo. Ora esplora la nostra risposta: una filiera trasparente e una collezione progettata per durare."
+        links={[
+          { to: "/", label: "Home", desc: "Torna all'esperienza visiva del brand.", eyebrow: "Inizio" },
+          { to: "/sostenibilita", label: "Sostenibilità", desc: "La fibra rigenerata e il processo di trasformazione.", eyebrow: "Materia" },
+          { to: "/collezioni", label: "Collezioni", desc: "La selezione Emerald Touch, edizione limitata.", eyebrow: "Shop" },
+          { to: "/chisiamo", label: "Chi Siamo", desc: "Vision, mission e filiera 100% Made in Italy.", eyebrow: "Manifesto" },
+        ]}
+      />
     </main>
   );
 };
