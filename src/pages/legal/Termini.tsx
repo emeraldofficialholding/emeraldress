@@ -8,6 +8,13 @@ const Termini = () => {
       intro="Le presenti condizioni generali disciplinano l'uso del sito emeraldress.com e i contratti di vendita conclusi tra Emeraldress e i propri clienti."
       metaTitle="Termini e Condizioni | Emeraldress"
       metaDescription="Condizioni generali di vendita e di utilizzo del sito Emeraldress: contratto, prezzi, spedizioni, recesso, garanzia e legge applicabile."
+      canonicalPath="/termini"
+      relatedLinks={[
+        { to: "/", label: "Home", desc: "Torna al manifesto e all'esperienza Emeraldress.", eyebrow: "Inizio" },
+        { to: "/privacy", label: "Privacy Policy", desc: "Trattamento dei dati personali secondo il GDPR.", eyebrow: "Legale" },
+        { to: "/faq", label: "FAQ & Spedizioni", desc: "Tempi di consegna, pagamenti, taglie e cura dei capi.", eyebrow: "Supporto" },
+        { to: "/resi", label: "Politica di Reso", desc: "Diritto di recesso entro 14 giorni e procedura completa.", eyebrow: "Supporto" },
+      ]}
     >
       <h2>1. Informazioni generali</h2>
       <p>
