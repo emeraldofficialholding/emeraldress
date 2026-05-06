@@ -6,6 +6,7 @@ import GemLoader from "@/components/GemLoader";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, Sparkles } from "lucide-react";
 const logoET = "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/emeraldress-logo-touch-collection.svg";
+import RelatedLinks from "@/components/RelatedLinks";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -178,6 +179,17 @@ const Collezioni = () => {
           </div>
         )}
       </div>
+
+      <RelatedLinks
+        title="Continua il viaggio"
+        intro="Dietro ogni capo c'è una filiera, una filosofia e uno strumento per misurarne l'impatto. Esplora il resto del mondo Emeraldress."
+        links={[
+          { to: "/", label: "Home", desc: "Il manifesto e l'esperienza visiva del brand.", eyebrow: "Inizio" },
+          { to: "/sostenibilita", label: "Sostenibilità", desc: "La fibra rigenerata e il processo di trasformazione.", eyebrow: "Materia" },
+          { to: "/emeraldscanner", label: "Emerald Scanner", desc: "Analizza un capo e scopri il suo impatto reale.", eyebrow: "Strumento" },
+          { to: "/chisiamo", label: "Chi Siamo", desc: "Vision, mission e filiera 100% Made in Italy.", eyebrow: "Manifesto" },
+        ]}
+      />
     </main>
   );
 };
