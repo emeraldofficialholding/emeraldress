@@ -4,6 +4,7 @@ import { Timeline } from "@/components/ui/timeline";
 import ScrollExpandMedia from "@/components/ui/scroll-expansion-hero";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 import { Instagram, PenTool, Heart, MessageCircle, Sparkles, ArrowRight } from "lucide-react";
+import RelatedLinks from "@/components/RelatedLinks";
 const logoET = "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/emeraldress-logo-touch-collection.svg";
 
 const fadeUp = {
@@ -80,6 +81,7 @@ const ChiSiamo = () => {
           name="description"
           content="Il manifesto Emeraldress: scopri la nostra visione di lusso consapevole, filiera etica e manifattura italiana."
         />
+        <link rel="canonical" href="https://www.emeraldress.com/chisiamo" />
       </Helmet>
       <ScrollExpandMedia
         mediaType="video"
@@ -260,6 +262,17 @@ const ChiSiamo = () => {
           </section>
         </div>
       </ScrollExpandMedia>
+
+      <RelatedLinks
+        title="Vivi il manifesto"
+        intro="La nostra storia continua nei capi, nei materiali e negli strumenti che mettiamo a disposizione di chi sceglie un lusso consapevole."
+        links={[
+          { to: "/", label: "Home", desc: "Torna all'esperienza visiva del brand.", eyebrow: "Inizio" },
+          { to: "/sostenibilita", label: "Sostenibilità", desc: "La fibra rigenerata e il processo di trasformazione.", eyebrow: "Materia" },
+          { to: "/collezioni", label: "Collezioni", desc: "La selezione Emerald Touch, edizione limitata.", eyebrow: "Shop" },
+          { to: "/emeraldscanner", label: "Emerald Scanner", desc: "Analizza un capo e scopri il suo impatto reale.", eyebrow: "Strumento" },
+        ]}
+      />
     </main>
   );
 };
