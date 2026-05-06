@@ -23,6 +23,7 @@ import Admin from "./pages/Admin";
 import ComingSoon from "./pages/ComingSoon";
 import Login from "./pages/Login";
 import Profilo from "./pages/Profilo";
+import ResetPassword from "./pages/ResetPassword";
 import Faq from "./pages/legal/Faq";
 import Resi from "./pages/legal/Resi";
 import Privacy from "./pages/legal/Privacy";
@@ -32,7 +33,7 @@ import CookieBanner from "@/components/CookieBanner";
 const queryClient = new QueryClient();
 
 // Routes that should NOT show the Navbar/Footer (standalone pages)
-const STANDALONE_ROUTES = ["/coming-soon", "/login", "/admin"];
+const STANDALONE_ROUTES = ["/coming-soon", "/login", "/admin", "/reset-password"];
 const NO_FOOTER_ROUTES = ["/profilo"];
 
 function AppShell() {
@@ -60,6 +61,7 @@ function AppShell() {
         {/* ── Public / always accessible ─────────────────────────── */}
         <Route path="/coming-soon" element={<ComingSoon />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/profilo" element={<Profilo />} />
 
