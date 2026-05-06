@@ -61,6 +61,13 @@ const Faq = () => {
       intro="Tutto quello che devi sapere su ordini, spedizioni, pagamenti e cura dei nostri capi. Se non trovi la risposta che cerchi, il nostro team è a tua disposizione."
       metaTitle="FAQ & Spedizioni | Emeraldress"
       metaDescription="Tempi di consegna, metodi di pagamento, taglie e cura dei capi Emeraldress. Tutte le risposte ufficiali del nostro servizio clienti."
+      canonicalPath="/faq"
+      relatedLinks={[
+        { to: "/", label: "Home", desc: "Torna al manifesto e all'esperienza Emeraldress.", eyebrow: "Inizio" },
+        { to: "/resi", label: "Politica di Reso", desc: "Diritto di recesso entro 14 giorni e procedura completa.", eyebrow: "Supporto" },
+        { to: "/termini", label: "Termini e Condizioni", desc: "Condizioni generali di vendita e d'uso del sito.", eyebrow: "Legale" },
+        { to: "/privacy", label: "Privacy Policy", desc: "Come trattiamo i tuoi dati personali secondo il GDPR.", eyebrow: "Legale" },
+      ]}
     >
       {/* Highlights spedizioni */}
       <div className="not-prose grid grid-cols-1 sm:grid-cols-2 gap-4 mb-14">

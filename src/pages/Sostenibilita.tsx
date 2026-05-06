@@ -20,6 +20,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 import { useProducts } from "@/hooks/useProducts";
 import GemLoader from "@/components/GemLoader";
+import RelatedLinks from "@/components/RelatedLinks";
 
 // --- DATI DEL CAROSELLO (Il testo diviso in 4 fasi) ---
 const slides = [
@@ -265,6 +266,7 @@ const Sostenibilita = () => {
           name="description"
           content="Scopri i tessuti rigenerati e il ciclo virtuoso della moda sostenibile Emeraldress."
         />
+        <link rel="canonical" href="https://www.emeraldress.com/sostenibilita" />
       </Helmet>
       {/* 1. HERO SECTION */}
       <HeroSustainability />
@@ -343,6 +345,17 @@ const Sostenibilita = () => {
 
       {/* 4. COLLEZIONI */}
       <LatestCollectionShowcase />
+
+      <RelatedLinks
+        title="Approfondisci la nostra visione"
+        intro="La sostenibilità è una pratica, non uno slogan. Esplora il manifesto, lo strumento di analisi e la collezione che la incarna."
+        links={[
+          { to: "/", label: "Home", desc: "Il manifesto e l'esperienza visiva del brand.", eyebrow: "Inizio" },
+          { to: "/collezioni", label: "Collezioni", desc: "La selezione Emerald Touch, edizione limitata.", eyebrow: "Shop" },
+          { to: "/emeraldscanner", label: "Emerald Scanner", desc: "Analizza un capo e scopri il suo impatto reale.", eyebrow: "Strumento" },
+          { to: "/chisiamo", label: "Chi Siamo", desc: "Vision, mission e filiera 100% Made in Italy.", eyebrow: "Manifesto" },
+        ]}
+      />
     </main>
   );
 };

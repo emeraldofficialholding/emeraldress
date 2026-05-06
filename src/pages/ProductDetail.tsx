@@ -7,6 +7,7 @@ import GemLoader from "@/components/GemLoader";
 import ImageFallback from "@/components/ImageFallback";
 import RelatedProducts from "@/components/RelatedProducts";
 import ProductReviews from "@/components/ProductReviews";
+import RelatedLinks from "@/components/RelatedLinks";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, ChevronLeft, ChevronRight, Ruler, ShoppingBag } from "lucide-react";
@@ -494,6 +495,15 @@ const ProductDetail = () => {
           <RelatedProducts currentProductId={product.id} category={product.category} />
           <ProductReviews productId={product.id} />
         </div>
+        <RelatedLinks
+          title="Esplora il mondo Emeraldress"
+          links={[
+            { to: "/", label: "Home", desc: "Torna all'esperienza visiva del brand.", eyebrow: "Inizio" },
+            { to: "/collezioni", label: "Collezioni", desc: "Tutta la selezione Emerald Touch.", eyebrow: "Shop" },
+            { to: "/sostenibilita", label: "Sostenibilità", desc: "La fibra rigenerata e il processo.", eyebrow: "Materia" },
+            { to: "/emeraldscanner", label: "Emerald Scanner", desc: "Analizza un capo e scopri il suo impatto.", eyebrow: "Strumento" },
+          ]}
+        />
       </main>
     </>
   );
