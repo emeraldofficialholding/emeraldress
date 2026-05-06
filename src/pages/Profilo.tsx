@@ -600,13 +600,14 @@ function ScansSection() {
 
   useEffect(() => {
     (async () => {
-      // Lo schema attuale non lega user_id alle scansioni: mostriamo le ultime
-      // dell'utente (placeholder = empty UI elegante se nulla).
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) { setRows([]); return; }
       const { data } = await supabase
         .from("scanner_requests")
         .select("id, created_at, image_url, sustainability_score, garment_type, diagnosis_result")
+        .eq("user_id", session.user.id)
         .order("created_at", { ascending: false })
-        .limit(0);
+        .limit(50);
       setRows((data as any) ?? []);
     })();
   }, []);
@@ -650,8 +651,14 @@ function ReviewsSection() {
 
   useEffect(() => {
     (async () => {
-      // Schema attuale: nessun user_id sulle reviews → UI placeholder elegante
-      setRows([]);
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) { setRows([]); return; }
+      const { data } = await supabase
+        .from("reviews")
+        .select("id, created_at, rating, comment, product_id, is_approved")
+        .eq("user_id", session.user.id)
+        .order("created_at", { ascending: false });
+      setRows((data as Review[]) ?? []);
     })();
   }, []);
 
