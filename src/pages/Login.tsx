@@ -55,6 +55,8 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
+  const [forgotMode, setForgotMode] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
 
   // Role-based redirect helper
   const redirectByRole = async (userId: string) => {
@@ -155,6 +157,29 @@ export default function Login() {
       setError("Si è verificato un errore con Google.");
       setIsLoading(false);
     }
+  };
+
+  // ── Forgot password ────────────────────────────────────────────────────────
+  const handleForgot = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setInfo(null);
+    if (!forgotEmail) {
+      setError("Inserisci la tua email.");
+      return;
+    }
+    setIsLoading(true);
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(forgotEmail, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    setIsLoading(false);
+    if (resetError) {
+      setError(resetError.message);
+      return;
+    }
+    setInfo("Se l'email è registrata riceverai un link per reimpostare la password.");
+    setForgotMode(false);
+    setForgotEmail("");
   };
 
   return (
@@ -268,7 +293,51 @@ export default function Login() {
                 </div>
 
                 <SubmitButton isLoading={isLoading} label="Entra" loadingLabel="Accesso in corso…" />
+                <button
+                  type="button"
+                  onClick={() => { setForgotMode(true); setError(null); setInfo(null); }}
+                  className="block w-full text-center text-[10px] tracking-[0.25em] uppercase text-emerald-800/60 hover:text-emerald-900 mt-2"
+                >
+                  Password dimenticata?
+                </button>
               </form>
+
+              {forgotMode && (
+                <motion.form
+                  initial={{ opacity: 0, y: -4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  onSubmit={handleForgot}
+                  className="mt-4 p-4 bg-white/60 border border-emerald-200 rounded-lg space-y-3"
+                >
+                  <p className="text-[10px] tracking-[0.25em] uppercase text-emerald-800/70">
+                    Recupera password
+                  </p>
+                  <input
+                    type="email"
+                    required
+                    value={forgotEmail}
+                    onChange={(e) => setForgotEmail(e.target.value)}
+                    className="w-full bg-white border border-emerald-200 rounded-lg px-4 py-2.5 text-sm text-emerald-950 focus:outline-none focus:border-emerald-500"
+                    placeholder="La tua email"
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      type="submit"
+                      disabled={isLoading}
+                      className="flex-1 py-2 rounded-lg text-[10px] tracking-[0.25em] uppercase font-medium bg-emerald-900 text-emerald-50 hover:bg-emerald-950 disabled:opacity-60"
+                    >
+                      Invia link
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setForgotMode(false)}
+                      className="px-3 py-2 text-[10px] tracking-[0.25em] uppercase text-emerald-800/70 hover:text-emerald-900"
+                    >
+                      Annulla
+                    </button>
+                  </div>
+                </motion.form>
+              )}
             </TabsContent>
 
             {/* ── Sign Up ─────────────────────────────────────── */}

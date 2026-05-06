@@ -59,6 +59,9 @@ type Order = {
   total_amount: number;
   items: OrderItem[];
   customer_email: string;
+  tracking_number?: string | null;
+  tracking_url?: string | null;
+  return_status?: string | null;
 };
 
 type Review = {
@@ -430,14 +433,16 @@ function EmptyState({ icon: Icon, title, message }: { icon: typeof Package; titl
 // ── Orders ─────────────────────────────────────────────────────────────────
 function OrdersSection({ email }: { email: string | null }) {
   const [orders, setOrders] = useState<Order[] | null>(null);
+  const { toast } = useToast();
+  const [requestingId, setRequestingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!email) return;
     (async () => {
+      // RLS lets us read both user_id-linked orders AND guest orders matching our email.
       const { data } = await supabase
         .from("orders")
-        .select("id, created_at, status, total_amount, guest_email")
-        .eq("guest_email", email)
+        .select("id, created_at, status, total_amount, guest_email, tracking_number, tracking_url, return_status")
         .order("created_at", { ascending: false });
       const mapped: Order[] = ((data as any[]) ?? []).map((o) => ({
         id: o.id,
@@ -446,10 +451,33 @@ function OrdersSection({ email }: { email: string | null }) {
         total_amount: Number(o.total_amount ?? 0),
         items: [],
         customer_email: o.guest_email ?? "",
+        tracking_number: o.tracking_number ?? null,
+        tracking_url: o.tracking_url ?? null,
+        return_status: o.return_status ?? null,
       }));
       setOrders(mapped);
     })();
   }, [email]);
+
+  const requestReturn = async (orderId: string) => {
+    setRequestingId(orderId);
+    try {
+      const res = await fetch("https://n8n.kreareweb.com/webhook/return-request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ order_id: orderId, customer_email: email, source: "profilo" }),
+      });
+      if (!res.ok) throw new Error("Webhook ko");
+      toast({ title: "Richiesta inviata", description: "Ti contatteremo via email per i prossimi passi." });
+      setOrders((prev) =>
+        prev ? prev.map((o) => (o.id === orderId ? { ...o, return_status: "requested" } : o)) : prev,
+      );
+    } catch {
+      toast({ title: "Errore", description: "Impossibile inviare la richiesta. Riprova.", variant: "destructive" });
+    } finally {
+      setRequestingId(null);
+    }
+  };
 
   return (
     <Card title="I Miei Ordini" emoji="📦">
@@ -462,6 +490,7 @@ function OrdersSection({ email }: { email: string | null }) {
           {orders.map((o) => {
             const items = Array.isArray(o.items) ? o.items : [];
             const isDelivered = o.status === "delivered";
+            const hasReturn = !!o.return_status;
             return (
               <li key={o.id} className="py-4 flex flex-col sm:flex-row sm:items-center gap-3">
                 <div className="flex-1 min-w-0">
@@ -470,19 +499,36 @@ function OrdersSection({ email }: { email: string | null }) {
                       {new Date(o.created_at).toLocaleDateString("it-IT", { day: "2-digit", month: "short", year: "numeric" })}
                     </span>
                     <StatusBadge status={o.status} />
+                    {hasReturn && (
+                      <span className="inline-flex items-center text-[10px] uppercase tracking-[0.15em] px-2 py-0.5 rounded-full bg-amber-50 text-amber-800">
+                        Reso: {o.return_status}
+                      </span>
+                    )}
                   </div>
                   <p className="text-sm text-emerald-950 truncate">
                     {items.length > 0 ? items.map((i) => i.name).filter(Boolean).join(" · ") : `Ordine #${o.id.slice(0, 8)}`}
                   </p>
                   <p className="text-xs text-emerald-900/60 mt-0.5">€ {Number(o.total_amount).toFixed(2)} · {items.length} articol{items.length === 1 ? "o" : "i"}</p>
+                  {o.tracking_url && (
+                    <a
+                      href={o.tracking_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-[11px] text-emerald-800 hover:text-emerald-950 mt-1"
+                    >
+                      <Truck className="w-3 h-3" />
+                      Traccia spedizione {o.tracking_number ? `· ${o.tracking_number}` : ""}
+                    </a>
+                  )}
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  {isDelivered && (
+                  {isDelivered && !hasReturn && (
                     <button
+                      disabled={requestingId === o.id}
                       className="text-xs px-3 py-1.5 rounded-full border border-emerald-200 text-emerald-900 hover:bg-emerald-50"
-                      onClick={() => alert("Richiesta di reso registrata. Ti contatteremo via email.")}
+                      onClick={() => requestReturn(o.id)}
                     >
-                      Richiedi Reso
+                      {requestingId === o.id ? "Invio…" : "Richiedi Reso"}
                     </button>
                   )}
                   <span className="text-[10px] text-emerald-800/50 font-mono">#{o.id.slice(0, 6)}</span>
@@ -554,13 +600,14 @@ function ScansSection() {
 
   useEffect(() => {
     (async () => {
-      // Lo schema attuale non lega user_id alle scansioni: mostriamo le ultime
-      // dell'utente (placeholder = empty UI elegante se nulla).
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) { setRows([]); return; }
       const { data } = await supabase
         .from("scanner_requests")
         .select("id, created_at, image_url, sustainability_score, garment_type, diagnosis_result")
+        .eq("user_id", session.user.id)
         .order("created_at", { ascending: false })
-        .limit(0);
+        .limit(50);
       setRows((data as any) ?? []);
     })();
   }, []);
@@ -604,8 +651,14 @@ function ReviewsSection() {
 
   useEffect(() => {
     (async () => {
-      // Schema attuale: nessun user_id sulle reviews → UI placeholder elegante
-      setRows([]);
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) { setRows([]); return; }
+      const { data } = await supabase
+        .from("reviews")
+        .select("id, created_at, rating, comment, product_id, is_approved")
+        .eq("user_id", session.user.id)
+        .order("created_at", { ascending: false });
+      setRows((data as Review[]) ?? []);
     })();
   }, []);
 
@@ -747,14 +800,19 @@ function SettingsSection({
   };
 
   const deleteAccount = async () => {
-    // Senza service role non possiamo cancellare auth.users dal client.
-    // Logout + messaggio: l'eliminazione completa va richiesta via supporto.
-    await supabase.auth.signOut();
-    toast({
-      title: "Richiesta inviata",
-      description: "Ti abbiamo disconnessa. Contatta supporto@emeraldress per la cancellazione completa dei dati.",
-    });
-    onLoggedOut();
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) throw new Error("Sessione assente");
+      const { error } = await supabase.functions.invoke("delete-account", {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      if (error) throw error;
+      await supabase.auth.signOut();
+      toast({ title: "Account eliminato", description: "I tuoi dati sono stati rimossi." });
+      onLoggedOut();
+    } catch (e: any) {
+      toast({ title: "Errore", description: e?.message ?? "Impossibile eliminare l'account", variant: "destructive" });
+    }
   };
 
   return (

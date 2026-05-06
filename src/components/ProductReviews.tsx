@@ -72,12 +72,14 @@ const ProductReviews = ({ productId }: { productId: string }) => {
       return;
     }
     setSubmitting(true);
+    const { data: { session } } = await supabase.auth.getSession();
     const { error } = await supabase.from("reviews").insert({
       product_id: productId,
       customer_name: name.trim(),
       rating,
       comment: comment.trim() || null,
       is_approved: false,
+      user_id: session?.user?.id ?? null,
     });
     setSubmitting(false);
     if (error) {

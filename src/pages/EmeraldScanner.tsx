@@ -145,6 +145,7 @@ const EmeraldScanner = () => {
       const inputType = hasImage && hasText ? "both" : hasImage ? "image" : "text";
 
       // Step 3: Insert with .select().single()
+      const { data: { session: scanSession } } = await supabase.auth.getSession();
       const { data, error } = await supabase
         .from("scanner_requests")
         .insert([
@@ -155,6 +156,7 @@ const EmeraldScanner = () => {
             brand: brand.trim() || null,
             garment_type: garmentType.trim() || null,
             material: material.trim() || null,
+            user_id: scanSession?.user?.id ?? null,
           },
         ])
         .select()
