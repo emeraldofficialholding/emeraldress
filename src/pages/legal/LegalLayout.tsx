@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
 import { ReactNode } from "react";
+import RelatedLinks, { RelatedLink } from "@/components/RelatedLinks";
 
 interface LegalLayoutProps {
   title: string;
@@ -11,6 +12,8 @@ interface LegalLayoutProps {
   metaTitle: string;
   metaDescription: string;
   lastUpdated?: string;
+  canonicalPath?: string;
+  relatedLinks?: RelatedLink[];
   children: ReactNode;
 }
 
@@ -21,6 +24,8 @@ const LegalLayout = ({
   metaTitle,
   metaDescription,
   lastUpdated = "1 maggio 2026",
+  canonicalPath,
+  relatedLinks,
   children,
 }: LegalLayoutProps) => {
   return (
@@ -28,6 +33,9 @@ const LegalLayout = ({
       <Helmet>
         <title>{metaTitle}</title>
         <meta name="description" content={metaDescription} />
+        {canonicalPath && (
+          <link rel="canonical" href={`https://www.emeraldress.com${canonicalPath}`} />
+        )}
       </Helmet>
 
       {/* Hero */}
@@ -118,6 +126,15 @@ const LegalLayout = ({
           </div>
         </div>
       </section>
+
+      {relatedLinks && relatedLinks.length > 0 && (
+        <RelatedLinks
+          title="Documenti correlati"
+          intro="Continua a esplorare le pagine ufficiali e le aree principali di Emeraldress."
+          links={relatedLinks}
+          variant="mint"
+        />
+      )}
     </main>
   );
 };
