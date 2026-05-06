@@ -38,13 +38,15 @@ export default function GatekeeperRoute({ children }: { children: React.ReactNod
 
     const checkAdminRole = async (userId: string): Promise<boolean> => {
       try {
-        const { data, error } = await withTimeout(
-          supabase
+        const { data, error } = await withTimeout<any>(
+          Promise.resolve(
+            supabase
             .from("user_roles")
             .select("role")
             .eq("user_id", userId)
             .eq("role", "admin")
             .maybeSingle(),
+          ),
           GATE_TIMEOUT_MS,
           "user_roles",
         );
