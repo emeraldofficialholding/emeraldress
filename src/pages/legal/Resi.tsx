@@ -8,6 +8,13 @@ const Resi = () => {
       intro="Il diritto di recesso e la procedura per restituire un capo Emeraldress, nel pieno rispetto della normativa europea a tutela del consumatore."
       metaTitle="Politica di Reso | Emeraldress"
       metaDescription="Diritto di recesso entro 14 giorni, procedura di reso e modalità di rimborso per gli acquisti effettuati su Emeraldress."
+      canonicalPath="/resi"
+      relatedLinks={[
+        { to: "/", label: "Home", desc: "Torna al manifesto e all'esperienza Emeraldress.", eyebrow: "Inizio" },
+        { to: "/faq", label: "FAQ & Spedizioni", desc: "Tempi di consegna, pagamenti, taglie e cura dei capi.", eyebrow: "Supporto" },
+        { to: "/termini", label: "Termini e Condizioni", desc: "Condizioni generali di vendita e d'uso del sito.", eyebrow: "Legale" },
+        { to: "/privacy", label: "Privacy Policy", desc: "Trattamento dei dati personali secondo il GDPR.", eyebrow: "Legale" },
+      ]}
     >
       <h2>1. Diritto di recesso</h2>
       <p>
