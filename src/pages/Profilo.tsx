@@ -800,14 +800,19 @@ function SettingsSection({
   };
 
   const deleteAccount = async () => {
-    // Senza service role non possiamo cancellare auth.users dal client.
-    // Logout + messaggio: l'eliminazione completa va richiesta via supporto.
-    await supabase.auth.signOut();
-    toast({
-      title: "Richiesta inviata",
-      description: "Ti abbiamo disconnessa. Contatta supporto@emeraldress per la cancellazione completa dei dati.",
-    });
-    onLoggedOut();
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) throw new Error("Sessione assente");
+      const { error } = await supabase.functions.invoke("delete-account", {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      if (error) throw error;
+      await supabase.auth.signOut();
+      toast({ title: "Account eliminato", description: "I tuoi dati sono stati rimossi." });
+      onLoggedOut();
+    } catch (e: any) {
+      toast({ title: "Errore", description: e?.message ?? "Impossibile eliminare l'account", variant: "destructive" });
+    }
   };
 
   return (
