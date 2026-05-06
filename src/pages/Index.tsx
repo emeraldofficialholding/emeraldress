@@ -6,6 +6,7 @@ import EmeraldTouchSection from "@/components/EmeraldTouchSection";
 import ClassicsSection from "@/components/ClassicsSection";
 import ManifestoSection from "@/components/ManifestoSection";
 import TrustMarquee from "@/components/TrustMarquee";
+import RelatedLinks from "@/components/RelatedLinks";
 
 const defaultSeo = {
   meta_title: "Emeraldress | Abbigliamento Sostenibile di Lusso e Fibra Riciclata",
@@ -77,6 +78,16 @@ const Index = () => {
       <EmeraldTouchSection />
       <ClassicsSection />
       <ManifestoSection />
+      <RelatedLinks
+        title="Esplora il mondo Emeraldress"
+        intro="Quattro porte d'ingresso al nostro universo: la collezione, la filosofia, la diagnostica del tessuto e la storia del brand."
+        links={[
+          { to: "/collezioni", label: "Collezioni", desc: "La selezione Emerald Touch, edizione limitata.", eyebrow: "Shop" },
+          { to: "/sostenibilita", label: "Sostenibilità", desc: "La fibra rigenerata e il processo di trasformazione.", eyebrow: "Materia" },
+          { to: "/emeraldscanner", label: "Emerald Scanner", desc: "Analizza un capo e scopri il suo impatto reale.", eyebrow: "Strumento" },
+          { to: "/chisiamo", label: "Chi Siamo", desc: "Vision, mission e filiera 100% Made in Italy.", eyebrow: "Manifesto" },
+        ]}
+      />
     </main>
   );
 };
