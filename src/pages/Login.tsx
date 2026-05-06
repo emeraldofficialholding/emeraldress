@@ -55,6 +55,8 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
+  const [forgotMode, setForgotMode] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
 
   // Role-based redirect helper
   const redirectByRole = async (userId: string) => {
@@ -155,6 +157,29 @@ export default function Login() {
       setError("Si è verificato un errore con Google.");
       setIsLoading(false);
     }
+  };
+
+  // ── Forgot password ────────────────────────────────────────────────────────
+  const handleForgot = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setInfo(null);
+    if (!forgotEmail) {
+      setError("Inserisci la tua email.");
+      return;
+    }
+    setIsLoading(true);
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(forgotEmail, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    setIsLoading(false);
+    if (resetError) {
+      setError(resetError.message);
+      return;
+    }
+    setInfo("Se l'email è registrata riceverai un link per reimpostare la password.");
+    setForgotMode(false);
+    setForgotEmail("");
   };
 
   return (
