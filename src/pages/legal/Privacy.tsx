@@ -8,6 +8,13 @@ const Privacy = () => {
       intro="La presente informativa descrive in modo trasparente come Emeraldress raccoglie, utilizza e protegge i dati personali dei propri utenti, in conformità al Regolamento (UE) 2016/679 (GDPR)."
       metaTitle="Privacy Policy | Emeraldress"
       metaDescription="Informativa sulla privacy di Emeraldress: trattamento dei dati personali, finalità, base giuridica e diritti dell'interessato ai sensi del GDPR."
+      canonicalPath="/privacy"
+      relatedLinks={[
+        { to: "/", label: "Home", desc: "Torna al manifesto e all'esperienza Emeraldress.", eyebrow: "Inizio" },
+        { to: "/termini", label: "Termini e Condizioni", desc: "Condizioni generali di vendita e d'uso del sito.", eyebrow: "Legale" },
+        { to: "/faq", label: "FAQ & Spedizioni", desc: "Tempi di consegna, pagamenti, taglie e cura dei capi.", eyebrow: "Supporto" },
+        { to: "/resi", label: "Politica di Reso", desc: "Diritto di recesso entro 14 giorni e procedura completa.", eyebrow: "Supporto" },
+      ]}
     >
       <h2>1. Titolare del trattamento</h2>
       <p>
