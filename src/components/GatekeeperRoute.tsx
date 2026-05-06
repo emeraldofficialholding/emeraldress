@@ -6,6 +6,19 @@ import GemLoader from "@/components/GemLoader";
 // Routes accessible to everyone (no auth required)
 const PUBLIC_ROUTES = ["/coming-soon", "/login", "/admin"];
 
+// Hard upper bound for the gate decision. If we cannot decide within this
+// window we assume the user is NOT an admin and redirect them out of the
+// loading screen, instead of leaving the app stuck on the GemLoader forever.
+const GATE_TIMEOUT_MS = 4000;
+
+const withTimeout = <T,>(p: Promise<T>, ms: number, label: string): Promise<T> =>
+  Promise.race([
+    p,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error(`gatekeeper:${label}:timeout`)), ms),
+    ),
+  ]);
+
 export default function GatekeeperRoute({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const [status, setStatus] = useState<"loading" | "allowed" | "blocked">("loading");
@@ -21,18 +34,24 @@ export default function GatekeeperRoute({ children }: { children: React.ReactNod
     }
 
     let isMounted = true;
+    let safety: ReturnType<typeof setTimeout> | null = null;
 
     const checkAdminRole = async (userId: string): Promise<boolean> => {
       try {
-        const { data, error } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", userId)
-          .eq("role", "admin")
-          .maybeSingle();
+        const { data, error } = await withTimeout(
+          supabase
+            .from("user_roles")
+            .select("role")
+            .eq("user_id", userId)
+            .eq("role", "admin")
+            .maybeSingle(),
+          GATE_TIMEOUT_MS,
+          "user_roles",
+        );
         if (error) return false;
         return !!data;
-      } catch {
+      } catch (e) {
+        console.warn("[Gatekeeper] role check failed:", e);
         return false;
       }
     };
@@ -40,7 +59,11 @@ export default function GatekeeperRoute({ children }: { children: React.ReactNod
     // Phase 1: initial session check controls the loading state
     const initialize = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session } } = await withTimeout(
+          supabase.auth.getSession(),
+          GATE_TIMEOUT_MS,
+          "getSession",
+        );
         if (!isMounted) return;
 
         if (!session?.user) {
@@ -50,12 +73,26 @@ export default function GatekeeperRoute({ children }: { children: React.ReactNod
 
         const isAdmin = await checkAdminRole(session.user.id);
         if (isMounted) setStatus(isAdmin ? "allowed" : "blocked");
-      } catch {
+      } catch (e) {
+        console.warn("[Gatekeeper] initialize failed:", e);
         if (isMounted) setStatus("blocked");
       }
     };
 
     initialize();
+
+    // Absolute last-resort safety net: never leave the user on the loader
+    // for more than GATE_TIMEOUT_MS * 2.
+    safety = setTimeout(() => {
+      if (!isMounted) return;
+      setStatus((s) => {
+        if (s === "loading") {
+          console.warn("[Gatekeeper] safety timeout — redirecting to /coming-soon");
+          return "blocked";
+        }
+        return s;
+      });
+    }, GATE_TIMEOUT_MS * 2);
 
     // Phase 2: react to subsequent auth changes (login/logout)
     // Use setTimeout to avoid deadlocking the Supabase SDK with async calls inside the callback
@@ -77,6 +114,7 @@ export default function GatekeeperRoute({ children }: { children: React.ReactNod
 
     return () => {
       isMounted = false;
+      if (safety) clearTimeout(safety);
       subscription.unsubscribe();
     };
   }, [location.pathname, isPublic]);
