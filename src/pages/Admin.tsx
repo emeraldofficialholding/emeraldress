@@ -262,37 +262,55 @@ export default function Admin() {
 
   // ── Auth check ───────────────────────────────────────────────────────────────
   async function checkAdmin(userId: string) {
-    const { data } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userId)
-      .eq("role", "admin")
-      .maybeSingle();
-    if (data) {
-      setAuthState("admin");
-      fetchAll();
-    } else {
+    try {
+      const { data } = await Promise.race([
+        supabase.from("user_roles").select("role").eq("user_id", userId).eq("role", "admin").maybeSingle(),
+        new Promise<{ data: null }>((resolve) => setTimeout(() => resolve({ data: null }), 4000)),
+      ]) as { data: any };
+      if (data) {
+        setAuthState("admin");
+        fetchAll();
+      } else {
+        setAuthState("not-admin");
+      }
+    } catch {
       setAuthState("not-admin");
     }
   }
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) {
-        setAuthState("unauthenticated");
-      } else {
-        checkAdmin(session.user.id);
-      }
+    let settled = false;
+    const safety = setTimeout(() => {
+      if (!settled) setAuthState((s) => (s === "loading" ? "unauthenticated" : s));
+    }, 6000);
+
+    Promise.race([
+      supabase.auth.getSession(),
+      new Promise<{ data: { session: null } }>((resolve) =>
+        setTimeout(() => resolve({ data: { session: null } }), 4000),
+      ),
+    ]).then(({ data: { session } }: any) => {
+      settled = true;
+      clearTimeout(safety);
+      if (!session) setAuthState("unauthenticated");
+      else checkAdmin(session.user.id);
+    }).catch(() => {
+      settled = true;
+      clearTimeout(safety);
+      setAuthState("unauthenticated");
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!session) {
         setAuthState("unauthenticated");
       } else {
-        checkAdmin(session.user.id);
+        setTimeout(() => checkAdmin(session.user.id), 0);
       }
     });
-    return () => subscription.unsubscribe();
+    return () => {
+      clearTimeout(safety);
+      subscription.unsubscribe();
+    };
   }, []);
 
   async function handleLogin(e: React.FormEvent) {
