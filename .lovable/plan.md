@@ -1,83 +1,39 @@
-## Obiettivo
+## Problema
 
-1. **Audit di unicità**: garantire che ogni pagina pubblica sia >90% diversa dalle altre per struttura, sezioni, CTA e SEO. I testi narrativi sono già unici — l'audit conferma che non ci siano blocchi duplicati di hero/CTA/SEO e corregge dove serve.
-2. **Interlinking interno**: ogni pagina deve linkare esplicitamente alle altre rotte rilevanti del sito, **inclusa la home**, oltre al footer (che già le contiene tutte). Questo migliora SEO, crawl e percezione di "sito vivo".
+Su `emeraldress.com/admin` (deploy Vercel) appare il 404 nativo di Vercel, non la SPA. Due cause:
 
----
+1. In `src/pages/ComingSoon.tsx` (riga 247) il bottone "Admin" punta a `href="/admin"`. Tu vuoi invece che porti a `/login` (chi non ha sessione vede il form, chi è admin viene reindirizzato).
+2. Anche digitando direttamente `/admin` o `/login` su Vercel, il fallback SPA non sembra scattare in modo affidabile insieme a `cleanUrls: true` → il browser riceve il 404 di Vercel prima ancora che React Router possa gestire la rotta.
 
-## Stato attuale (riassunto audit)
+## Cosa farò
 
-| Pagina | Hero unica | Sezioni interne uniche | Link interni nel body |
-|---|---|---|---|
-| `/` (Index) | Video hero + Manifesto + Touch + Classics | ✅ | → `/collezioni`, `/chisiamo`, `/sostenibilita` |
-| `/collezioni` | Header sobrio + grid prodotti | ✅ | ❌ solo prodotti, nessun link a sostenibilità/scanner/chi siamo |
-| `/sostenibilita` | Video hero + carosello fibra + griglia caratteristiche | ✅ | → `/collezioni`, `/product/:id` (manca `/chisiamo`, `/emeraldscanner`) |
-| `/chisiamo` | ScrollExpandMedia + Timeline + Stats | ✅ | ❌ solo IG esterno, nessun link interno |
-| `/emeraldscanner` | Form scanner + radar + risultato | ✅ | → `/sostenibilita`, `/collezioni` (manca `/chisiamo`) |
-| `/faq`, `/resi`, `/privacy`, `/termini` | LegalLayout condiviso (breadcrumb + h1 + body) | ⚠️ struttura identica tra di loro, ma contenuto unico | Solo breadcrumb → `/`. Mancano cross-link tra pagine legali e verso shop |
-| `/product/:id` | Galleria + dettagli + recensioni | ✅ | Già linka prodotti correlati |
+### 1. `src/pages/ComingSoon.tsx`
+- Cambiare il bottone Admin: da `<a href="/admin">` a `<Link to="/login">` di `react-router-dom` (niente full reload, niente passaggio dal server).
+- Etichetta invariata ("Admin" / "Accesso riservato"), solo destinazione.
 
-**Verdetto**: la struttura è già ≥90% differente tra pagine principali. I problemi reali sono:
-- Mancano **link interni nel corpo** delle pagine `/chisiamo`, `/collezioni`, `/sostenibilita`, `/emeraldscanner` e legali.
-- Le 4 pagine legali hanno layout identico — accettabile per categoria, ma serve almeno un blocco "**Vedi anche**" che le differenzi reciprocamente.
+### 2. `vercel.json`
+- Rimuovere `"cleanUrls": true` (non serve a una SPA e può interferire con il rewrite catch-all).
+- Sostituire la regex negativa attuale con il rewrite SPA standard:
+  ```json
+  "rewrites": [
+    { "source": "/((?!.*\\.).*)", "destination": "/index.html" }
+  ]
+  ```
+  Così ogni path senza estensione (es. `/admin`, `/login`, `/coming-soon`, `/profilo/abc`) viene servito da `index.html` e gestito da React Router. Asset statici (`.js`, `.css`, `.png`, `.xml`, `.txt`, `.ico`, ecc.) restano serviti normalmente. `sitemap.xml`, `robots.txt`, `sw.js`, `manifest.json`, favicon e `.well-known/*` continuano a funzionare perché hanno estensione.
+- Headers e cache invariati.
 
----
+### 3. Nessuna altra modifica
+- `GatekeeperRoute` resta com'è (già con timeout di safety).
+- `Login.tsx` già reindirizza l'utente in base al ruolo dopo il login (admin → `/admin`, altri → `/profilo`), quindi il flusso "/coming-soon → bottone Admin → /login → /admin" funzionerà end-to-end.
 
-## Lavoro da fare
+## Cosa mi serve da te
 
-### 1. Nuovo componente `RelatedLinks`
-Componente riutilizzabile (`src/components/RelatedLinks.tsx`) che mostra 3 card minimali con: eyebrow, titolo, descrizione breve, link. Estetica coerente con design system (Pure White / Crema / Mint Green / Off-Black, font serif per titoli, Alice per body).
+**Nulla.** Ho tutto quello che mi serve: codice, `vercel.json` e screenshot del 404. Posso procedere appena approvi il piano.
 
-API:
-```tsx
-<RelatedLinks
-  title="Continua a esplorare"
-  links={[
-    { to: "/", label: "Home", desc: "Torna al manifesto" },
-    { to: "/sostenibilita", label: "Sostenibilità", desc: "..." },
-    ...
-  ]}
-/>
-```
+## Verifica post-deploy
 
-### 2. Inserire `RelatedLinks` in fondo a ogni pagina pubblica
-Selezione mirata (ogni pagina linka **solo le altre rotte rilevanti**, mai sé stessa, sempre la home):
-
-- **`/` (Index)**: aggiungere una sezione "Esplora il mondo Emeraldress" prima del footer con link a `/collezioni`, `/sostenibilita`, `/chisiamo`, `/emeraldscanner`.
-- **`/collezioni`** → Home, Sostenibilità, Emerald Scanner, Chi Siamo.
-- **`/sostenibilita`** → Home, Collezioni, Emerald Scanner, Chi Siamo.
-- **`/chisiamo`** → Home, Sostenibilità, Collezioni, Emerald Scanner.
-- **`/emeraldscanner`** → Home, Sostenibilità, Collezioni, Chi Siamo.
-- **`/faq`, `/resi`, `/privacy`, `/termini`**: integrare in `LegalLayout` un blocco "Documenti correlati" che linka alle altre 3 pagine legali + Home + Collezioni. Questo differenzia le 4 pagine legali tra loro perché ognuna esclude se stessa.
-- **`/product/:id`**: già ha `RelatedProducts`; aggiungere riga finale con link minimal a `/collezioni`, `/sostenibilita`, `/emeraldscanner`.
-
-### 3. SEO check rapido
-Verificare che ogni pagina abbia `<title>` e `meta description` distinti (già il caso) e aggiungere `<link rel="canonical">` dove manca (Index ce l'ha, le altre no). Aggiungere canonical a Collezioni, Sostenibilità, ChiSiamo, EmeraldScanner e LegalLayout.
-
-### 4. Pagine escluse dall'interlinking
-`/admin`, `/login`, `/reset-password`, `/profilo`, `/coming-soon` — restano standalone come da memoria (`STANDALONE_ROUTES`). Nessun cambio.
-
----
-
-## File da toccare
-
-- `src/components/RelatedLinks.tsx` *(nuovo)*
-- `src/pages/Index.tsx`
-- `src/pages/Collezioni.tsx`
-- `src/pages/Sostenibilita.tsx`
-- `src/pages/ChiSiamo.tsx`
-- `src/pages/EmeraldScanner.tsx`
-- `src/pages/ProductDetail.tsx`
-- `src/pages/legal/LegalLayout.tsx` *(props per links + canonical)*
-- `src/pages/legal/Faq.tsx`, `Resi.tsx`, `Privacy.tsx`, `Termini.tsx` *(passare elenco link "vedi anche")*
-
----
-
-## Cosa NON faccio
-
-- Non riscrivo i contenuti narrativi (sono già unici e curati).
-- Non tocco la home oltre l'aggiunta della sezione interlink (hero, manifesto, classics restano).
-- Non cambio `/admin`, `/login`, `/profilo`, `/coming-soon`, `/reset-password`.
-- Non cambio Footer (già contiene tutti i link globali).
-
-Conferma per procedere.
+Dopo il redeploy su Vercel, controlla:
+- `emeraldress.com/coming-soon` → click "Admin" → arrivi su `/login` senza 404.
+- `emeraldress.com/login` digitato a mano → si apre il form (no 404).
+- `emeraldress.com/admin` digitato a mano da non loggato → React Router carica, GatekeeperRoute ti rimanda a `/coming-soon`.
+- `emeraldress.com/sitemap.xml` e `/robots.txt` → continuano a rispondere correttamente.
