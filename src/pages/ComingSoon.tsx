@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Loader2, Sparkles } from "lucide-react";
 const logoED = "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/emeraldress-icon-ed.svg";
 import { toast } from "sonner";
+import { Link } from "react-router-dom";
 
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 
@@ -243,12 +244,11 @@ export default function ComingSoon() {
           <p className="text-[10px] tracking-[0.3em] uppercase text-emerald-800/40">EMERALDRESS · PORTO CERVO · LUSSO CONSAPEVOLE
 
           </p>
-          <a
-            href="/admin"
+          <Link
+            to="/login"
             className="text-[9px] tracking-[0.2em] uppercase text-emerald-900/20 hover:text-emerald-900/50 transition-colors duration-300">
-
             Admin Access
-          </a>
+          </Link>
         </motion.div>
       </div>
     </div>
