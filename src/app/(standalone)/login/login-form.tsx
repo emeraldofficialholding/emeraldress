@@ -39,6 +39,10 @@ const GoogleIcon = () => (
   </svg>
 );
 
+// Quando beta-gate ON, signup nascosto (solo accesso per utenti esistenti).
+// Coerente col middleware: se beta-gate ON, sito chiuso al pubblico.
+const SIGNUP_ENABLED = process.env.NEXT_PUBLIC_BETA_GATE !== "true";
+
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -112,6 +116,10 @@ export function LoginForm() {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!SIGNUP_ENABLED) {
+      setError("Le registrazioni sono temporaneamente chiuse.");
+      return;
+    }
     setError(null);
     setInfo(null);
     setIsLoading(true);
@@ -245,25 +253,28 @@ export function LoginForm() {
         <Tabs
           value={tab}
           onValueChange={(v) => {
+            if (!SIGNUP_ENABLED && v === "signup") return;
             setTab(v as "signin" | "signup");
             setError(null);
             setInfo(null);
           }}
         >
-          <TabsList className="grid w-full grid-cols-2 bg-white/50 border border-emerald-200 mb-5">
-            <TabsTrigger
-              value="signin"
-              className="text-[11px] tracking-[0.2em] uppercase data-[state=active]:bg-emerald-900 data-[state=active]:text-emerald-50"
-            >
-              Accedi
-            </TabsTrigger>
-            <TabsTrigger
-              value="signup"
-              className="text-[11px] tracking-[0.2em] uppercase data-[state=active]:bg-emerald-900 data-[state=active]:text-emerald-50"
-            >
-              Crea Account
-            </TabsTrigger>
-          </TabsList>
+          {SIGNUP_ENABLED && (
+            <TabsList className="grid w-full grid-cols-2 bg-white/50 border border-emerald-200 mb-5">
+              <TabsTrigger
+                value="signin"
+                className="text-[11px] tracking-[0.2em] uppercase data-[state=active]:bg-emerald-900 data-[state=active]:text-emerald-50"
+              >
+                Accedi
+              </TabsTrigger>
+              <TabsTrigger
+                value="signup"
+                className="text-[11px] tracking-[0.2em] uppercase data-[state=active]:bg-emerald-900 data-[state=active]:text-emerald-50"
+              >
+                Crea Account
+              </TabsTrigger>
+            </TabsList>
+          )}
 
           <TabsContent value="signin">
             <form onSubmit={handleSignIn} className="space-y-4">
