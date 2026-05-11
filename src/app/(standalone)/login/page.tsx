@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { LoginForm } from "./login-form";
 
 export const metadata: Metadata = {
@@ -7,6 +8,11 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
+// useSearchParams() richiede Suspense boundary per static rendering.
 export default function LoginPage() {
-  return <LoginForm />;
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#e4ffec]" />}>
+      <LoginForm />
+    </Suspense>
+  );
 }
