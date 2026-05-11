@@ -29,7 +29,8 @@ async function getSeo(): Promise<Required<SeoSettings>> {
       .eq("id", 1)
       .maybeSingle();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const s = ((data as any)?.seo_settings ?? {}) as SeoSettings;
+    const raw = (data as any)?.seo_settings;
+    const s = (raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {}) as SeoSettings;
     return {
       meta_title: s.meta_title || defaultSeo.meta_title,
       meta_description: s.meta_description || defaultSeo.meta_description,

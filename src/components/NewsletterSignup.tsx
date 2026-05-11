@@ -23,7 +23,9 @@ const NewsletterSignup = () => {
     setLoading(true);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error } = await (supabase.from("subscribers") as any).insert({
+      name: value.split("@")[0] ?? "Subscriber",
       email: value,
+      phone: "",
       source: "footer",
       active: true,
     });
