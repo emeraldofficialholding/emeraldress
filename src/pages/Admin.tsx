@@ -263,52 +263,53 @@ export default function Admin() {
   // ── Auth check ───────────────────────────────────────────────────────────────
   async function checkAdmin(userId: string) {
     try {
-      const { data } = await Promise.race([
-        supabase.from("user_roles").select("role").eq("user_id", userId).eq("role", "admin").maybeSingle(),
-        new Promise<{ data: null }>((resolve) => setTimeout(() => resolve({ data: null }), 4000)),
-      ]) as { data: any };
+      const { data, error } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId)
+        .eq("role", "admin")
+        .maybeSingle();
+      if (error) {
+        // Network/RLS error: don't downgrade an already-admin state.
+        console.warn("[Admin] role check error:", error);
+        setAuthState((s) => (s === "admin" ? s : "not-admin"));
+        return;
+      }
       if (data) {
         setAuthState("admin");
         fetchAll();
       } else {
-        setAuthState("not-admin");
+        setAuthState((s) => (s === "admin" ? s : "not-admin"));
       }
-    } catch {
-      setAuthState("not-admin");
+    } catch (e) {
+      console.warn("[Admin] role check failed:", e);
+      setAuthState((s) => (s === "admin" ? s : "not-admin"));
     }
   }
 
   useEffect(() => {
-    let settled = false;
-    const safety = setTimeout(() => {
-      if (!settled) setAuthState((s) => (s === "loading" ? "unauthenticated" : s));
-    }, 6000);
+    supabase.auth.getSession()
+      .then(({ data: { session } }) => {
+        if (!session) setAuthState((s) => (s === "admin" ? s : "unauthenticated"));
+        else checkAdmin(session.user.id);
+      })
+      .catch((e) => {
+        console.warn("[Admin] getSession failed:", e);
+        setAuthState((s) => (s === "admin" ? s : "unauthenticated"));
+      });
 
-    Promise.race([
-      supabase.auth.getSession(),
-      new Promise<{ data: { session: null } }>((resolve) =>
-        setTimeout(() => resolve({ data: { session: null } }), 4000),
-      ),
-    ]).then(({ data: { session } }: any) => {
-      settled = true;
-      clearTimeout(safety);
-      if (!session) setAuthState("unauthenticated");
-      else checkAdmin(session.user.id);
-    }).catch(() => {
-      settled = true;
-      clearTimeout(safety);
-      setAuthState("unauthenticated");
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!session) {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      // Ignore noisy events that don't change identity. Re-checking the role
+      // on every TOKEN_REFRESHED can flap the state away from "admin".
+      if (event === "TOKEN_REFRESHED" || event === "USER_UPDATED") return;
+      if (event === "SIGNED_OUT" || !session) {
         setAuthState("unauthenticated");
-      } else {
-        setTimeout(() => checkAdmin(session.user.id), 0);
+        return;
       }
+      // SIGNED_IN / INITIAL_SESSION with a session
+      setTimeout(() => checkAdmin(session.user.id), 0);
     });
     return () => {
-      clearTimeout(safety);
       subscription.unsubscribe();
     };
   }, []);
