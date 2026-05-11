@@ -9,7 +9,7 @@ const PUBLIC_ROUTES = ["/coming-soon", "/login", "/admin"];
 // Hard upper bound for the gate decision. If we cannot decide within this
 // window we assume the user is NOT an admin and redirect them out of the
 // loading screen, instead of leaving the app stuck on the GemLoader forever.
-const GATE_TIMEOUT_MS = 4000;
+const GATE_TIMEOUT_MS = 10000;
 
 const withTimeout = <T,>(p: Promise<T>, ms: number, label: string): Promise<T> =>
   Promise.race([
