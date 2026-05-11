@@ -288,12 +288,23 @@ export default function Admin() {
   }
 
   useEffect(() => {
+    let settled = false;
+    // Hard safety: never leave the admin page on the loader for more than 6s.
+    const safety = setTimeout(() => {
+      if (settled) return;
+      setAuthState((s) => (s === "loading" ? "unauthenticated" : s));
+    }, 6000);
+
     supabase.auth.getSession()
       .then(({ data: { session } }) => {
+        settled = true;
+        clearTimeout(safety);
         if (!session) setAuthState((s) => (s === "admin" ? s : "unauthenticated"));
         else checkAdmin(session.user.id);
       })
       .catch((e) => {
+        settled = true;
+        clearTimeout(safety);
         console.warn("[Admin] getSession failed:", e);
         setAuthState((s) => (s === "admin" ? s : "unauthenticated"));
       });
@@ -310,6 +321,7 @@ export default function Admin() {
       setTimeout(() => checkAdmin(session.user.id), 0);
     });
     return () => {
+      clearTimeout(safety);
       subscription.unsubscribe();
     };
   }, []);
