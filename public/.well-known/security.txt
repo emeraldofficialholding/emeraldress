@@ -1,0 +1,8 @@
+# Emeraldress Security Policy
+# https://www.rfc-editor.org/rfc/rfc9116
+
+Contact: mailto:emeraldresshop@gmail.com
+Expires: 2027-01-01T00:00:00.000Z
+Preferred-Languages: it, en
+Canonical: https://www.emeraldress.com/.well-known/security.txt
+Policy: https://www.emeraldress.com/privacy

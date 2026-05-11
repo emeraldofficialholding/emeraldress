@@ -1,0 +1,155 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 10%;
+
+    --card: 100 10% 98%;
+    --card-foreground: 0 0% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 10%;
+
+    --primary: 152 60% 28%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 100 10% 97%;
+    --secondary-foreground: 0 0% 10%;
+
+    --muted: 100 10% 96%;
+    --muted-foreground: 0 0% 45%;
+
+    --accent: 140 60% 94%;
+    --accent-foreground: 152 60% 20%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 152 60% 28%;
+
+    --radius: 0.25rem;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 152 60% 28%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 140 60% 94%;
+    --sidebar-accent-foreground: 152 60% 20%;
+    --sidebar-border: 0 0% 90%;
+    --sidebar-ring: 152 60% 28%;
+  }
+
+  .dark {
+    --background: 0 0% 5%;
+    --foreground: 0 0% 95%;
+    --card: 0 0% 8%;
+    --card-foreground: 0 0% 95%;
+    --popover: 0 0% 8%;
+    --popover-foreground: 0 0% 95%;
+    --primary: 152 60% 40%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 12%;
+    --secondary-foreground: 0 0% 95%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 60%;
+    --accent: 152 30% 15%;
+    --accent-foreground: 152 60% 80%;
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 0 0% 95%;
+    --border: 0 0% 18%;
+    --input: 0 0% 18%;
+    --ring: 152 60% 40%;
+    --sidebar-background: 0 0% 8%;
+    --sidebar-foreground: 0 0% 90%;
+    --sidebar-primary: 152 60% 40%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 152 30% 15%;
+    --sidebar-accent-foreground: 152 60% 80%;
+    --sidebar-border: 0 0% 18%;
+    --sidebar-ring: 152 60% 40%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased text-[0.85em] overflow-x-hidden;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-serif);
+  }
+}
+
+@layer utilities {
+  .font-serif {
+    font-family: var(--font-serif);
+  }
+  .font-sans {
+    font-family: var(--font-sans);
+  }
+}
+
+/* Trust marquee animation */
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}
+
+/* Butterfly loader */
+@keyframes butterfly-float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-8px) rotate(5deg); }
+  75% { transform: translateY(-4px) rotate(-5deg); }
+}
+
+.animate-butterfly {
+  animation: butterfly-float 2s ease-in-out infinite;
+}
+
+body { overflow-x: hidden; }
+
+/* Legal/policy pages typography */
+.legal-content h2 {
+  font-family: ui-serif, Georgia, "Times New Roman", serif;
+  font-size: 1.6rem;
+  line-height: 1.2;
+  color: hsl(152 60% 14%);
+  margin-top: 3rem;
+  margin-bottom: 1rem;
+  letter-spacing: -0.01em;
+}
+.legal-content h2:first-child { margin-top: 0; }
+.legal-content h3 {
+  font-family: ui-serif, Georgia, "Times New Roman", serif;
+  font-size: 1.15rem;
+  color: hsl(152 60% 18%);
+  margin-top: 2rem;
+  margin-bottom: 0.5rem;
+}
+.legal-content p { margin-bottom: 1.1rem; }
+.legal-content ul, .legal-content ol {
+  margin: 0.5rem 0 1.4rem 1.25rem;
+  padding-left: 0.5rem;
+}
+.legal-content ul { list-style: disc; }
+.legal-content ol { list-style: decimal; }
+.legal-content li { margin-bottom: 0.5rem; }
+.legal-content strong { color: hsl(152 60% 18%); font-weight: 600; }
+.legal-content a { color: hsl(152 60% 28%); text-decoration: underline; text-underline-offset: 4px; }
+.legal-content a:hover { color: hsl(152 60% 14%); }
+.legal-content hr {
+  border: 0;
+  border-top: 1px solid hsl(140 40% 90%);
+  margin: 2.5rem 0;
+}

@@ -1,0 +1,18 @@
+/* TEAM */
+    Brand & Direction: Emeraldress
+    Contact: emeraldresshop [at] gmail.com
+    Location: Olbia — Porto Cervo, Sardegna, Italia
+
+/* SITE */
+    Last update: 2026/05
+    Language: Italian / English
+    Doctype: HTML5
+    IDE: Lovable
+    Standards: HTML5, CSS3, ES2022
+    Components: React, Vite, TailwindCSS, Supabase
+    Typography: Alice, Playfair Display
+
+/* THANKS */
+    Costa Smeralda — for the colors
+    ECONYL® — for the regenerated yarn
+    Italian artisans — for the craft
