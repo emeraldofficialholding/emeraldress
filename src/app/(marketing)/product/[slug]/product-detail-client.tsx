@@ -45,6 +45,17 @@ import type { Product } from "@/hooks/useProducts";
 const supabase = getSupabaseBrowserClient();
 
 // ── Size guide modal ──────────────────────────────────────────────────────
+const SIZE_GUIDE_ED = [
+  { size: "XS/S", it: "36 – 38", bacino: "80 – 90 cm", fit: "Aderente" },
+  { size: "S/M", it: "38 – 40", bacino: "90 – 100 cm", fit: "Aderente" },
+  { size: "M/L", it: "42 – 44", bacino: "100 – 110 cm", fit: "Comfort fit aderente" },
+];
+const SIZE_GUIDE_MEASURES = [
+  { size: "XS/S", seno: "78 – 86 cm", vita: "58 – 66 cm", fianchi: "80 – 90 cm" },
+  { size: "S/M", seno: "86 – 94 cm", vita: "66 – 74 cm", fianchi: "90 – 100 cm" },
+  { size: "M/L", seno: "94 – 102 cm", vita: "74 – 82 cm", fianchi: "100 – 110 cm" },
+];
+
 const SizeGuideModal = ({ open, onClose }: { open: boolean; onClose: () => void }) => (
   <AnimatePresence>
     {open && (
@@ -54,76 +65,149 @@ const SizeGuideModal = ({ open, onClose }: { open: boolean; onClose: () => void 
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="fixed inset-0 z-[60] bg-emerald-950/40 backdrop-blur-sm"
+          className="fixed inset-0 z-[60] bg-emerald-950/45 backdrop-blur-sm"
         />
         <motion.div
           initial={{ opacity: 0, scale: 0.96, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.96, y: 20 }}
           transition={{ duration: 0.25 }}
-          className="fixed inset-x-4 top-1/2 -translate-y-1/2 z-[61] max-w-md mx-auto bg-white rounded-2xl shadow-2xl border border-emerald-200"
+          className="fixed inset-x-3 sm:inset-x-4 top-1/2 -translate-y-1/2 z-[61] max-w-2xl mx-auto bg-[#faf6ef] rounded-2xl shadow-2xl border border-emerald-200/60 max-h-[90vh] overflow-hidden flex flex-col"
         >
-          <div className="p-6 sm:p-7">
-            <div className="flex items-center justify-between mb-5">
-              <div>
-                <p className="text-[10px] tracking-[0.3em] uppercase text-emerald-700/60">Misure</p>
-                <h3
-                  className="text-xl text-emerald-950 mt-1"
-                  style={{ fontFamily: "'Playfair Display', serif", fontWeight: 400 }}
-                >
-                  Guida alle taglie
-                </h3>
-              </div>
-              <button
-                onClick={onClose}
-                aria-label="Chiudi"
-                className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-emerald-50 text-emerald-800/70"
+          <button
+            onClick={onClose}
+            aria-label="Chiudi"
+            className="absolute top-3 right-3 z-10 w-9 h-9 rounded-full flex items-center justify-center bg-white/70 hover:bg-white text-emerald-800/70 hover:text-emerald-950 transition-colors backdrop-blur-sm"
+          >
+            <X size={16} />
+          </button>
+
+          <div className="overflow-y-auto px-5 sm:px-10 py-8 sm:py-10">
+            {/* Brand header */}
+            <div className="text-center mb-6">
+              <h2
+                className="text-2xl sm:text-3xl tracking-[0.18em] text-emerald-950"
+                style={{ fontFamily: "'Playfair Display', serif", fontWeight: 400 }}
               >
-                <X size={16} />
-              </button>
+                EMERALDRESS
+              </h2>
+              <div className="flex items-center justify-center gap-2 my-2">
+                <span className="h-px w-8 bg-emerald-700/30" />
+                <span
+                  className="text-[11px] tracking-[0.3em] text-emerald-700/80"
+                  style={{ fontFamily: "'Playfair Display', serif", fontWeight: 500 }}
+                >
+                  ED
+                </span>
+                <span className="h-px w-8 bg-emerald-700/30" />
+              </div>
+              <h3
+                className="text-xl sm:text-2xl tracking-[0.12em] text-emerald-950"
+                style={{ fontFamily: "'Playfair Display', serif", fontWeight: 400 }}
+              >
+                GUIDA ALLE TAGLIE
+              </h3>
+              <p className="mt-2 text-[10px] sm:text-[11px] tracking-[0.3em] uppercase text-emerald-700/65">
+                Trova la taglia perfetta per te
+              </p>
             </div>
 
-            <table className="w-full text-xs">
-              <thead>
-                <tr className="border-b border-emerald-100">
-                  {["Taglia", "Busto", "Vita", "Fianchi"].map((h) => (
-                    <th
-                      key={h}
-                      className="py-2.5 text-left text-emerald-700/70 tracking-[0.15em] uppercase font-medium text-[10px]"
-                    >
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {[
-                  ["XS", "80 cm", "62 cm", "88 cm"],
-                  ["S", "84 cm", "66 cm", "92 cm"],
-                  ["M", "88 cm", "70 cm", "96 cm"],
-                  ["L", "94 cm", "76 cm", "102 cm"],
-                  ["XL", "100 cm", "82 cm", "108 cm"],
-                ].map(([t, b, w, h]) => (
-                  <tr key={t} className="border-b border-emerald-100/50 last:border-0">
-                    {[t, b, w, h].map((v, i) => (
-                      <td
-                        key={i}
-                        className={cn(
-                          "py-3 text-emerald-950",
-                          i === 0 && "font-medium tracking-wider"
-                        )}
+            {/* Main table */}
+            <div className="bg-white/50 rounded-xl overflow-hidden border border-emerald-100/70 mb-6">
+              <table className="w-full text-xs sm:text-sm">
+                <thead>
+                  <tr className="border-b border-emerald-100/80 bg-emerald-50/40">
+                    {["Taglia Emeraldress", "Taglia IT", "Bacino", "Vestibilità"].map((h) => (
+                      <th
+                        key={h}
+                        className="py-3 px-3 sm:px-4 text-left text-emerald-800/80 tracking-[0.12em] uppercase font-medium text-[9px] sm:text-[10px]"
                       >
-                        {v}
-                      </td>
+                        {h}
+                      </th>
                     ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {SIZE_GUIDE_ED.map((row) => (
+                    <tr key={row.size} className="border-b border-emerald-100/40 last:border-0">
+                      <td
+                        className="py-3 px-3 sm:px-4 text-emerald-950 font-medium tracking-[0.1em]"
+                        style={{ fontFamily: "'Playfair Display', serif" }}
+                      >
+                        {row.size}
+                      </td>
+                      <td className="py-3 px-3 sm:px-4 text-emerald-900/80">{row.it}</td>
+                      <td className="py-3 px-3 sm:px-4 text-emerald-900/80">{row.bacino}</td>
+                      <td className="py-3 px-3 sm:px-4 text-emerald-900/80 italic">{row.fit}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
-            <p className="mt-5 text-[11px] text-emerald-900/60 leading-relaxed">
+            {/* Descriptive paragraph */}
+            <p className="text-center text-xs sm:text-[13px] text-emerald-900/75 leading-relaxed max-w-xl mx-auto mb-7 italic">
+              I capi <span className="not-italic font-medium tracking-wide">EMERALDRESS</span> sono
+              realizzati in tessuti altamente elasticizzati e modellanti, studiati per adattarsi al
+              corpo valorizzando la silhouette con comfort e sostegno.
+            </p>
+
+            {/* Divider with diamond */}
+            <div className="flex items-center justify-center gap-3 mb-5">
+              <span className="flex-1 h-px bg-emerald-700/20 max-w-[120px]" />
+              <span className="w-2 h-2 rotate-45 bg-emerald-700/40" />
+              <span className="flex-1 h-px bg-emerald-700/20 max-w-[120px]" />
+            </div>
+
+            <h4
+              className="text-center text-base sm:text-lg tracking-[0.18em] uppercase text-emerald-950 mb-4"
+              style={{ fontFamily: "'Playfair Display', serif", fontWeight: 400 }}
+            >
+              Misure Indicative
+            </h4>
+
+            {/* Measures table */}
+            <div className="bg-white/50 rounded-xl overflow-hidden border border-emerald-100/70">
+              <table className="w-full text-xs sm:text-sm">
+                <thead>
+                  <tr className="border-b border-emerald-100/80 bg-emerald-50/40">
+                    {["Taglia", "Seno", "Vita", "Fianchi"].map((h) => (
+                      <th
+                        key={h}
+                        className="py-3 px-3 sm:px-4 text-left text-emerald-800/80 tracking-[0.12em] uppercase font-medium text-[9px] sm:text-[10px]"
+                      >
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {SIZE_GUIDE_MEASURES.map((row) => (
+                    <tr key={row.size} className="border-b border-emerald-100/40 last:border-0">
+                      <td
+                        className="py-3 px-3 sm:px-4 text-emerald-950 font-medium tracking-[0.1em]"
+                        style={{ fontFamily: "'Playfair Display', serif" }}
+                      >
+                        {row.size}
+                      </td>
+                      <td className="py-3 px-3 sm:px-4 text-emerald-900/80">{row.seno}</td>
+                      <td className="py-3 px-3 sm:px-4 text-emerald-900/80">{row.vita}</td>
+                      <td className="py-3 px-3 sm:px-4 text-emerald-900/80">{row.fianchi}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <p className="mt-6 text-center text-[11px] text-emerald-900/55 leading-relaxed">
               Le misure sono indicative. Per consigli personalizzati scrivici a{" "}
-              <a href="mailto:hello@emeraldress.com" className="underline">hello@emeraldress.com</a>.
+              <a
+                href="mailto:emeraldresshop@gmail.com"
+                className="underline hover:text-emerald-700 transition-colors"
+              >
+                emeraldresshop@gmail.com
+              </a>
+              .
             </p>
           </div>
         </motion.div>
