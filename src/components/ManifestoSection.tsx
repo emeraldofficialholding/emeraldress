@@ -1,65 +1,11 @@
 "use client";
 
-import { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
-import { ArrowRight, Globe, Fingerprint, Scissors, Loader2 } from "lucide-react";
-import { toast } from "sonner";
-
-const logoED = "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/emeraldress-icon-ed.svg";
-
-// NOTE: il webhook n8n e il payload restano invariati per non rompere il WF newsletter.
-const N8N_NEWSLETTER_URL =
-  process.env.NEXT_PUBLIC_N8N_NEWSLETTER_URL ?? "https://n8n.kreareweb.com/webhook/newsletter-register";
+import { ArrowRight, Globe, Fingerprint, Scissors } from "lucide-react";
 
 const ManifestoSection = () => {
-  const [formData, setFormData] = useState({
-    nome: "",
-    email: "",
-    telefono: "",
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!formData.nome || !formData.email || !formData.telefono) {
-      toast.error("Per favore, compila tutti i campi obbligatori.");
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    try {
-      const res = await fetch(N8N_NEWSLETTER_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          full_name: formData.nome,
-          email: formData.email,
-          phone: formData.telefono,
-          source: "manifesto_home",
-        }),
-      });
-
-      if (!res.ok) throw new Error("Webhook error");
-
-      toast.success("Benvenuto nell'Inner Circle di Emeraldress.");
-      setFormData({ nome: "", email: "", telefono: "" });
-    } catch (error) {
-      console.error("Error submitting form:", error);
-      toast.error("Si è verificato un errore. Riprova più tardi.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
   return (
     <div className="flex flex-col w-full">
       <section className="relative py-40 overflow-hidden flex items-center justify-center min-h-[85vh]">
@@ -234,109 +180,6 @@ const ManifestoSection = () => {
         </div>
       </section>
 
-      <section className="py-24 bg-[#e4ffec] relative overflow-hidden border-t border-emerald-100">
-        <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-white rounded-full blur-[150px] pointer-events-none -translate-y-1/2 translate-x-1/3 opacity-60" />
-
-        <div className="container mx-auto px-4 lg:px-8 relative z-10">
-          <div className="max-w-4xl mx-auto text-center mb-16">
-            <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl p-2 bg-inherit">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={logoED} alt="Emeraldress" className="w-full h-full object-contain invert brightness-200" />
-            </div>
-            <h3 className="font-serif text-4xl md:text-5xl text-emerald-950 mb-6">Entra nell&apos;Emerald Circle</h3>
-            <p className="text-emerald-800/80 font-sans text-lg max-w-xl mx-auto">
-              Ricevi <strong>inviti esclusivi</strong> per le sfilate, <strong>accesso anticipato</strong> ai drop
-              limitati e contenuti riservati sulla <strong>sostenibilità</strong>.
-            </p>
-          </div>
-
-          <div className="max-w-5xl mx-auto">
-            <form onSubmit={handleSubmit} className="flex flex-col gap-10">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
-                <div className="group relative">
-                  <input
-                    type="text"
-                    name="nome"
-                    id="nome"
-                    value={formData.nome}
-                    onChange={handleInputChange}
-                    className="block w-full bg-transparent border-b border-emerald-900/20 py-4 text-emerald-950 text-lg placeholder-transparent focus:border-emerald-600 focus:outline-none transition-colors peer"
-                    placeholder="Nome Completo"
-                    required
-                  />
-                  <label
-                    htmlFor="nome"
-                    className="absolute left-0 -top-3.5 text-emerald-700 text-xs transition-all peer-placeholder-shown:text-lg peer-placeholder-shown:text-emerald-800/60 peer-placeholder-shown:top-4 peer-focus:-top-3.5 peer-focus:text-emerald-700 peer-focus:text-xs uppercase tracking-widest"
-                  >
-                    Nome Completo
-                  </label>
-                </div>
-
-                <div className="group relative">
-                  <input
-                    type="email"
-                    name="email"
-                    id="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    className="block w-full bg-transparent border-b border-emerald-900/20 py-4 text-emerald-950 text-lg placeholder-transparent focus:border-emerald-600 focus:outline-none transition-colors peer"
-                    placeholder="Indirizzo Email"
-                    required
-                  />
-                  <label
-                    htmlFor="email"
-                    className="absolute left-0 -top-3.5 text-emerald-700 text-xs transition-all peer-placeholder-shown:text-lg peer-placeholder-shown:text-emerald-800/60 peer-placeholder-shown:top-4 peer-focus:-top-3.5 peer-focus:text-emerald-700 peer-focus:text-xs uppercase tracking-widest"
-                  >
-                    Indirizzo Email
-                  </label>
-                </div>
-
-                <div className="group relative">
-                  <input
-                    type="tel"
-                    name="telefono"
-                    id="telefono"
-                    value={formData.telefono}
-                    onChange={handleInputChange}
-                    className="block w-full bg-transparent border-b border-emerald-900/20 py-4 text-emerald-950 text-lg placeholder-transparent focus:border-emerald-600 focus:outline-none transition-colors peer"
-                    placeholder="Numero di Telefono"
-                    required
-                  />
-                  <label
-                    htmlFor="telefono"
-                    className="absolute left-0 -top-3.5 text-emerald-700 text-xs transition-all peer-placeholder-shown:text-lg peer-placeholder-shown:text-emerald-800/60 peer-placeholder-shown:top-4 peer-focus:-top-3.5 peer-focus:text-emerald-700 peer-focus:text-xs uppercase tracking-widest"
-                  >
-                    Numero di Telefono
-                  </label>
-                </div>
-              </div>
-
-              <div className="flex justify-center pt-8">
-                <HoverBorderGradient
-                  as="button"
-                  type="submit"
-                  disabled={isSubmitting}
-                  containerClassName="rounded-full"
-                  className="bg-emerald-950 text-[#e4ffec] border-none flex items-center gap-3 px-12 py-4 font-bold tracking-widest uppercase text-sm w-full md:w-auto justify-center min-w-[200px] hover:bg-emerald-900 transition-colors"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      Registrazione...
-                    </>
-                  ) : (
-                    "Iscriviti Ora"
-                  )}
-                </HoverBorderGradient>
-              </div>
-
-              <p className="text-center text-xs text-emerald-900/50 mt-0">
-                I tuoi dati sono al sicuro. Non inviamo spam, solo eccellenza.
-              </p>
-            </form>
-          </div>
-        </div>
-      </section>
     </div>
   );
 };
