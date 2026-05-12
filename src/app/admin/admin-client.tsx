@@ -562,8 +562,8 @@ ${bodyContent}
       // WF EMERALD-Email-Send: il WF gestisce dedup atomico (email_campaigns lock),
       // INSERT email_log status='pending' poi UPDATE 'sent'/'failed'.
       // NON facciamo pre-INSERT lato sito per evitare race condition col WF lock.
+      // URL hardcoded: il vecchio /webhook/email-send e' stato disattivato dall'agente n8n.
       const webhookUrl =
-        process.env.NEXT_PUBLIC_N8N_EMAIL_URL ||
         "https://n8n.kreareweb.com/webhook/emerald/email-send-b2a4d6f8c0e2a4b6d8f0c2e4a6b8d0f2";
       const res = await fetch(webhookUrl, {
         method: "POST",
