@@ -11,7 +11,7 @@ const logoET = "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/publi
 const links = [
   { to: "/", label: "Home" },
   { to: "/collezioni", label: "Collezioni" },
-  { to: "/chisiamo", label: "Chi Siamo" },
+  { to: "/chi-siamo", label: "Chi Siamo" },
   { to: "/sostenibilita", label: "Sostenibilità" },
   { to: "/emeraldscanner", label: "Emerald Scanner" },
 ];

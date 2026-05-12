@@ -168,7 +168,7 @@ export function CollezioniClient() {
           { to: "/", label: "Home", desc: "Il manifesto e l'esperienza visiva del brand.", eyebrow: "Inizio" },
           { to: "/sostenibilita", label: "Sostenibilità", desc: "La fibra rigenerata e il processo di trasformazione.", eyebrow: "Materia" },
           { to: "/emeraldscanner", label: "Emerald Scanner", desc: "Analizza un capo e scopri il suo impatto reale.", eyebrow: "Strumento" },
-          { to: "/chisiamo", label: "Chi Siamo", desc: "Vision, mission e filiera 100% Made in Italy.", eyebrow: "Manifesto" },
+          { to: "/chi-siamo", label: "Chi Siamo", desc: "Vision, mission e filiera 100% Made in Italy.", eyebrow: "Manifesto" },
         ]}
       />
     </main>

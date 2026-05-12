@@ -7,7 +7,7 @@ const STATIC_URLS: MetadataRoute.Sitemap = [
   { url: `${SITE_URL}/`, changeFrequency: "weekly", priority: 1.0 },
   { url: `${SITE_URL}/collezioni`, changeFrequency: "weekly", priority: 0.9 },
   { url: `${SITE_URL}/sostenibilita`, changeFrequency: "monthly", priority: 0.7 },
-  { url: `${SITE_URL}/chisiamo`, changeFrequency: "monthly", priority: 0.7 },
+  { url: `${SITE_URL}/chi-siamo`, changeFrequency: "monthly", priority: 0.7 },
   { url: `${SITE_URL}/emeraldscanner`, changeFrequency: "monthly", priority: 0.6 },
   { url: `${SITE_URL}/faq`, changeFrequency: "monthly", priority: 0.5 },
   { url: `${SITE_URL}/resi`, changeFrequency: "yearly", priority: 0.4 },

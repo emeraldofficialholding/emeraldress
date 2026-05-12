@@ -1,8 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import { useState } from "react";
 import ImageFallback from "./ImageFallback";
+import FullscreenProductViewer from "./FullscreenProductViewer";
 import type { Product } from "@/hooks/useProducts";
 
 interface ProductCardProps {
@@ -12,26 +15,51 @@ interface ProductCardProps {
 
 const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
   const href = `/product/${product.slug ?? product.id}`;
+  const router = useRouter();
+  const [fullscreen, setFullscreen] = useState(false);
+
+  const handleClick = (e: React.MouseEvent) => {
+    // Mobile (<lg): apri viewer fullscreen anziche' navigare subito.
+    // Su desktop il click segue il <Link> normalmente.
+    if (typeof window !== "undefined" && window.matchMedia("(max-width: 1023px)").matches) {
+      e.preventDefault();
+      setFullscreen(true);
+    }
+  };
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, delay: index * 0.1 }}
-      viewport={{ once: true }}
-    >
-      <Link href={href} className="group block">
-        <div className="aspect-[3/4] overflow-hidden bg-muted mb-3 shadow-sm transition-shadow duration-300 group-hover:shadow-lg">
-          <ImageFallback
-            src={product.images?.[0]}
-            hoverSrc={product.images?.[1]}
-            alt={`${product.name} — Emeraldress abbigliamento sostenibile di lusso`}
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-          />
-        </div>
-        <h3 className="font-serif text-sm md:text-base">{product.name}</h3>
-        <p className="text-muted-foreground text-sm font-sans mt-1">€{Number(product.price).toFixed(2)}</p>
-      </Link>
-    </motion.div>
+    <>
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: index * 0.1 }}
+        viewport={{ once: true }}
+      >
+        <Link href={href} onClick={handleClick} className="group block">
+          <div className="aspect-[3/4] overflow-hidden bg-gradient-to-br from-emerald-50/60 to-white mb-3 shadow-sm transition-shadow duration-300 group-hover:shadow-lg">
+            <ImageFallback
+              src={product.images?.[0]}
+              hoverSrc={product.images?.[1]}
+              alt={`${product.name} — Emeraldress abbigliamento sostenibile di lusso`}
+              className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-[1.03]"
+            />
+          </div>
+          <h3 className="font-serif text-sm md:text-base">{product.name}</h3>
+          <p className="text-muted-foreground text-sm font-sans mt-1">€{Number(product.price).toFixed(2)}</p>
+        </Link>
+      </motion.div>
+
+      {fullscreen && (
+        <FullscreenProductViewer
+          product={product}
+          onClose={() => {
+            setFullscreen(false);
+            router.push(href);
+          }}
+          onDismiss={() => setFullscreen(false)}
+        />
+      )}
+    </>
   );
 };
 

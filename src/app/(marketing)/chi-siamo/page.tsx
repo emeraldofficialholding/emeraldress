@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { ChiSiamoClient } from "./chisiamo-client";
+import { ChiSiamoClient } from "./chi-siamo-client";
 
 export const metadata: Metadata = {
   title: "Il Manifesto | L'Etica di Emeraldress",
   description:
     "Il manifesto Emeraldress: scopri la nostra visione di lusso consapevole, filiera etica e manifattura italiana.",
-  alternates: { canonical: "/chisiamo" },
+  alternates: { canonical: "/chi-siamo" },
 };
 
 const articleSchema = {
@@ -14,7 +14,7 @@ const articleSchema = {
   name: "Chi Siamo — Emeraldress",
   description:
     "Storia, vision, mission e filiera 100% Made in Italy di Emeraldress, brand di moda sostenibile dalla Costa Smeralda.",
-  url: "https://www.emeraldress.com/chisiamo",
+  url: "https://www.emeraldress.com/chi-siamo",
   about: {
     "@type": "Organization",
     name: "Emeraldress",

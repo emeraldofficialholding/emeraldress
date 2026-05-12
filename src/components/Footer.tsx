@@ -43,7 +43,7 @@ const Footer = () => {
               <FooterLink href="/collezioni" label="Collezioni" />
               <FooterLink href="/sostenibilita" label="Sostenibilità" />
               <FooterLink href="/emeraldscanner" label="Emerald Scanner" />
-              <FooterLink href="/chisiamo" label="Chi Siamo" />
+              <FooterLink href="/chi-siamo" label="Chi Siamo" />
             </ul>
           </div>
 

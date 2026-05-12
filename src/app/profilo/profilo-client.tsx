@@ -10,7 +10,6 @@ import {
   Sparkles,
   Settings,
   LogOut,
-  Menu,
   Loader2,
   Home,
   Star,
@@ -24,7 +23,6 @@ import {
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 const supabase = getSupabaseBrowserClient();
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -95,6 +93,8 @@ const SECTIONS: { id: SectionId; label: string; icon: typeof Package; emoji: str
 ];
 
 const AVATAR_BUCKET = "emerald-asset";
+const LOGO_EMERALD_TOUCH =
+  "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/emeraldress-logo-touch-collection.svg";
 
 export function ProfiloClient() {
   const router = useRouter();
@@ -105,7 +105,14 @@ export function ProfiloClient() {
   const [email, setEmail] = useState<string | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [section, setSection] = useState<SectionId>("ordini");
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   // Auth + profile fetch
   useEffect(() => {
@@ -160,9 +167,18 @@ export function ProfiloClient() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "#f7fdf9" }}>
-        <GemLoader />
-      </div>
+      <>
+        <ProfileTopBar scrolled={false} />
+        <div
+          className="min-h-screen flex items-center justify-center"
+          style={{
+            background:
+              "radial-gradient(120% 80% at 50% -10%, #e6f7ec 0%, #f7fdf9 45%, #f7fdf9 100%)",
+          }}
+        >
+          <GemLoader />
+        </div>
+      </>
     );
   }
 
@@ -198,10 +214,27 @@ export function ProfiloClient() {
 
   return (
     <>
-      <div className="min-h-screen w-full max-w-full overflow-x-hidden" style={{ backgroundColor: "#f7fdf9" }}>
-        <div className="mx-auto flex w-full max-w-6xl pt-20 sm:pt-24">
+      <ProfileTopBar scrolled={scrolled} />
+      <div
+        className="min-h-screen w-full max-w-full overflow-x-hidden relative"
+        style={{
+          background:
+            "radial-gradient(120% 80% at 50% -10%, #e6f7ec 0%, #f7fdf9 45%, #f7fdf9 100%)",
+        }}
+      >
+        {/* Subtle decorative gradients */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-0 h-[360px] opacity-60"
+          style={{
+            background:
+              "radial-gradient(60% 60% at 80% 10%, rgba(16,185,129,0.10) 0%, transparent 70%), radial-gradient(50% 50% at 10% 30%, rgba(5,150,105,0.08) 0%, transparent 70%)",
+          }}
+        />
+
+        <div className="relative mx-auto flex w-full max-w-6xl pt-16 sm:pt-20">
           {/* Desktop sidebar */}
-          <aside className="hidden lg:flex w-72 shrink-0 min-h-screen border-r border-emerald-100 bg-white/60">
+          <aside className="hidden lg:flex w-72 shrink-0 min-h-screen border-r border-emerald-100/70 bg-white/70 backdrop-blur-sm">
             <ProfileSidebar
               displayName={displayName}
               initials={initials}
@@ -213,7 +246,7 @@ export function ProfiloClient() {
           </aside>
 
           {/* Main */}
-          <main className="flex-1 w-full max-w-full overflow-x-hidden p-4 lg:p-10 pb-32 lg:pb-10">
+          <main className="flex-1 w-full max-w-full overflow-x-hidden p-4 lg:p-10 pb-32 lg:pb-16">
             <SectionHeader displayName={displayName} avatarUrl={profile?.avatar_url ?? null} initials={initials} />
 
             <AnimatePresence mode="wait">
@@ -246,23 +279,26 @@ export function ProfiloClient() {
 
         {/* Mobile bottom nav (app-style) */}
         <nav
-          className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur border-t border-emerald-100 px-1 pb-[env(safe-area-inset-bottom)]"
+          className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-emerald-100 shadow-[0_-4px_20px_-8px_rgba(6,95,70,0.15)] px-1 pb-[env(safe-area-inset-bottom)]"
           aria-label="Navigazione profilo"
         >
           <ul className="flex items-stretch justify-between">
             {SECTIONS.map(({ id, label, icon: Icon }) => {
               const active = section === id;
               return (
-                <li key={id} className="flex-1">
+                <li key={id} className="flex-1 relative">
                   <button
                     onClick={() => setSection(id)}
-                    className={`w-full flex flex-col items-center justify-center gap-1 py-2.5 transition-colors ${
-                      active ? "text-emerald-900" : "text-emerald-900/50"
+                    className={`w-full flex flex-col items-center justify-center gap-1 pt-2.5 pb-2 transition-colors ${
+                      active ? "text-emerald-900" : "text-emerald-900/45"
                     }`}
+                    aria-current={active ? "page" : undefined}
                   >
                     <span
-                      className={`flex items-center justify-center w-9 h-9 rounded-full transition-all ${
-                        active ? "bg-emerald-900 text-emerald-50" : ""
+                      className={`flex items-center justify-center w-9 h-9 rounded-full transition-all duration-300 ${
+                        active
+                          ? "bg-emerald-900 text-emerald-50 shadow-[0_4px_12px_-2px_rgba(6,95,70,0.35)] scale-105"
+                          : ""
                       }`}
                     >
                       <Icon className="w-[18px] h-[18px]" />
@@ -271,6 +307,13 @@ export function ProfiloClient() {
                       {label.replace("I Miei ", "").replace("Le Mie ", "")}
                     </span>
                   </button>
+                  {active && (
+                    <motion.span
+                      layoutId="profilo-tab-indicator"
+                      className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-[2px] rounded-full bg-emerald-700"
+                      transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                    />
+                  )}
                 </li>
               );
             })}
@@ -278,6 +321,45 @@ export function ProfiloClient() {
         </nav>
       </div>
     </>
+  );
+}
+
+// ── Top bar (slim, due loghi) ──────────────────────────────────────────────
+function ProfileTopBar({ scrolled }: { scrolled: boolean }) {
+  return (
+    <header
+      className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
+        scrolled
+          ? "bg-white/85 backdrop-blur-md border-b border-emerald-100/70 shadow-[0_1px_0_rgba(6,95,70,0.04)]"
+          : "bg-white/60 backdrop-blur-sm border-b border-transparent"
+      }`}
+    >
+      <div className="mx-auto flex w-full max-w-6xl items-center justify-between h-14 sm:h-16 px-4 lg:px-8">
+        <Link
+          href="/"
+          aria-label="Torna alla home Emeraldress"
+          className="font-serif text-base sm:text-lg tracking-[0.22em] font-semibold text-emerald-950 hover:opacity-70 transition-opacity"
+          style={{ fontFamily: "'Playfair Display', serif" }}
+        >
+          EMERALDRESS
+        </Link>
+
+        <div className="h-6 w-px bg-emerald-200/60" aria-hidden />
+
+        <Link
+          href="/chi-siamo"
+          aria-label="Scopri Emerald Touch — Chi siamo"
+          className="flex items-center hover:opacity-70 transition-opacity"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={LOGO_EMERALD_TOUCH}
+            alt="Emerald Touch"
+            className="h-5 sm:h-6 object-contain"
+          />
+        </Link>
+      </div>
+    </header>
   );
 }
 
@@ -345,19 +427,34 @@ function SectionHeader({
   initials: string;
 }) {
   return (
-    <div className="flex items-center gap-4 sm:gap-5">
-      <div className="block">
+    <div className="relative overflow-hidden rounded-2xl border border-emerald-100/80 bg-gradient-to-br from-white via-white to-emerald-50/60 px-5 py-6 sm:px-8 sm:py-7 shadow-[0_10px_30px_-15px_rgba(6,95,70,0.18)]">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -top-16 -right-16 w-56 h-56 rounded-full opacity-50"
+        style={{
+          background:
+            "radial-gradient(50% 50% at 50% 50%, rgba(16,185,129,0.18) 0%, transparent 70%)",
+        }}
+      />
+      <div className="relative flex items-center gap-4 sm:gap-5">
         <Avatar avatarUrl={avatarUrl} initials={initials} size="lg" />
-      </div>
-      <div>
-        <p className="text-[10px] tracking-[0.35em] uppercase text-emerald-700/60 mb-2">Area Personale</p>
-        <h1
-          className="text-2xl sm:text-3xl text-emerald-950"
-          style={{ fontFamily: "'Playfair Display', serif", fontWeight: 400 }}
-        >
-          Ciao, {displayName}!
-        </h1>
-        <div className="mt-3 w-10 h-px bg-emerald-400/50" />
+        <div className="min-w-0">
+          <p className="text-[10px] tracking-[0.35em] uppercase text-emerald-700/60 mb-1.5">
+            Area Personale
+          </p>
+          <h1
+            className="text-2xl sm:text-3xl text-emerald-950 truncate"
+            style={{ fontFamily: "'Playfair Display', serif", fontWeight: 400 }}
+          >
+            Ciao, <span className="italic text-emerald-800">{displayName}</span>
+          </h1>
+          <div className="mt-3 flex items-center gap-2">
+            <span className="w-10 h-px bg-emerald-400/60" />
+            <span className="text-[10px] tracking-[0.25em] uppercase text-emerald-700/50">
+              Benvenuta nel tuo mondo
+            </span>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -399,10 +496,14 @@ function Avatar({
 // ── Card wrapper ───────────────────────────────────────────────────────────
 function Card({ title, emoji, children, action }: { title: string; emoji?: string; children: React.ReactNode; action?: React.ReactNode }) {
   return (
-    <div className="rounded-2xl border border-emerald-100 bg-white p-5 sm:p-8 shadow-sm">
+    <div className="group relative rounded-2xl border border-emerald-100/80 bg-white p-5 sm:p-8 shadow-[0_4px_20px_-8px_rgba(6,95,70,0.10)] hover:shadow-[0_10px_30px_-12px_rgba(6,95,70,0.20)] transition-shadow duration-300">
+      <span
+        aria-hidden
+        className="absolute left-0 top-6 bottom-6 w-[2px] rounded-full bg-gradient-to-b from-emerald-400/40 via-emerald-600/30 to-transparent"
+      />
       <div className="flex items-center justify-between gap-3 mb-5">
-        <div className="flex items-center gap-2">
-          {emoji && <span className="text-xl">{emoji}</span>}
+        <div className="flex items-center gap-2.5">
+          {emoji && <span className="text-xl leading-none">{emoji}</span>}
           <h2
             className="text-lg sm:text-xl text-emerald-950"
             style={{ fontFamily: "'Playfair Display', serif", fontWeight: 400 }}
@@ -419,12 +520,18 @@ function Card({ title, emoji, children, action }: { title: string; emoji?: strin
 
 function EmptyState({ icon: Icon, title, message }: { icon: typeof Package; title: string; message: string }) {
   return (
-    <div className="text-center py-10">
-      <div className="mx-auto w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center mb-3">
-        <Icon className="w-5 h-5 text-emerald-700/70" />
+    <div className="text-center py-12">
+      <div
+        className="mx-auto w-14 h-14 rounded-full flex items-center justify-center mb-4 ring-1 ring-emerald-100"
+        style={{
+          background:
+            "radial-gradient(60% 60% at 50% 40%, rgba(16,185,129,0.12) 0%, rgba(247,253,249,0.6) 70%)",
+        }}
+      >
+        <Icon className="w-5 h-5 text-emerald-700/80" />
       </div>
       <p className="text-sm font-medium text-emerald-950">{title}</p>
-      <p className="text-xs text-emerald-900/50 mt-1 max-w-xs mx-auto">{message}</p>
+      <p className="text-xs text-emerald-900/55 mt-1.5 max-w-xs mx-auto leading-relaxed">{message}</p>
     </div>
   );
 }

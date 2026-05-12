@@ -93,7 +93,7 @@ const ManifestoSection = () => {
             </h2>
 
             <div className="flex justify-center">
-              <Link href="/chisiamo">
+              <Link href="/chi-siamo">
                 <HoverBorderGradient
                   containerClassName="rounded-full"
                   className="bg-[#e4ffec] text-emerald-950 flex items-center gap-3 px-10 py-4 font-bold tracking-widest uppercase text-sm hover:bg-white transition-all duration-500 shadow-[0_0_20px_rgba(228,255,236,0.3)]"

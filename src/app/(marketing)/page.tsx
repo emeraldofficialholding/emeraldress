@@ -6,6 +6,7 @@ import EmeraldTouchSection from "@/components/EmeraldTouchSection";
 import ClassicsSection from "@/components/ClassicsSection";
 import ManifestoSection from "@/components/ManifestoSection";
 import RelatedLinks from "@/components/RelatedLinks";
+import EmeraldCircleSection from "@/components/EmeraldCircleSection";
 
 interface SeoSettings {
   meta_title?: string;
@@ -104,9 +105,10 @@ export default async function HomePage() {
           { to: "/collezioni", label: "Collezioni", desc: "La selezione Emerald Touch, edizione limitata.", eyebrow: "Shop" },
           { to: "/sostenibilita", label: "Sostenibilità", desc: "La fibra rigenerata e il processo di trasformazione.", eyebrow: "Materia" },
           { to: "/emeraldscanner", label: "Emerald Scanner", desc: "Analizza un capo e scopri il suo impatto reale.", eyebrow: "Strumento" },
-          { to: "/chisiamo", label: "Chi Siamo", desc: "Vision, mission e filiera 100% Made in Italy.", eyebrow: "Manifesto" },
+          { to: "/chi-siamo", label: "Chi Siamo", desc: "Vision, mission e filiera 100% Made in Italy.", eyebrow: "Manifesto" },
         ]}
       />
+      <EmeraldCircleSection />
     </main>
   );
 }

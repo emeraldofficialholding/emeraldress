@@ -20,7 +20,7 @@ const EmeraldTouchSection = () => {
   });
 
   const displayProducts =
-    emeraldProducts && emeraldProducts.length > 0 ? emeraldProducts.slice(0, 4) : allProducts?.slice(0, 4);
+    emeraldProducts && emeraldProducts.length > 0 ? emeraldProducts.slice(0, 5) : allProducts?.slice(0, 5);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -86,7 +86,7 @@ const EmeraldTouchSection = () => {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-100px" }}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-10"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 md:gap-6"
           >
             {displayProducts?.map((product, i) => (
               <ProductCard key={product.id} product={product} index={i} />

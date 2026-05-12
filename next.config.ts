@@ -39,6 +39,16 @@ const nextConfig: NextConfig = {
     formats: ["image/avif", "image/webp"],
   },
 
+  async redirects() {
+    return [
+      {
+        source: "/chisiamo",
+        destination: "/chi-siamo",
+        permanent: true,
+      },
+    ];
+  },
+
   async headers() {
     return [
       {

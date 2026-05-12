@@ -162,9 +162,9 @@ export function ChiSiamoClient() {
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-14">
                 {[
-                  "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/ASSET/emeraldress-socialdress-1.webp",
+                  "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/products/Dress-Charme-Touch/Emeraldress-Dress-Charme-Touch.webp",
                   "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/ASSET/emeraldress-socialdress-2.webp",
-                  "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/ASSET/emeraldress-socialdress-3.webp",
+                  "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/products/Dress-Touch/Emeraldress-Dress-Touch.webp",
                   "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/ASSET/emeraldress-socialdress-4.webp",
                 ].map((src, i) => (
                   <motion.div
