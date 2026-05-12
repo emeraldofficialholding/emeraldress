@@ -343,9 +343,21 @@ export function ProductDetailClient({ product }: { product: Product }) {
 
               {product.stripe_payment_link ? (
                 (() => {
+                  // Payment Link mode — passiamo product_id + size + idempotency_key
+                  // nel client_reference_id (separator __, perche' Stripe non accetta /).
+                  // Il WF1 lato n8n riceve `checkout.session.completed` con questo campo,
+                  // lo parsa e crea order_items con size + product_id corretti.
+                  // Formato: pid_{uuid}__size_{ENCODED}__idem_{12char}
                   const sep = product.stripe_payment_link!.includes("?") ? "&" : "?";
+                  const encodedSize = selectedSize?.replace(/\//g, "_");
+                  const idem = (typeof crypto !== "undefined" && "randomUUID" in crypto)
+                    ? crypto.randomUUID().replace(/-/g, "").slice(0, 12)
+                    : `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+                  const clientRef = selectedSize
+                    ? `pid_${product.id.replace(/-/g, "")}__size_${encodedSize}__idem_${idem}`
+                    : "";
                   const href = selectedSize
-                    ? `${product.stripe_payment_link}${sep}client_reference_id=${encodeURIComponent(`size-${selectedSize}`)}`
+                    ? `${product.stripe_payment_link}${sep}client_reference_id=${encodeURIComponent(clientRef)}`
                     : "#";
                   return (
                     <motion.a
