@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabasePublicClient } from "@/lib/supabase/public";
 import HeroSection from "@/components/HeroSection";
 import TrustMarquee from "@/components/TrustMarquee";
 import EmeraldTouchSection from "@/components/EmeraldTouchSection";
@@ -23,7 +23,7 @@ const defaultSeo: Required<SeoSettings> = {
 
 async function getSeo(): Promise<Required<SeoSettings>> {
   try {
-    const supabase = await createSupabaseServerClient();
+    const supabase = createSupabasePublicClient();
     const { data } = await supabase
       .from("app_settings")
       .select("seo_settings")

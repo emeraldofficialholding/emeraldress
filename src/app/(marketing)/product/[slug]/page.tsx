@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabasePublicClient } from "@/lib/supabase/public";
 import type { Product } from "@/hooks/useProducts";
 import { ProductDetailClient } from "./product-detail-client";
 
@@ -10,13 +10,17 @@ interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 async function getProduct(slugOrId: string): Promise<Product | null> {
-  const supabase = await createSupabaseServerClient();
-  const { data } = await supabase
-    .from("products")
-    .select("*")
-    .or(`slug.eq.${slugOrId},id.eq.${slugOrId}`)
-    .maybeSingle();
+  const supabase = createSupabasePublicClient();
+  // postgrest fa fail su .or(`id.eq.<non-uuid>`) perche' id e' uuid:
+  // splittiamo la query in due passi e teniamo solo slug se non e' un UUID.
+  const looksLikeUuid = UUID_RE.test(slugOrId);
+  const query = supabase.from("products").select("*");
+  const { data } = looksLikeUuid
+    ? await query.or(`slug.eq.${slugOrId},id.eq.${slugOrId}`).maybeSingle()
+    : await query.eq("slug", slugOrId).maybeSingle();
   if (!data) return null;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const p = data as any;
@@ -30,7 +34,7 @@ async function getProduct(slugOrId: string): Promise<Product | null> {
 
 export async function generateStaticParams() {
   try {
-    const supabase = await createSupabaseServerClient();
+    const supabase = createSupabasePublicClient();
     const { data } = await supabase.from("products").select("slug, id");
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return ((data as any[]) ?? []).map((p) => ({ slug: (p.slug as string) ?? (p.id as string) }));
