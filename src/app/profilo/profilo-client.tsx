@@ -347,8 +347,8 @@ function ProfileTopBar({ scrolled }: { scrolled: boolean }) {
         <div className="h-6 w-px bg-emerald-200/60" aria-hidden />
 
         <Link
-          href="/chi-siamo"
-          aria-label="Scopri Emerald Touch — Chi siamo"
+          href="/collezioni"
+          aria-label="Scopri la collezione Emerald Touch"
           className="flex items-center hover:opacity-70 transition-opacity"
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
