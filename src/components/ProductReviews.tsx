@@ -223,9 +223,9 @@ const ProductReviews = ({ productId }: { productId: string }) => {
           </h2>
         </div>
 
-        {/* Summary card */}
-        {reviews.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-8 md:gap-12 mb-12 rounded-2xl border border-emerald-100 bg-white p-6 md:p-8 shadow-[0_10px_30px_-18px_rgba(6,95,70,0.15)]">
+        {/* Summary card — solo se ci sono recensioni */}
+        {!loading && reviews.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-8 md:gap-12 mb-10 rounded-2xl border border-emerald-100 bg-white p-6 md:p-8 shadow-[0_10px_30px_-18px_rgba(6,95,70,0.15)]">
             <div className="flex flex-col items-center md:items-start justify-center text-center md:text-left">
               <span
                 className="text-6xl text-emerald-950 leading-none mb-3"
@@ -248,25 +248,25 @@ const ProductReviews = ({ productId }: { productId: string }) => {
               <RatingBreakdown reviews={reviews} />
             </div>
           </div>
-        ) : null}
+        )}
 
-        {/* Toolbar */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-          <button
-            onClick={handleStart}
-            className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full text-[11px] tracking-[0.25em] uppercase font-medium transition-all hover:opacity-95 active:scale-[0.98]"
-            style={{
-              background: "linear-gradient(135deg, #052e1f 0%, #064e3b 45%, #047857 100%)",
-              color: "#f0fdf4",
-              boxShadow: "0 8px 24px -10px rgba(5,150,105,0.45)",
-            }}
-          >
-            <PenLine size={13} />
-            {showForm ? "Annulla" : "Scrivi una recensione"}
-          </button>
+        {/* Toolbar — solo quando ci sono recensioni (button + sort affiancati) */}
+        {!loading && reviews.length > 0 && (
+          <div className="flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-3 mb-8">
+            <button
+              onClick={handleStart}
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full text-[11px] tracking-[0.25em] uppercase font-medium transition-all hover:opacity-95 active:scale-[0.98]"
+              style={{
+                background: "linear-gradient(135deg, #052e1f 0%, #064e3b 45%, #047857 100%)",
+                color: "#f0fdf4",
+                boxShadow: "0 8px 24px -10px rgba(5,150,105,0.45)",
+              }}
+            >
+              <PenLine size={13} />
+              {showForm ? "Annulla" : "Scrivi una recensione"}
+            </button>
 
-          {reviews.length > 0 && (
-            <div className="relative">
+            <div className="relative self-start sm:self-auto">
               <select
                 value={sort}
                 onChange={(e) => setSort(e.target.value as SortMode)}
@@ -281,8 +281,8 @@ const ProductReviews = ({ productId }: { productId: string }) => {
                 className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-emerald-700"
               />
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Form */}
         <AnimatePresence>
@@ -380,31 +380,85 @@ const ProductReviews = ({ productId }: { productId: string }) => {
 
         {/* List */}
         {loading ? (
-          <div className="flex justify-center py-12">
-            <Loader2 className="w-5 h-5 animate-spin text-emerald-700" />
+          <div className="rounded-2xl border border-emerald-100/70 bg-white/60 p-8 md:p-12 grid grid-cols-1 md:grid-cols-[280px_1fr] gap-8 md:gap-12 animate-pulse">
+            <div className="flex flex-col items-center md:items-start gap-3">
+              <div className="h-16 w-20 rounded-md bg-emerald-100/50" />
+              <div className="h-4 w-32 rounded bg-emerald-100/40" />
+              <div className="h-3 w-40 rounded bg-emerald-100/30" />
+            </div>
+            <div className="md:border-l md:border-emerald-100 md:pl-12 space-y-2.5">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="flex items-center gap-3">
+                  <div className="h-3 w-6 rounded bg-emerald-100/40" />
+                  <div className="flex-1 h-1.5 rounded-full bg-emerald-100/40" />
+                </div>
+              ))}
+            </div>
           </div>
         ) : sortedReviews.length === 0 ? (
-          <div className="text-center py-16 rounded-2xl border border-dashed border-emerald-200 bg-white/50">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="relative overflow-hidden rounded-3xl border border-emerald-200/70 bg-gradient-to-br from-white via-emerald-50/40 to-white text-center px-6 py-14 md:py-20"
+          >
             <div
-              className="mx-auto w-14 h-14 rounded-full flex items-center justify-center mb-4 ring-1 ring-emerald-100"
+              aria-hidden
+              className="pointer-events-none absolute inset-0 opacity-60"
               style={{
                 background:
-                  "radial-gradient(60% 60% at 50% 40%, rgba(16,185,129,0.12) 0%, rgba(247,253,249,0.6) 70%)",
+                  "radial-gradient(50% 50% at 50% 0%, rgba(16,185,129,0.10) 0%, transparent 70%), radial-gradient(40% 40% at 100% 100%, rgba(5,150,105,0.06) 0%, transparent 70%)",
               }}
-            >
-              <MessageCircle className="w-5 h-5 text-emerald-700/80" />
+            />
+
+            <div className="relative">
+              <div
+                className="mx-auto w-16 h-16 rounded-2xl flex items-center justify-center mb-5 bg-gradient-to-br from-emerald-700 to-emerald-900 shadow-[0_12px_30px_-10px_rgba(6,95,70,0.45)]"
+              >
+                <MessageCircle className="w-6 h-6 text-emerald-50" strokeWidth={1.5} />
+              </div>
+
+              <p className="text-[10px] tracking-[0.4em] uppercase text-emerald-700/60 mb-3">
+                Inaugura · le voci
+              </p>
+
+              <h3
+                className="text-2xl md:text-3xl text-emerald-950 max-w-md mx-auto leading-tight mb-3"
+                style={{ fontFamily: "'Playfair Display', serif", fontWeight: 400 }}
+              >
+                Sii la <span className="italic text-emerald-700">prima voce</span> a raccontare questo capo
+              </h3>
+
+              <p className="text-sm text-emerald-900/65 max-w-md mx-auto leading-relaxed mb-7">
+                Vestibilità, qualità del tessuto, sensazione al tatto: la tua esperienza ispira la
+                community Emeraldress.
+              </p>
+
+              {!showForm && (
+                <button
+                  onClick={handleStart}
+                  className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full text-[11px] tracking-[0.25em] uppercase font-medium transition-all hover:opacity-95 active:scale-[0.98]"
+                  style={{
+                    background:
+                      "linear-gradient(135deg, #052e1f 0%, #064e3b 45%, #047857 100%)",
+                    color: "#f0fdf4",
+                    boxShadow: "0 12px 30px -10px rgba(5,150,105,0.45)",
+                  }}
+                >
+                  <PenLine size={13} />
+                  Scrivi la prima recensione
+                </button>
+              )}
+
+              <div className="mt-7 flex items-center justify-center gap-3 text-[10px] tracking-[0.25em] uppercase text-emerald-700/55">
+                <span className="flex items-center gap-1.5">
+                  <BadgeCheck size={11} />
+                  Solo clienti verificati
+                </span>
+                <span className="w-1 h-1 rounded-full bg-emerald-700/40" />
+                <span>Pubblicata entro 24h</span>
+              </div>
             </div>
-            <p
-              className="text-lg text-emerald-950 mb-1"
-              style={{ fontFamily: "'Playfair Display', serif", fontWeight: 400 }}
-            >
-              Sii la prima voce
-            </p>
-            <p className="text-sm text-emerald-900/60 max-w-sm mx-auto">
-              Ancora nessuna recensione su questo capo. Condividi la tua esperienza e ispira la
-              community.
-            </p>
-          </div>
+          </motion.div>
         ) : (
           <ul className="space-y-5">
             {sortedReviews.map((r, i) => (
