@@ -303,25 +303,42 @@ export function ProductDetailClient({ product }: { product: Product }) {
                 </div>
 
                 <div className="flex gap-2 flex-wrap">
-                  {sizes.map((size) => (
-                    <motion.button
-                      key={size}
-                      onClick={() => setSelectedSize(size === selectedSize ? null : size)}
-                      whileTap={{ scale: 0.95 }}
-                      className={cn(
-                        "relative w-12 h-12 text-xs font-sans tracking-wider border transition-all duration-300",
-                        selectedSize === size
-                          ? "border-primary bg-primary text-primary-foreground"
-                          : "border-border hover:border-foreground bg-background text-foreground",
-                      )}
-                    >
-                      {size}
-                      {selectedSize === size && (
-                        <motion.span layoutId="size-indicator" className="absolute inset-0 bg-primary -z-10" />
-                      )}
-                    </motion.button>
-                  ))}
+                  {sizes.map((size) => {
+                    const stockForSize = product.stock_by_size?.[size] ?? 0;
+                    const outOfStock = stockForSize <= 0;
+                    return (
+                      <motion.button
+                        key={size}
+                        onClick={() => {
+                          if (outOfStock) return;
+                          setSelectedSize(size === selectedSize ? null : size);
+                        }}
+                        disabled={outOfStock}
+                        whileTap={outOfStock ? undefined : { scale: 0.95 }}
+                        title={outOfStock ? "Esaurito" : undefined}
+                        className={cn(
+                          "relative w-12 h-12 text-xs font-sans tracking-wider border transition-all duration-300",
+                          outOfStock
+                            ? "border-border text-muted-foreground/40 line-through cursor-not-allowed bg-muted/30"
+                            : selectedSize === size
+                              ? "border-primary bg-primary text-primary-foreground"
+                              : "border-border hover:border-foreground bg-background text-foreground",
+                        )}
+                        aria-label={`Taglia ${size}${outOfStock ? " (esaurita)" : ""}`}
+                      >
+                        {size}
+                        {selectedSize === size && !outOfStock && (
+                          <motion.span layoutId="size-indicator" className="absolute inset-0 bg-primary -z-10" />
+                        )}
+                      </motion.button>
+                    );
+                  })}
                 </div>
+                {sizes.every((s) => (product.stock_by_size?.[s] ?? 0) <= 0) && (
+                  <p className="mt-3 text-[11px] font-sans text-muted-foreground italic">
+                    Tutte le taglie sono attualmente esaurite. Iscriviti alla newsletter per essere avvisato del restock.
+                  </p>
+                )}
               </div>
 
               {product.stripe_payment_link ? (

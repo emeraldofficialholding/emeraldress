@@ -41,6 +41,7 @@ interface Product {
   price: number;
   sale_price: number | null;
   stock: number;
+  stock_by_size?: Record<string, number> | null;
   status: string;
   category: string;
   collection_id?: string | null;
@@ -127,11 +128,14 @@ const emptyForm = {
   price: "",
   sale_price: "",
   stock: "0",
+  stock_xs_s: "0",
+  stock_s_m: "0",
+  stock_m_l: "0",
   category: "classics",
   collection_id: "",
   fabric_details: "",
   shipping_info: "",
-  sizes: "S,M,L",
+  sizes: "XS/S,S/M,M/L",
   status: "active" as "active" | "draft",
   stripe_payment_link: "",
 };
@@ -625,12 +629,16 @@ ${bodyContent}
 
   function openEditProduct(p: Product) {
     setEditingProduct(p);
+    const sbs = p.stock_by_size ?? {};
     setForm({
       name: p.name,
       description: p.description || "",
       price: String(p.price),
       sale_price: p.sale_price ? String(p.sale_price) : "",
       stock: String(p.stock ?? 0),
+      stock_xs_s: String(sbs["XS/S"] ?? 0),
+      stock_s_m: String(sbs["S/M"] ?? 0),
+      stock_m_l: String(sbs["M/L"] ?? 0),
       category: p.category,
       collection_id: p.collection_id || "",
       fabric_details: p.fabric_details || "",
@@ -680,12 +688,20 @@ ${bodyContent}
         ? form.sizes.split(",").map((s) => s.trim()).filter(Boolean)
         : [];
 
+      const stockBySize = {
+        "XS/S": parseInt(form.stock_xs_s) || 0,
+        "S/M": parseInt(form.stock_s_m) || 0,
+        "M/L": parseInt(form.stock_m_l) || 0,
+      };
+
       const payload: Record<string, unknown> = {
         name: form.name,
         description: form.description || null,
         price: parseFloat(form.price),
         sale_price: form.sale_price ? parseFloat(form.sale_price) : null,
-        stock: parseInt(form.stock) || 0,
+        // `stock` totale è auto-sincronizzato dal trigger DB (somma stock_by_size).
+        // Non lo passiamo qui: lo lascia gestire al trigger per evitare drift.
+        stock_by_size: stockBySize,
         category: form.category,
         collection_id: form.collection_id || null,
         fabric_details: form.fabric_details || null,
@@ -3490,17 +3506,48 @@ ${bodyContent}
                   </div>
                 </div>
 
-                {/* Stock & Collezione */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">Stock</Label>
-                    <Input
-                      type="number"
-                      value={form.stock}
-                      onChange={(e) => setForm((f) => ({ ...f, stock: e.target.value }))}
-                      className="rounded-xl border-neutral-200"
-                    />
+                {/* Stock per taglia (totale auto-calcolato da trigger DB) */}
+                <div>
+                  <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">
+                    Stock per taglia
+                    <span className="ml-2 text-emerald-600 normal-case font-normal">
+                      (totale: {(parseInt(form.stock_xs_s) || 0) + (parseInt(form.stock_s_m) || 0) + (parseInt(form.stock_m_l) || 0)})
+                    </span>
+                  </Label>
+                  <div className="grid grid-cols-3 gap-2">
+                    <div>
+                      <p className="text-[10px] uppercase tracking-widest text-neutral-400 mb-1">XS/S</p>
+                      <Input
+                        type="number"
+                        min={0}
+                        value={form.stock_xs_s}
+                        onChange={(e) => setForm((f) => ({ ...f, stock_xs_s: e.target.value }))}
+                        className="rounded-xl border-neutral-200"
+                      />
+                    </div>
+                    <div>
+                      <p className="text-[10px] uppercase tracking-widest text-neutral-400 mb-1">S/M</p>
+                      <Input
+                        type="number"
+                        min={0}
+                        value={form.stock_s_m}
+                        onChange={(e) => setForm((f) => ({ ...f, stock_s_m: e.target.value }))}
+                        className="rounded-xl border-neutral-200"
+                      />
+                    </div>
+                    <div>
+                      <p className="text-[10px] uppercase tracking-widest text-neutral-400 mb-1">M/L</p>
+                      <Input
+                        type="number"
+                        min={0}
+                        value={form.stock_m_l}
+                        onChange={(e) => setForm((f) => ({ ...f, stock_m_l: e.target.value }))}
+                        className="rounded-xl border-neutral-200"
+                      />
+                    </div>
                   </div>
+                </div>
+                <div className="grid grid-cols-1 gap-3">
                   <div>
                     <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">Collezione</Label>
                     <select

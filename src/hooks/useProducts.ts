@@ -21,6 +21,8 @@ export interface Product {
   fabric_details: string | null;
   shipping_info: string | null;
   stock: number;
+  /** Stock per ogni taglia, es. `{"XS/S": 4, "S/M": 3, "M/L": 3}`. La colonna `stock` totale è auto-sincronizzata da trigger DB. */
+  stock_by_size: Record<string, number>;
   created_at: string;
   slug?: string | null;
   stripe_payment_link?: string | null;
