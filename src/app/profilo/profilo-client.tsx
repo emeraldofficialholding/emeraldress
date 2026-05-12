@@ -438,10 +438,13 @@ function OrdersSection({ email }: { email: string | null }) {
   useEffect(() => {
     if (!email) return;
     (async () => {
-      // RLS lets us read both user_id-linked orders AND guest orders matching our email.
+      // RLS lets us read user_id-linked orders, guest_email orders and customer_email orders.
+      // customer_email è il nuovo standard popolato dal Modulo 1 n8n. guest_email è legacy.
       const { data } = await supabase
         .from("orders")
-        .select("id, created_at, status, total_amount, guest_email, tracking_number, tracking_url, return_status")
+        .select(
+          "id, created_at, status, total_amount, guest_email, customer_email, order_number, tracking_number, tracking_url, return_status",
+        )
         .order("created_at", { ascending: false });
       const mapped: Order[] = ((data as any[]) ?? []).map((o) => ({
         id: o.id,
@@ -449,7 +452,7 @@ function OrdersSection({ email }: { email: string | null }) {
         status: o.status,
         total_amount: Number(o.total_amount ?? 0),
         items: [],
-        customer_email: o.guest_email ?? "",
+        customer_email: o.customer_email ?? o.guest_email ?? "",
         tracking_number: o.tracking_number ?? null,
         tracking_url: o.tracking_url ?? null,
         return_status: o.return_status ?? null,
