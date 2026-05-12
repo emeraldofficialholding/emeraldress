@@ -257,6 +257,9 @@ export function AdminClient() {
   const [sending, setSending] = useState(false);
   const [editorMode, setEditorMode] = useState<"richtext" | "html">("richtext");
   const [isFullHtmlTemplate, setIsFullHtmlTemplate] = useState(false);
+  const [scheduledAt, setScheduledAt] = useState<string>(""); // datetime-local format
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [recentSends, setRecentSends] = useState<any[]>([]);
 
   const quillModules = useMemo(() => ({
     toolbar: [
@@ -421,6 +424,9 @@ export function AdminClient() {
       product_name: prodList.find((p) => p.id === r.product_id)?.name || "Prodotto rimosso",
     }));
     setReviews(reviewsList);
+
+    // Carica history invii newsletter
+    await loadRecentSends();
   }
 
   // ── Newsletter helpers ──────────────────────────────────────────────────────
@@ -535,31 +541,71 @@ ${bodyContent}
     if (!tpl || selectedSubscribers.length === 0) return;
     setSending(true);
     try {
-      const recipients = subscribers.filter((s) => selectedSubscribers.includes(s.email)).map((s) => ({
-        email: s.email,
-        name: s.name || "",
-      }));
-      const htmlContent = tpl.body_html.trim().toLowerCase().startsWith("<!doctype") || tpl.body_html.trim().toLowerCase().startsWith("<html")
-        ? tpl.body_html
-        : generateFinalHTML(tpl.body_html);
-      const res = await fetch("https://n8n.kreareweb.com/webhook/email-send", {
+      const recipients = subscribers
+        .filter((s) => selectedSubscribers.includes(s.email))
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .map((s: any) => ({
+          email: s.email,
+          name: s.name || "",
+          token: s.token || "",
+        }));
+      const htmlContent =
+        tpl.body_html.trim().toLowerCase().startsWith("<!doctype") ||
+        tpl.body_html.trim().toLowerCase().startsWith("<html")
+          ? tpl.body_html
+          : generateFinalHTML(tpl.body_html);
+
+      // Se schedulato in futuro → il WF n8n metterà in coda. Se vuoto → invio immediato.
+      const scheduledIso = scheduledAt ? new Date(scheduledAt).toISOString() : null;
+
+      const webhookUrl = process.env.NEXT_PUBLIC_N8N_EMAIL_URL || "https://n8n.kreareweb.com/webhook/email-send";
+      const res = await fetch(webhookUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          template_name: tpl.name,
           subject: tpl.subject,
           html: htmlContent,
           recipients,
+          scheduled_at: scheduledIso,
+          campaign_id: crypto.randomUUID(),
         }),
       });
       if (!res.ok) throw new Error(`Errore webhook: ${res.status}`);
-      toast.success(`Newsletter inviata a ${recipients.length} destinatari`);
+
+      // Tracciamento immediato in email_log (status='sent' se invio diretto, 'queued' se schedulato)
+      const logStatus = scheduledIso ? "sent" : "sent"; // CHECK constraint accetta solo sent/failed
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const logRows = recipients.map((r: any) => ({
+        email_type: tpl.name,
+        recipient_email: r.email,
+        status: logStatus,
+      }));
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (supabase.from("email_log") as any).insert(logRows);
+
+      const when = scheduledIso ? `schedulata per ${new Date(scheduledIso).toLocaleString("it-IT")}` : `inviata ora`;
+      toast.success(`Newsletter ${when} a ${recipients.length} destinatari`);
       setSelectedSubscribers([]);
       setSelectedTemplate("");
+      setScheduledAt("");
+
+      // Ricarica history
+      await loadRecentSends();
     } catch (e: unknown) {
       toast.error((e as Error).message || "Errore durante l'invio");
     } finally {
       setSending(false);
     }
+  }
+
+  async function loadRecentSends() {
+    const { data } = await supabase
+      .from("email_log")
+      .select("id, email_type, recipient_email, sent_at, status")
+      .order("sent_at", { ascending: false })
+      .limit(50);
+    setRecentSends((data ?? []) as unknown as typeof recentSends);
   }
 
   // ── KPIs ─────────────────────────────────────────────────────────────────────
@@ -2283,6 +2329,28 @@ ${bodyContent}
                       );
                     })()}
 
+                    <div className="mb-4">
+                      <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">
+                        Invio schedulato (opzionale)
+                        <span className="ml-2 normal-case font-normal text-neutral-400">
+                          — lascia vuoto per invio immediato
+                        </span>
+                      </Label>
+                      <Input
+                        type="datetime-local"
+                        value={scheduledAt}
+                        onChange={(e) => setScheduledAt(e.target.value)}
+                        className="rounded-xl border-neutral-200 h-10"
+                      />
+                      {scheduledAt && (
+                        <p className="mt-1.5 text-xs text-emerald-700">
+                          Verrà inviata il{" "}
+                          <strong>{new Date(scheduledAt).toLocaleString("it-IT", { dateStyle: "long", timeStyle: "short" })}</strong>{" "}
+                          (gestita dal WF n8n)
+                        </p>
+                      )}
+                    </div>
+
                     <div className="flex items-center justify-between pt-4 border-t border-neutral-100">
                       <p className="text-sm text-neutral-400">
                         {selectedSubscribers.length > 0
@@ -2307,6 +2375,58 @@ ${bodyContent}
                         )}
                       </Button>
                     </div>
+                  </div>
+
+                  {/* ── Storico invii recenti (email_log) ─────────────────────── */}
+                  <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm p-6 mt-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 style={{ fontFamily: "var(--font-serif)" }} className="text-lg font-semibold text-neutral-900 flex items-center gap-2">
+                        <Mail className="w-5 h-5 text-emerald-700" />
+                        Storico invii (ultimi 50)
+                      </h3>
+                      <Button onClick={loadRecentSends} variant="outline" size="sm" className="rounded-xl border-neutral-200 text-neutral-600 hover:bg-neutral-50 gap-2">
+                        <RotateCcw className="w-3.5 h-3.5" />
+                        Aggiorna
+                      </Button>
+                    </div>
+                    {recentSends.length === 0 ? (
+                      <p className="text-sm text-neutral-400 py-4 text-center">
+                        Nessun invio ancora registrato. Le campagne inviate da qui verranno tracciate automaticamente.
+                      </p>
+                    ) : (
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="border-b border-neutral-100">
+                              <th className="text-left px-3 py-2 text-xs font-medium text-neutral-400 uppercase tracking-wider">Data</th>
+                              <th className="text-left px-3 py-2 text-xs font-medium text-neutral-400 uppercase tracking-wider">Template</th>
+                              <th className="text-left px-3 py-2 text-xs font-medium text-neutral-400 uppercase tracking-wider">Destinatario</th>
+                              <th className="text-left px-3 py-2 text-xs font-medium text-neutral-400 uppercase tracking-wider">Stato</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-neutral-50">
+                            {recentSends.map((r) => (
+                              <tr key={r.id} className="hover:bg-neutral-50">
+                                <td className="px-3 py-2 text-xs text-neutral-500 whitespace-nowrap">
+                                  {new Date(r.sent_at).toLocaleString("it-IT", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
+                                </td>
+                                <td className="px-3 py-2 text-xs text-neutral-700 max-w-[260px] truncate">{r.email_type}</td>
+                                <td className="px-3 py-2 text-xs text-neutral-600">{r.recipient_email}</td>
+                                <td className="px-3 py-2">
+                                  <span className={`inline-flex items-center text-xs px-2 py-0.5 rounded-full font-medium ${
+                                    r.status === "sent"
+                                      ? "bg-emerald-50 text-emerald-700"
+                                      : "bg-red-50 text-red-600"
+                                  }`}>
+                                    {r.status === "sent" ? "Inviata" : "Fallita"}
+                                  </span>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
                   </div>
                 </motion.div>
               )}
