@@ -128,9 +128,6 @@ const emptyForm = {
   price: "",
   sale_price: "",
   stock: "0",
-  stock_xs_s: "0",
-  stock_s_m: "0",
-  stock_m_l: "0",
   category: "classics",
   collection_id: "",
   fabric_details: "",
@@ -138,7 +135,18 @@ const emptyForm = {
   sizes: "XS/S,S/M,M/L",
   status: "active" as "active" | "draft",
   stripe_payment_link: "",
+  // stockMap: chiave = taglia (es. "XS/S"), valore = quantita' (string per Input).
+  // Sincronizzato con `sizes` quando l'admin modifica la lista taglie.
+  stockMap: { "XS/S": "0", "S/M": "0", "M/L": "0" } as Record<string, string>,
 };
+
+// Utility: parse "XS, S, M-L" -> ["XS","S","M-L"], split solo su virgola.
+function parseSizesInput(input: string): string[] {
+  return input
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
 
 // ══════════════════════════════════════════════════════════════════════════════
 export function AdminClient() {
@@ -673,22 +681,31 @@ ${bodyContent}
   function openEditProduct(p: Product) {
     setEditingProduct(p);
     const sbs = p.stock_by_size ?? {};
+    const productSizes = (p.sizes || []).filter(Boolean);
+    // stockMap: per ogni taglia del prodotto, prendi lo stock dal DB (0 default).
+    // Includi anche eventuali chiavi residue in stock_by_size non piu' in sizes
+    // cosi' l'admin le vede e puo' azzerarle/rimuoverle.
+    const stockMap: Record<string, string> = {};
+    productSizes.forEach((s) => {
+      stockMap[s] = String(sbs[s] ?? 0);
+    });
+    Object.keys(sbs).forEach((k) => {
+      if (!(k in stockMap)) stockMap[k] = String(sbs[k] ?? 0);
+    });
     setForm({
       name: p.name,
       description: p.description || "",
       price: String(p.price),
       sale_price: p.sale_price ? String(p.sale_price) : "",
       stock: String(p.stock ?? 0),
-      stock_xs_s: String(sbs["XS/S"] ?? 0),
-      stock_s_m: String(sbs["S/M"] ?? 0),
-      stock_m_l: String(sbs["M/L"] ?? 0),
       category: p.category,
       collection_id: p.collection_id || "",
       fabric_details: p.fabric_details || "",
       shipping_info: p.shipping_info || "",
-      sizes: (p.sizes || []).join(","),
+      sizes: productSizes.join(","),
       status: (p.status === "draft" ? "draft" : "active") as "active" | "draft",
       stripe_payment_link: p.stripe_payment_link || "",
+      stockMap,
     });
     // Flatten in case DB has nested arrays like [["url"]] instead of ["url"]
     const flatImages: string[] = (p.images || [])
@@ -727,15 +744,15 @@ ${bodyContent}
         }
       }
 
-      const sizesArray: string[] = form.sizes
-        ? form.sizes.split(",").map((s) => s.trim()).filter(Boolean)
-        : [];
+      const sizesArray: string[] = parseSizesInput(form.sizes);
 
-      const stockBySize = {
-        "XS/S": parseInt(form.stock_xs_s) || 0,
-        "S/M": parseInt(form.stock_s_m) || 0,
-        "M/L": parseInt(form.stock_m_l) || 0,
-      };
+      // stockBySize: solo per le taglie presenti nella lista corrente.
+      // Eventuali chiavi obsolete vengono droppate (cosi' il trigger ricalcola
+      // correttamente lo stock totale).
+      const stockBySize: Record<string, number> = {};
+      sizesArray.forEach((s) => {
+        stockBySize[s] = parseInt(form.stockMap[s] ?? "0") || 0;
+      });
 
       const payload: Record<string, unknown> = {
         name: form.name,
@@ -3625,46 +3642,82 @@ ${bodyContent}
                   </div>
                 </div>
 
-                {/* Stock per taglia (totale auto-calcolato da trigger DB) */}
-                <div>
-                  <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">
-                    Stock per taglia
-                    <span className="ml-2 text-emerald-600 normal-case font-normal">
-                      (totale: {(parseInt(form.stock_xs_s) || 0) + (parseInt(form.stock_s_m) || 0) + (parseInt(form.stock_m_l) || 0)})
-                    </span>
-                  </Label>
-                  <div className="grid grid-cols-3 gap-2">
-                    <div>
-                      <p className="text-[10px] uppercase tracking-widest text-neutral-400 mb-1">XS/S</p>
-                      <Input
-                        type="number"
-                        min={0}
-                        value={form.stock_xs_s}
-                        onChange={(e) => setForm((f) => ({ ...f, stock_xs_s: e.target.value }))}
-                        className="rounded-xl border-neutral-200"
-                      />
-                    </div>
-                    <div>
-                      <p className="text-[10px] uppercase tracking-widest text-neutral-400 mb-1">S/M</p>
-                      <Input
-                        type="number"
-                        min={0}
-                        value={form.stock_s_m}
-                        onChange={(e) => setForm((f) => ({ ...f, stock_s_m: e.target.value }))}
-                        className="rounded-xl border-neutral-200"
-                      />
-                    </div>
-                    <div>
-                      <p className="text-[10px] uppercase tracking-widest text-neutral-400 mb-1">M/L</p>
-                      <Input
-                        type="number"
-                        min={0}
-                        value={form.stock_m_l}
-                        onChange={(e) => setForm((f) => ({ ...f, stock_m_l: e.target.value }))}
-                        className="rounded-xl border-neutral-200"
-                      />
-                    </div>
+                {/* Taglie disponibili + stock per ogni taglia */}
+                <div className="space-y-3">
+                  <div>
+                    <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">
+                      Taglie disponibili
+                    </Label>
+                    <Input
+                      value={form.sizes}
+                      onChange={(e) => {
+                        const newSizes = e.target.value;
+                        const arr = parseSizesInput(newSizes);
+                        setForm((f) => {
+                          // Mantieni lo stock esistente per le taglie ancora presenti.
+                          const next: Record<string, string> = {};
+                          arr.forEach((s) => {
+                            next[s] = f.stockMap[s] ?? "0";
+                          });
+                          return { ...f, sizes: newSizes, stockMap: next };
+                        });
+                      }}
+                      placeholder="es. XS, S, M, L, XL  oppure  XS/S, S/M, M/L"
+                      className="rounded-xl border-neutral-200"
+                    />
+                    <p className="text-[10px] text-neutral-400 mt-1">
+                      Separa le taglie con la virgola. Per ogni taglia inserita comparirà un campo stock qui sotto.
+                    </p>
                   </div>
+
+                  {(() => {
+                    const sizesList = parseSizesInput(form.sizes);
+                    const total = sizesList.reduce(
+                      (sum, s) => sum + (parseInt(form.stockMap[s] ?? "0") || 0),
+                      0,
+                    );
+                    if (sizesList.length === 0) {
+                      return (
+                        <p className="text-xs text-neutral-400 italic">
+                          Aggiungi almeno una taglia per definire lo stock.
+                        </p>
+                      );
+                    }
+                    return (
+                      <div>
+                        <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">
+                          Stock per taglia
+                          <span className="ml-2 text-emerald-600 normal-case font-normal">
+                            (totale collezione: {total})
+                          </span>
+                        </Label>
+                        <div
+                          className="grid gap-2"
+                          style={{ gridTemplateColumns: `repeat(${Math.min(sizesList.length, 4)}, minmax(0,1fr))` }}
+                        >
+                          {sizesList.map((size) => (
+                            <div key={size}>
+                              <p className="text-[10px] uppercase tracking-widest text-neutral-400 mb-1 truncate" title={size}>
+                                {size}
+                              </p>
+                              <Input
+                                type="number"
+                                min={0}
+                                value={form.stockMap[size] ?? "0"}
+                                onChange={(e) =>
+                                  setForm((f) => ({
+                                    ...f,
+                                    stockMap: { ...f.stockMap, [size]: e.target.value },
+                                  }))
+                                }
+                                className="rounded-xl border-neutral-200"
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
                 <div className="grid grid-cols-1 gap-3">
                   <div>
@@ -3688,17 +3741,6 @@ ${bodyContent}
                       ))}
                     </select>
                   </div>
-                </div>
-
-                {/* Sizes */}
-                <div>
-                  <Label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">Taglie (separate da virgola)</Label>
-                  <Input
-                    value={form.sizes}
-                    onChange={(e) => setForm((f) => ({ ...f, sizes: e.target.value }))}
-                    placeholder="XS, S, M, L, XL"
-                    className="rounded-xl border-neutral-200"
-                  />
                 </div>
 
                 {/* Fabric */}

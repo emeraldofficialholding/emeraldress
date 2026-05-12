@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // ── Shimmer particles ─────────────────────────────────────────────────────────
 const particles = Array.from({ length: 12 }, (_, i) => ({
@@ -39,23 +38,16 @@ const GoogleIcon = () => (
   </svg>
 );
 
-// Quando beta-gate ON, signup nascosto (solo accesso per utenti esistenti).
-// Coerente col middleware: se beta-gate ON, sito chiuso al pubblico.
-const SIGNUP_ENABLED = process.env.NEXT_PUBLIC_BETA_GATE !== "true";
-
+// La registrazione vive solo nel popup AuthDialog (azioni come "salva in wishlist").
+// La pagina /login e' dedicata SOLO all'accesso utenti esistenti (admin inclusi).
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const supabase = getSupabaseBrowserClient();
-  const [tab, setTab] = useState<"signin" | "signup">("signin");
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-
-  const [signupEmail, setSignupEmail] = useState("");
-  const [signupPassword, setSignupPassword] = useState("");
-  const [showSignupPassword, setShowSignupPassword] = useState(false);
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -107,42 +99,6 @@ export function LoginForm() {
         return;
       }
       await redirectByRole(data.user.id);
-    } catch {
-      setError("Si è verificato un errore. Riprova più tardi.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!SIGNUP_ENABLED) {
-      setError("Le registrazioni sono temporaneamente chiuse.");
-      return;
-    }
-    setError(null);
-    setInfo(null);
-    setIsLoading(true);
-    try {
-      const redirectUrl = `${window.location.origin}/auth/callback`;
-      const { data, error: signUpError } = await supabase.auth.signUp({
-        email: signupEmail,
-        password: signupPassword,
-        options: { emailRedirectTo: redirectUrl },
-      });
-      if (signUpError) {
-        if (signUpError.message.toLowerCase().includes("registered")) {
-          setError("Email già registrata. Prova ad accedere.");
-        } else {
-          setError(signUpError.message);
-        }
-        return;
-      }
-      if (data.session && data.user) {
-        await redirectByRole(data.user.id);
-      } else {
-        setInfo("Account creato. Controlla la tua email per confermare.");
-      }
     } catch {
       setError("Si è verificato un errore. Riprova più tardi.");
     } finally {
@@ -245,38 +201,12 @@ export function LoginForm() {
             className="text-3xl text-emerald-950"
             style={{ fontFamily: "'Playfair Display', serif", fontWeight: 400 }}
           >
-            {tab === "signin" ? "Accesso" : "Registrazione"}
+            Accesso
           </h1>
           <div className="mt-3 mx-auto w-10 h-px bg-emerald-400/50" />
         </motion.div>
 
-        <Tabs
-          value={tab}
-          onValueChange={(v) => {
-            if (!SIGNUP_ENABLED && v === "signup") return;
-            setTab(v as "signin" | "signup");
-            setError(null);
-            setInfo(null);
-          }}
-        >
-          {SIGNUP_ENABLED && (
-            <TabsList className="grid w-full grid-cols-2 bg-white/50 border border-emerald-200 mb-5">
-              <TabsTrigger
-                value="signin"
-                className="text-[11px] tracking-[0.2em] uppercase data-[state=active]:bg-emerald-900 data-[state=active]:text-emerald-50"
-              >
-                Accedi
-              </TabsTrigger>
-              <TabsTrigger
-                value="signup"
-                className="text-[11px] tracking-[0.2em] uppercase data-[state=active]:bg-emerald-900 data-[state=active]:text-emerald-50"
-              >
-                Crea Account
-              </TabsTrigger>
-            </TabsList>
-          )}
-
-          <TabsContent value="signin">
+        <div>
             <form onSubmit={handleSignIn} className="space-y-4">
               <div>
                 <label
@@ -374,65 +304,7 @@ export function LoginForm() {
                 </div>
               </motion.form>
             )}
-          </TabsContent>
-
-          <TabsContent value="signup">
-            <form onSubmit={handleSignUp} className="space-y-4">
-              <div>
-                <label
-                  htmlFor="signup-email"
-                  className="block text-[10px] tracking-[0.25em] uppercase text-emerald-800/60 mb-2"
-                >
-                  Email
-                </label>
-                <input
-                  id="signup-email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  value={signupEmail}
-                  onChange={(e) => setSignupEmail(e.target.value)}
-                  className="w-full bg-white/60 border border-emerald-200 rounded-lg px-4 py-3 text-sm text-emerald-950 placeholder:text-emerald-700/30 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-300 transition-all"
-                  placeholder="nome@example.com"
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="signup-password"
-                  className="block text-[10px] tracking-[0.25em] uppercase text-emerald-800/60 mb-2"
-                >
-                  Password
-                </label>
-                <div className="relative">
-                  <input
-                    id="signup-password"
-                    type={showSignupPassword ? "text" : "password"}
-                    autoComplete="new-password"
-                    required
-                    minLength={6}
-                    value={signupPassword}
-                    onChange={(e) => setSignupPassword(e.target.value)}
-                    className="w-full bg-white/60 border border-emerald-200 rounded-lg px-4 py-3 pr-11 text-sm text-emerald-950 placeholder:text-emerald-700/30 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-300 transition-all"
-                    placeholder="Almeno 6 caratteri"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowSignupPassword((v) => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-emerald-600/50 hover:text-emerald-700"
-                  >
-                    {showSignupPassword ? <EyeOff size={15} /> : <Eye size={15} />}
-                  </button>
-                </div>
-              </div>
-
-              <SubmitButton
-                isLoading={isLoading}
-                label="Crea Account"
-                loadingLabel="Creazione in corso…"
-              />
-            </form>
-          </TabsContent>
-        </Tabs>
+        </div>
 
         {error && (
           <motion.p

@@ -3,10 +3,13 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { User, Menu, X, ChevronDown } from "lucide-react";
+import { User, Menu, X, ChevronDown, Shield, LogIn } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 const logoET = "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/emeraldress-logo-touch-collection.svg";
+
+type AuthState = "guest" | "user" | "admin";
 
 const links = [
   { to: "/", label: "Home" },
@@ -20,6 +23,7 @@ const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collezioniOpen, setCollezioniOpen] = useState(false);
+  const [authState, setAuthState] = useState<AuthState>("guest");
   const pathname = usePathname() ?? "/";
   const isHome = pathname === "/";
 
@@ -32,6 +36,45 @@ const Navbar = () => {
   useEffect(() => {
     setMobileOpen(false);
   }, [pathname]);
+
+  // Stato auth + ruolo per decidere dove punta l'icona utente.
+  useEffect(() => {
+    const supabase = getSupabaseBrowserClient();
+    const resolve = async () => {
+      const { data } = await supabase.auth.getSession();
+      const user = data.session?.user;
+      if (!user) {
+        setAuthState("guest");
+        return;
+      }
+      const { data: roleRow } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .eq("role", "admin")
+        .maybeSingle();
+      setAuthState(roleRow ? "admin" : "user");
+    };
+    void resolve();
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      if (!session?.user) {
+        setAuthState("guest");
+      } else {
+        void resolve();
+      }
+    });
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
+  const userHref =
+    authState === "guest" ? "/login" : authState === "admin" ? "/admin" : "/profilo";
+  const userLabel =
+    authState === "guest"
+      ? "Accedi"
+      : authState === "admin"
+        ? "Area admin"
+        : "Area utente";
+  const UserIcon = authState === "guest" ? LogIn : authState === "admin" ? Shield : User;
 
   const transparent = isHome && !scrolled && !mobileOpen;
 
@@ -84,9 +127,31 @@ const Navbar = () => {
             )}
           </nav>
 
-          <div className="flex items-center gap-4">
-            <Link href="/profilo" className="hover:opacity-70 transition-opacity" aria-label="Area utente">
-              <User className="w-5 h-5" />
+          <div className="flex items-center gap-3">
+            {/* Admin: scorciatoia visibile separata oltre all'icona utente */}
+            {authState === "admin" && (
+              <Link
+                href="/profilo"
+                className="hidden sm:inline-flex items-center gap-1.5 text-[10px] tracking-[0.2em] uppercase opacity-70 hover:opacity-100 transition-opacity"
+                aria-label="Area personale"
+              >
+                <User className="w-4 h-4" />
+                Profilo
+              </Link>
+            )}
+            <Link
+              href={userHref}
+              className="relative hover:opacity-70 transition-opacity"
+              aria-label={userLabel}
+              title={userLabel}
+            >
+              <UserIcon className="w-5 h-5" />
+              {authState === "admin" && (
+                <span
+                  className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-background"
+                  aria-hidden
+                />
+              )}
             </Link>
             <button
               className="lg:hidden hover:opacity-70"

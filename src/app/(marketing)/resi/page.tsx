@@ -43,13 +43,16 @@ export default function ResiPage() {
       <p>Riceverai una conferma con le istruzioni operative per la restituzione.</p>
 
       <h2>3. Condizioni per il reso</h2>
-      <p>I prodotti restituiti devono:</p>
+      <p>
+        Per essere accettato, il capo restituito deve rispettare tre condizioni inderogabili:
+      </p>
       <ul>
-        <li>essere integri, non utilizzati, non lavati e non danneggiati;</li>
-        <li>conservare tutte le etichette originali e il packaging interno;</li>
-        <li>essere accompagnati dalla ricevuta o riferimento d&apos;ordine.</li>
+        <li><strong>mai indossato</strong> — il capo deve essere integro, non utilizzato e non lavato;</li>
+        <li><strong>mai sporcato</strong> — assenza di macchie, profumi, trucco, deodorante o qualsiasi alterazione;</li>
+        <li><strong>mai senza etichetta</strong> — il cartellino originale deve essere ancora attaccato e il packaging interno conservato.</li>
       </ul>
       <p>
+        Il reso deve inoltre essere accompagnato dalla ricevuta o dal riferimento d&apos;ordine.
         Per ragioni di igiene e sicurezza, non vengono accettati resi di capi che presentino segni
         d&apos;uso, alterazioni, profumi, macchie o etichette rimosse.
       </p>

@@ -769,7 +769,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
                 <li className="flex flex-col items-center gap-2 p-3 rounded-xl bg-white border border-emerald-100">
                   <RotateCcw size={16} className="text-emerald-700" />
                   <span className="text-[10px] tracking-[0.15em] uppercase text-emerald-900 font-medium leading-tight">
-                    Reso facile<br />30 giorni
+                    Reso<br />14 giorni
                   </span>
                 </li>
                 <li className="flex flex-col items-center gap-2 p-3 rounded-xl bg-white border border-emerald-100">
@@ -806,15 +806,26 @@ export function ProductDetailClient({ product }: { product: Product }) {
                   <AccordionTrigger className="text-[11px] tracking-[0.25em] uppercase hover:no-underline py-4 text-emerald-950 font-medium">
                     Spedizione & Resi
                   </AccordionTrigger>
-                  <AccordionContent className="text-sm text-emerald-900/75 leading-relaxed pb-5 space-y-2">
+                  <AccordionContent className="text-sm text-emerald-900/75 leading-relaxed pb-5 space-y-3">
                     <p>
                       {product.shipping_info ||
                         "Spedizione standard 3–5 giorni lavorativi in Italia. Spedizione espressa disponibile al checkout."}
                     </p>
-                    <p>
-                      Reso gratuito entro 30 giorni. Il capo deve essere integro e con le etichette
-                      originali.
-                    </p>
+                    <div>
+                      <p className="font-medium text-emerald-950 mb-1.5">Diritto di recesso entro 14 giorni</p>
+                      <p>
+                        Hai 14 giorni dalla consegna per esercitare il diritto di recesso (art. 52 D.Lgs. 206/2005).
+                        Il capo deve essere restituito:
+                      </p>
+                      <ul className="mt-1.5 ml-4 list-disc space-y-0.5 text-emerald-900/70">
+                        <li><strong>mai indossato</strong>, integro e non lavato</li>
+                        <li><strong>mai sporcato</strong>, senza profumi, macchie o alterazioni</li>
+                        <li><strong>mai senza etichetta</strong> — cartellino originale attaccato</li>
+                      </ul>
+                      <p className="mt-1.5 text-[12px] text-emerald-900/60">
+                        Spese di restituzione a carico del cliente. <a href="/resi" className="underline hover:text-emerald-700">Leggi la policy completa →</a>
+                      </p>
+                    </div>
                   </AccordionContent>
                 </AccordionItem>
 
