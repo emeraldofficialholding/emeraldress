@@ -11,9 +11,9 @@ import type { Product } from "@/hooks/useProducts";
 
 interface FullscreenProductViewerProps {
   product: Product;
-  /** Chiamato quando l'utente "esce" tappando il dismiss esplicito (X): chiude e va a /product. */
+  /** Qualsiasi uscita (X, swipe, tap titolo) chiude il viewer e naviga a /product/[slug]. */
   onClose: () => void;
-  /** Chiusura silenziosa senza navigare (es. swipe down). */
+  /** Chiusura silenziosa (solo per casi controllati come l'apertura di AuthDialog). */
   onDismiss: () => void;
 }
 
@@ -79,7 +79,7 @@ export default function FullscreenProductViewer({
           dragConstraints={{ top: 0, bottom: 0 }}
           dragElastic={0.5}
           onDragEnd={(_, info) => {
-            if (info.offset.y > 120) onDismiss();
+            if (info.offset.y > 120) onClose();
           }}
           className="absolute inset-0 flex items-center justify-center touch-pan-y"
         >
@@ -95,8 +95,8 @@ export default function FullscreenProductViewer({
         {/* Top gradient + close */}
         <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black/60 to-transparent pointer-events-none" />
         <button
-          onClick={onDismiss}
-          aria-label="Chiudi anteprima"
+          onClick={onClose}
+          aria-label="Apri scheda prodotto"
           className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-white/15 backdrop-blur-md text-white flex items-center justify-center active:scale-95 transition"
         >
           <X size={18} />
