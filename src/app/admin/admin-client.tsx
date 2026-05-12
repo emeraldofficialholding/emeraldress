@@ -555,43 +555,40 @@ ${bodyContent}
           ? tpl.body_html
           : generateFinalHTML(tpl.body_html);
 
-      // Se schedulato in futuro → il WF n8n metterà in coda. Se vuoto → invio immediato.
+      // Se schedulato in futuro → il WF n8n metterà in coda con Wait Until. Se vuoto → invio immediato.
       const scheduledIso = scheduledAt ? new Date(scheduledAt).toISOString() : null;
+      const campaignId = crypto.randomUUID();
 
-      const webhookUrl = process.env.NEXT_PUBLIC_N8N_EMAIL_URL || "https://n8n.kreareweb.com/webhook/email-send";
+      // WF EMERALD-Email-Send: il WF gestisce dedup atomico (email_campaigns lock),
+      // INSERT email_log status='pending' poi UPDATE 'sent'/'failed'.
+      // NON facciamo pre-INSERT lato sito per evitare race condition col WF lock.
+      const webhookUrl =
+        process.env.NEXT_PUBLIC_N8N_EMAIL_URL ||
+        "https://n8n.kreareweb.com/webhook/emerald/email-send-b2a4d6f8c0e2a4b6d8f0c2e4a6b8d0f2";
       const res = await fetch(webhookUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          campaign_id: campaignId,
           template_name: tpl.name,
           subject: tpl.subject,
           html: htmlContent,
           recipients,
           scheduled_at: scheduledIso,
-          campaign_id: crypto.randomUUID(),
         }),
       });
       if (!res.ok) throw new Error(`Errore webhook: ${res.status}`);
 
-      // Tracciamento immediato in email_log (status='sent' se invio diretto, 'queued' se schedulato)
-      const logStatus = scheduledIso ? "sent" : "sent"; // CHECK constraint accetta solo sent/failed
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const logRows = recipients.map((r: any) => ({
-        email_type: tpl.name,
-        recipient_email: r.email,
-        status: logStatus,
-      }));
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await (supabase.from("email_log") as any).insert(logRows);
-
-      const when = scheduledIso ? `schedulata per ${new Date(scheduledIso).toLocaleString("it-IT")}` : `inviata ora`;
-      toast.success(`Newsletter ${when} a ${recipients.length} destinatari`);
+      const when = scheduledIso
+        ? `schedulata per ${new Date(scheduledIso).toLocaleString("it-IT")}`
+        : `in invio ora`;
+      toast.success(`Campagna ${when} (${recipients.length} destinatari) — vedi storico per stato.`);
       setSelectedSubscribers([]);
       setSelectedTemplate("");
       setScheduledAt("");
 
-      // Ricarica history
-      await loadRecentSends();
+      // Ricarica history (potrebbe non avere ancora righe se il WF e' in Wait Until)
+      setTimeout(() => loadRecentSends(), 2000);
     } catch (e: unknown) {
       toast.error((e as Error).message || "Errore durante l'invio");
     } finally {
@@ -602,7 +599,7 @@ ${bodyContent}
   async function loadRecentSends() {
     const { data } = await supabase
       .from("email_log")
-      .select("id, email_type, recipient_email, sent_at, status")
+      .select("id, email_type, recipient, sent_at, status, campaign_id")
       .order("sent_at", { ascending: false })
       .limit(50);
     setRecentSends((data ?? []) as unknown as typeof recentSends);
@@ -2411,14 +2408,16 @@ ${bodyContent}
                                   {new Date(r.sent_at).toLocaleString("it-IT", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
                                 </td>
                                 <td className="px-3 py-2 text-xs text-neutral-700 max-w-[260px] truncate">{r.email_type}</td>
-                                <td className="px-3 py-2 text-xs text-neutral-600">{r.recipient_email}</td>
+                                <td className="px-3 py-2 text-xs text-neutral-600">{r.recipient}</td>
                                 <td className="px-3 py-2">
                                   <span className={`inline-flex items-center text-xs px-2 py-0.5 rounded-full font-medium ${
                                     r.status === "sent"
                                       ? "bg-emerald-50 text-emerald-700"
-                                      : "bg-red-50 text-red-600"
+                                      : r.status === "pending"
+                                        ? "bg-amber-50 text-amber-700"
+                                        : "bg-red-50 text-red-600"
                                   }`}>
-                                    {r.status === "sent" ? "Inviata" : "Fallita"}
+                                    {r.status === "sent" ? "Inviata" : r.status === "pending" ? "In coda" : "Fallita"}
                                   </span>
                                 </td>
                               </tr>
