@@ -254,10 +254,12 @@ export async function POST(request: NextRequest) {
     const sessionExpiresAt = Math.floor(Date.now() / 1000) + RESERVATION_TTL_SECONDS;
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
-      // card + klarna (BNPL): Klarna richiede EUR e che il customer abiti in
-      // un paese supportato. Stripe lo mostra automaticamente nel checkout
-      // hosted se l'utente è eligibile, altrimenti fallback su card.
-      payment_method_types: ["card", "klarna"],
+      // NOTA Klarna: era ["card", "klarna"] ma in alcuni account/scenari
+      // (Klarna pending review, shipping_options con delivery_estimate,
+      // descrizioni mancanti) Stripe rifiuta l'intera session. Per il drop
+      // di domani teniamo solo card. Riabiliteremo Klarna dopo verifica
+      // attivazione + eventuale rimozione di delivery_estimate.
+      payment_method_types: ["card"],
       line_items,
       expires_at: sessionExpiresAt,
       success_url: `${SITE_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
