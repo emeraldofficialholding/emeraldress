@@ -13,45 +13,38 @@ export const ContainerScroll = ({
   const { scrollYProgress } = useScroll({
     target: containerRef,
   });
-  const [isDesktop, setIsDesktop] = React.useState(false);
+  const [isMobile, setIsMobile] = React.useState(false);
 
   React.useEffect(() => {
-    const check = () => {
-      // Effetto "laptop chrome" solo su desktop (≥ lg = 1024px).
-      // Sotto, tablet/mobile renderizzano il contenuto in un container fluido.
-      setIsDesktop(window.innerWidth >= 1024);
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
     };
-    check();
-    window.addEventListener("resize", check);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
     return () => {
-      window.removeEventListener("resize", check);
+      window.removeEventListener("resize", checkMobile);
     };
   }, []);
 
-  const rotate = useTransform(scrollYProgress, [0, 1], [20, 0]);
-  const scale = useTransform(scrollYProgress, [0, 1], [1.05, 1]);
-  const translate = useTransform(scrollYProgress, [0, 1], [0, -100]);
+  // Scale: parte leggermente più grande e si normalizza a 1 mentre scrolli.
+  // Su mobile lo scaling è meno aggressivo così il form resta leggibile.
+  const scaleDimensions = (): [number, number] => {
+    return isMobile ? [0.95, 1] : [1.05, 1];
+  };
 
-  // Mobile / iPad: niente effetto 3D, niente altezza fissa, no monitor finto.
-  // Il contenuto rispetta il suo flow naturale e scorre con la pagina.
-  if (!isDesktop) {
-    return (
-      <div className="w-full relative px-4 py-8" ref={containerRef}>
-        <div className="max-w-5xl mx-auto">{titleComponent}</div>
-        <div className="mt-6 max-w-5xl mx-auto w-full bg-background rounded-2xl border border-neutral-200 overflow-hidden">
-          {children}
-        </div>
-      </div>
-    );
-  }
+  const rotate = useTransform(scrollYProgress, [0, 1], [20, 0]);
+  const scale = useTransform(scrollYProgress, [0, 1], scaleDimensions());
+  const translate = useTransform(scrollYProgress, [0, 1], [0, -100]);
 
   return (
     <div
-      className="h-[80rem] flex items-center justify-center relative p-20"
+      // Outer scroll area: deve essere abbastanza alta da permettere il completamento
+      // dell'animazione (rotate 20→0 + scale 0.95→1) prima che la sezione esca dalla view.
+      className="h-[75rem] md:h-[85rem] lg:h-[80rem] flex items-center justify-center relative p-2 md:p-12 lg:p-20"
       ref={containerRef}
     >
       <div
-        className="py-40 w-full relative"
+        className="py-10 md:py-24 lg:py-40 w-full relative"
         style={{
           perspective: "1000px",
         }}
@@ -96,9 +89,14 @@ export const Card = ({
         boxShadow:
           "0 0 #0000004d, 0 9px 20px #0000004a, 0 37px 37px #00000042, 0 84px 50px #00000026, 0 149px 60px #0000000a, 0 233px 65px #00000003",
       }}
-      className="max-w-5xl -mt-12 mx-auto h-[30rem] md:h-[40rem] w-full border-4 border-[#6C6C6C] p-2 md:p-6 bg-[#222222] rounded-[30px] shadow-2xl"
+      // Cornice "iPad/laptop": altezze maggiori su mobile/iPad così il form ci sta.
+      // Mobile 38rem (~608px), iPad portrait 48rem (~768px), desktop 40rem.
+      className="max-w-5xl -mt-12 mx-auto h-[38rem] md:h-[48rem] lg:h-[40rem] w-full border-4 border-[#6C6C6C] p-2 md:p-4 lg:p-6 bg-[#222222] rounded-[30px] shadow-2xl"
     >
-      <div className="h-full w-full overflow-y-auto rounded-2xl bg-background md:rounded-2xl md:p-4" style={{ WebkitOverflowScrolling: 'touch' }}>
+      <div
+        className="h-full w-full overflow-y-auto rounded-2xl bg-background md:rounded-2xl"
+        style={{ WebkitOverflowScrolling: "touch" }}
+      >
         {children}
       </div>
     </motion.div>

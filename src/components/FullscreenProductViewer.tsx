@@ -163,18 +163,18 @@ export default function FullscreenProductViewer({
               dragElastic={{ top: 0.6, bottom: 0.6, left: 0.6, right: 0.6 }}
               dragMomentum={false}
               onDragEnd={handleDragEnd}
-              className="absolute inset-0 flex items-center justify-center select-none"
+              className="absolute inset-0 select-none"
             >
-              {/* Padding top/bottom per non far coprire l'immagine dai gradient */}
-              <div className="w-full h-full flex items-center justify-center pt-20 pb-44 px-4">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={cover}
-                  alt={product.name}
-                  className="max-w-full max-h-full w-auto h-auto object-contain pointer-events-none"
-                  draggable={false}
-                />
-              </div>
+              {/* Immagine edge-to-edge: object-contain con bande nere sopra/sotto
+                  che ospitano top close + bottom info gradient (l'immagine resta
+                  intera, nessun taglio di corpo/orlo). */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={cover}
+                alt={product.name}
+                className="absolute inset-0 w-full h-full object-contain pointer-events-none"
+                draggable={false}
+              />
             </motion.div>
           </AnimatePresence>
         </div>
