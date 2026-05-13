@@ -1,7 +1,12 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { updateSupabaseSession } from "@/lib/supabase/middleware";
 
-const BETA_GATE_ENABLED = process.env.NEXT_PUBLIC_BETA_GATE === "true";
+const BETA_GATE_FLAG = process.env.NEXT_PUBLIC_BETA_GATE === "true";
+
+// Data ufficiale del drop: dopo questo istante il beta-gate si auto-disabilita
+// anche se NEXT_PUBLIC_BETA_GATE è ancora "true". Sicurezza per dimenticanza
+// di redeploy a ridosso del lancio.
+const DROP_AT_MS = new Date("2026-05-14T18:00:00+02:00").getTime();
 
 // Path pubblici accessibili anche con beta-gate attivo.
 const PUBLIC_BYPASS = ["/coming-soon", "/login", "/reset-password", "/auth", "/unsubscribe", "/api", "/checkout"];
@@ -53,7 +58,9 @@ export async function middleware(request: NextRequest) {
   }
 
   // 3. Beta gate — solo admin entra; tutti gli altri → /coming-soon.
-  if (BETA_GATE_ENABLED) {
+  // Auto-disabilita dopo l'istante del drop (failsafe se manca redeploy).
+  const betaGateActive = BETA_GATE_FLAG && Date.now() < DROP_AT_MS;
+  if (betaGateActive) {
     const isBypass = PUBLIC_BYPASS.some((prefix) => pathname.startsWith(prefix));
     if (!isBypass && !isAdmin) {
       const url = request.nextUrl.clone();
