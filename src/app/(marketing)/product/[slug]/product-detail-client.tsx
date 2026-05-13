@@ -32,6 +32,7 @@ import ProductReviews from "@/components/ProductReviews";
 import RelatedLinks from "@/components/RelatedLinks";
 import { AuthDialog } from "@/components/AuthDialog";
 import { useWishlist } from "@/contexts/WishlistContext";
+import { useCart } from "@/contexts/CartContext";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import {
   Accordion,
@@ -473,6 +474,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
   const [stickyVisible, setStickyVisible] = useState(false);
 
   const { addItem, removeItem, hasItem } = useWishlist();
+  const { addItem: addToCart, openCart } = useCart();
   const liked = hasItem(product.id);
   const reviewsRef = useRef<HTMLDivElement>(null);
   const buyPanelRef = useRef<HTMLDivElement>(null);
@@ -553,32 +555,34 @@ export function ProductDetailClient({ product }: { product: Product }) {
     toast.success("Aggiunto alla wishlist");
   };
 
-  // Build Stripe checkout URL
-  const stripeHref = useMemo(() => {
-    if (!product.stripe_payment_link || !selectedSize) return null;
-    const sep = product.stripe_payment_link.includes("?") ? "&" : "?";
-    const encodedSize = selectedSize.replace(/\//g, "_");
-    const idem =
-      typeof crypto !== "undefined" && "randomUUID" in crypto
-        ? crypto.randomUUID().replace(/-/g, "").slice(0, 12)
-        : `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
-    const clientRef = `pid_${product.id.replace(/-/g, "")}__size_${encodedSize}__idem_${idem}`;
-    return `${product.stripe_payment_link}${sep}client_reference_id=${encodeURIComponent(clientRef)}`;
-  }, [product.stripe_payment_link, product.id, selectedSize]);
-
   const scrollToReviews = () => {
     reviewsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
-  const handleBuy = (e: React.MouseEvent<HTMLAnchorElement>) => {
+  const handleAddToCart = () => {
     if (!selectedSize) {
-      e.preventDefault();
       toast.error("Seleziona una taglia", {
-        description: "Scegli una taglia prima di procedere all'acquisto.",
+        description: "Scegli una taglia prima di aggiungere al carrello.",
       });
       buyPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
+    if (stockForSelected <= 0) {
+      toast.error("Taglia non disponibile");
+      return;
+    }
+    addToCart({
+      productId: product.id,
+      slug: product.slug ?? product.id,
+      name: product.name.trim(),
+      price: Number(product.price),
+      image: images[0] ?? "",
+      size: selectedSize,
+    });
+    toast.success("Aggiunto al carrello", {
+      description: `${product.name.trim()} · Taglia ${selectedSize}`,
+    });
+    openCart();
   };
 
   const handleShare = async () => {
@@ -785,14 +789,12 @@ export function ProductDetailClient({ product }: { product: Product }) {
                 </div>
               </div>
 
-              {/* CTA: Buy + Wishlist */}
+              {/* CTA: Add to cart + Wishlist */}
               <div className="flex items-stretch gap-2 mb-3">
-                {product.stripe_payment_link && !allOutOfStock ? (
-                  <motion.a
-                    href={stripeHref ?? "#"}
-                    onClick={handleBuy}
-                    target={selectedSize ? "_blank" : undefined}
-                    rel="noopener noreferrer"
+                {!allOutOfStock ? (
+                  <motion.button
+                    type="button"
+                    onClick={handleAddToCart}
                     whileTap={selectedSize ? { scale: 0.99 } : {}}
                     className={cn(
                       "flex-1 flex items-center justify-center gap-2.5 text-xs tracking-[0.25em] uppercase font-medium rounded-lg py-4 transition-all duration-300",
@@ -812,13 +814,13 @@ export function ProductDetailClient({ product }: { product: Product }) {
                   >
                     <ShoppingBag size={14} />
                     {selectedSize
-                      ? `Acquista — Taglia ${selectedSize}`
+                      ? `Aggiungi al carrello — ${selectedSize}`
                       : "Seleziona una taglia"}
-                  </motion.a>
+                  </motion.button>
                 ) : (
                   <div className="flex-1 flex items-center justify-center gap-2.5 text-xs tracking-[0.25em] uppercase rounded-lg py-4 bg-emerald-100 text-emerald-700/60 cursor-not-allowed">
                     <ShoppingBag size={14} />
-                    {allOutOfStock ? "Esaurito" : "Non disponibile"}
+                    Esaurito
                   </div>
                 )}
 
@@ -1058,19 +1060,17 @@ export function ProductDetailClient({ product }: { product: Product }) {
                 </p>
                 <p className="text-[11px] text-emerald-900/70">€{Number(product.price).toFixed(2)}</p>
               </div>
-              {stripeHref && selectedSize ? (
-                <a
-                  href={stripeHref}
-                  target="_blank"
-                  rel="noopener noreferrer"
+              {selectedSize ? (
+                <button
+                  onClick={handleAddToCart}
                   className="shrink-0 px-5 py-3 rounded-lg text-[11px] tracking-[0.2em] uppercase font-medium text-emerald-50 active:scale-95 transition"
                   style={{
                     background:
                       "linear-gradient(135deg, #052e1f 0%, #064e3b 45%, #047857 100%)",
                   }}
                 >
-                  Acquista
-                </a>
+                  Aggiungi
+                </button>
               ) : (
                 <button
                   onClick={() => {

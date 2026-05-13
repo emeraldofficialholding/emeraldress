@@ -1,0 +1,226 @@
+import { NextResponse, type NextRequest } from "next/server";
+import type Stripe from "stripe";
+import { getStripe } from "@/lib/stripe";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+
+export const runtime = "nodejs";
+// I webhook NON devono essere cacheati ne' pre-renderizzati.
+export const dynamic = "force-dynamic";
+
+const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
+const N8N_WEBHOOK_URL = process.env.N8N_ORDER_WEBHOOK_URL; // opzionale
+
+type CompactCartItem = { p: string; s: string; q: number; a: number };
+
+function reassembleCart(metadata: Record<string, string> | null): CompactCartItem[] {
+  if (!metadata) return [];
+  if (metadata.cart) {
+    try {
+      return JSON.parse(metadata.cart);
+    } catch {
+      return [];
+    }
+  }
+  // chunked
+  const chunkCount = Number(metadata.cart_chunks ?? 0);
+  if (chunkCount > 0) {
+    let joined = "";
+    for (let i = 0; i < chunkCount; i++) {
+      joined += metadata[`cart_${i}`] ?? "";
+    }
+    try {
+      return JSON.parse(joined);
+    } catch {
+      return [];
+    }
+  }
+  return [];
+}
+
+export async function POST(request: NextRequest) {
+  if (!WEBHOOK_SECRET) {
+    // eslint-disable-next-line no-console
+    console.error("[stripe webhook] STRIPE_WEBHOOK_SECRET non configurato");
+    return NextResponse.json({ error: "Webhook non configurato" }, { status: 500 });
+  }
+
+  const signature = request.headers.get("stripe-signature");
+  if (!signature) {
+    return NextResponse.json({ error: "Firma mancante" }, { status: 400 });
+  }
+
+  const rawBody = await request.text();
+  const stripe = getStripe();
+
+  let event: Stripe.Event;
+  try {
+    event = stripe.webhooks.constructEvent(rawBody, signature, WEBHOOK_SECRET);
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error("[stripe webhook] Firma invalida:", err);
+    return NextResponse.json({ error: "Firma invalida" }, { status: 400 });
+  }
+
+  // Idempotenza: usiamo session.id come idempotency_key in orders.
+  if (event.type === "checkout.session.completed") {
+    const session = event.data.object as Stripe.Checkout.Session;
+    try {
+      await handleCheckoutCompleted(session);
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error("[stripe webhook] handleCheckoutCompleted error:", e);
+      // Restituiamo 500 cosi' Stripe ritenta
+      return NextResponse.json({ error: "Errore handler" }, { status: 500 });
+    }
+  }
+
+  return NextResponse.json({ received: true });
+}
+
+async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
+  // Ignoriamo sessioni non pagate (es. async payment in pending)
+  if (session.payment_status !== "paid") return;
+
+  const supabase = createSupabaseAdminClient();
+
+  // Check idempotenza (cast: idempotency_key non e' ancora nei types generati)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: existing } = await (supabase.from("orders") as any)
+    .select("id")
+    .eq("idempotency_key", session.id)
+    .maybeSingle();
+  if (existing) return;
+
+  const stripe = getStripe();
+  // Recupera anche customer details + shipping
+  const fullSession = await stripe.checkout.sessions.retrieve(session.id, {
+    expand: ["line_items", "customer_details", "shipping_cost"],
+  });
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const meta = (fullSession.metadata ?? {}) as any;
+  const cart = reassembleCart(meta);
+  if (cart.length === 0) {
+    // eslint-disable-next-line no-console
+    console.warn("[stripe webhook] Cart vuoto nei metadata", session.id);
+  }
+
+  const customer = fullSession.customer_details;
+  const shipping = fullSession.collected_information?.shipping_details ?? null;
+  const totalAmount = (fullSession.amount_total ?? 0) / 100;
+  const subtotal = (fullSession.amount_subtotal ?? 0) / 100;
+  const shippingCost =
+    typeof fullSession.shipping_cost?.amount_total === "number"
+      ? fullSession.shipping_cost.amount_total / 100
+      : 0;
+
+  // Carica i prodotti per arricchire order_items con product_id e prezzo coerente
+  const productIds = Array.from(new Set(cart.map((c) => c.p)));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: products } = productIds.length
+    ? await supabase.from("products").select("id, name, stock_by_size").in("id", productIds)
+    : { data: [] };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const productMap = new Map<string, any>(((products as any[]) ?? []).map((p) => [p.id, p]));
+
+  // Genera order_number progressivo (fallback su timestamp se manca trigger)
+  const orderNumber = `EMD-${Date.now().toString(36).toUpperCase()}`;
+
+  const orderInsert = {
+    customer_email: customer?.email ?? fullSession.customer_email ?? null,
+    customer_name: customer?.name ?? null,
+    customer_phone: customer?.phone ?? null,
+    guest_email: customer?.email ?? null,
+    total_amount: totalAmount,
+    subtotal,
+    shipping_cost: shippingCost,
+    currency: (fullSession.currency ?? "eur").toLowerCase(),
+    locale: fullSession.locale ?? "it",
+    status: "processing",
+    payment_method: "stripe",
+    payment_id: typeof fullSession.payment_intent === "string" ? fullSession.payment_intent : null,
+    idempotency_key: session.id,
+    order_number: orderNumber,
+    shipping_address: shipping
+      ? {
+          name: shipping.name ?? null,
+          address: shipping.address ?? null,
+        }
+      : null,
+    billing_address: customer
+      ? {
+          name: customer.name ?? null,
+          address: customer.address ?? null,
+        }
+      : null,
+    metadata: {
+      stripe_session_id: session.id,
+      source: "cart-checkout-v1",
+    },
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: insertedOrder, error: insertOrderErr } = await (supabase.from("orders") as any)
+    .insert(orderInsert)
+    .select("id")
+    .single();
+  if (insertOrderErr || !insertedOrder) {
+    throw insertOrderErr ?? new Error("Order insert failed");
+  }
+  const orderId = insertedOrder.id as string;
+
+  // order_items + decrement stock
+  for (const line of cart) {
+    const p = productMap.get(line.p);
+    const unitPrice = line.a / 100;
+    const lineTotal = unitPrice * line.q;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (supabase.from("order_items") as any).insert({
+      order_id: orderId,
+      product_id: line.p,
+      quantity: line.q,
+      selected_size: line.s,
+      size: line.s,
+      price_at_purchase: unitPrice,
+      unit_price: unitPrice,
+      product_name: p?.name?.trim?.() ?? null,
+      line_subtotal: lineTotal,
+      line_total: lineTotal,
+    });
+
+    // Decrement stock_by_size per la taglia. Trigger DB risincronizza `stock`.
+    if (p) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const currentSbs = (p.stock_by_size ?? {}) as Record<string, number>;
+      const newQty = Math.max(0, (Number(currentSbs[line.s] ?? 0) || 0) - line.q);
+      const nextSbs = { ...currentSbs, [line.s]: newQty };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (supabase.from("products") as any)
+        .update({ stock_by_size: nextSbs })
+        .eq("id", line.p);
+      // aggiorna mappa locale per multi-line dello stesso prodotto
+      productMap.set(line.p, { ...p, stock_by_size: nextSbs });
+    }
+  }
+
+  // Notifica n8n (best effort, non blocca)
+  if (N8N_WEBHOOK_URL) {
+    try {
+      await fetch(N8N_WEBHOOK_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          event: "order.created",
+          order_id: orderId,
+          stripe_session_id: session.id,
+          customer_email: orderInsert.customer_email,
+          total_amount: totalAmount,
+          source: "cart-checkout-v1",
+        }),
+      });
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.warn("[stripe webhook] n8n notify failed:", e);
+    }
+  }
+}

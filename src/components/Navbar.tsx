@@ -3,9 +3,10 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { User, Menu, X, ChevronDown, Shield, LogIn } from "lucide-react";
+import { User, Menu, X, ChevronDown, Shield, LogIn, ShoppingBag } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
+import { useCart } from "@/contexts/CartContext";
 
 const logoET = "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/emeraldress-logo-touch-collection.svg";
 
@@ -24,6 +25,7 @@ const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collezioniOpen, setCollezioniOpen] = useState(false);
   const [authState, setAuthState] = useState<AuthState>("guest");
+  const { totalItems, openCart } = useCart();
   const pathname = usePathname() ?? "/";
   const isHome = pathname === "/";
 
@@ -153,6 +155,22 @@ const Navbar = () => {
                 />
               )}
             </Link>
+            <button
+              type="button"
+              onClick={openCart}
+              aria-label={`Apri carrello${totalItems > 0 ? ` (${totalItems} articoli)` : ""}`}
+              className="relative hover:opacity-70 transition-opacity"
+            >
+              <ShoppingBag className="w-5 h-5" />
+              {totalItems > 0 && (
+                <span
+                  className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-emerald-700 text-emerald-50 text-[10px] font-medium leading-none flex items-center justify-center ring-2 ring-background"
+                  aria-hidden
+                >
+                  {totalItems > 9 ? "9+" : totalItems}
+                </span>
+              )}
+            </button>
             <button
               className="lg:hidden hover:opacity-70"
               onClick={() => setMobileOpen(!mobileOpen)}
