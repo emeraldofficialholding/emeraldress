@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
@@ -10,6 +10,102 @@ import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 const logoED = "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/emeraldress-icon-ed.svg";
 const N8N_NEWSLETTER_URL =
   process.env.NEXT_PUBLIC_N8N_NEWSLETTER_URL ?? "https://n8n.kreareweb.com/webhook/newsletter-register";
+
+// Drop ufficiale: giovedi' 14 maggio 2026, 18:00 ora italiana (CEST = +02:00).
+// Per cambiare la data al volo basta toccare questa costante.
+const DROP_AT_ISO = "2026-05-14T18:00:00+02:00";
+
+interface TimeLeft {
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+  total: number;
+}
+
+function getTimeLeft(target: number): TimeLeft {
+  const total = Math.max(0, target - Date.now());
+  const days = Math.floor(total / 86_400_000);
+  const hours = Math.floor((total % 86_400_000) / 3_600_000);
+  const minutes = Math.floor((total % 3_600_000) / 60_000);
+  const seconds = Math.floor((total % 60_000) / 1000);
+  return { days, hours, minutes, seconds, total };
+}
+
+function CountdownUnit({ value, label }: { value: number; label: string }) {
+  const padded = String(value).padStart(2, "0");
+  return (
+    <div className="flex flex-col items-center min-w-[64px] sm:min-w-[88px]">
+      <div
+        className="relative w-full aspect-square sm:aspect-[5/4] flex items-center justify-center rounded-2xl border border-emerald-900/15 bg-white/55 backdrop-blur-sm shadow-[0_12px_30px_-18px_rgba(6,95,70,0.35)] overflow-hidden"
+      >
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-x-3 top-0 h-px bg-gradient-to-r from-transparent via-emerald-600/40 to-transparent"
+        />
+        <span
+          className="text-3xl sm:text-5xl tabular-nums text-emerald-950 leading-none"
+          style={{ fontFamily: "'Playfair Display', serif", fontWeight: 400 }}
+        >
+          {padded}
+        </span>
+      </div>
+      <span className="mt-2 text-[9px] sm:text-[10px] tracking-[0.3em] uppercase text-emerald-800/60">
+        {label}
+      </span>
+    </div>
+  );
+}
+
+function Countdown({ targetIso }: { targetIso: string }) {
+  const targetMs = new Date(targetIso).getTime();
+  const [mounted, setMounted] = useState(false);
+  const [time, setTime] = useState<TimeLeft>(() => getTimeLeft(targetMs));
+
+  useEffect(() => {
+    setMounted(true);
+    const tick = () => setTime(getTimeLeft(targetMs));
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [targetMs]);
+
+  // SSR: rendiamo placeholder neutro per evitare hydration mismatch.
+  if (!mounted) {
+    return (
+      <div className="flex items-center justify-center gap-2.5 sm:gap-4">
+        {["GG", "HH", "MM", "SS"].map((l) => (
+          <CountdownUnit key={l} value={0} label={l === "GG" ? "Giorni" : l === "HH" ? "Ore" : l === "MM" ? "Min" : "Sec"} />
+        ))}
+      </div>
+    );
+  }
+
+  if (time.total <= 0) {
+    return (
+      <div className="text-center">
+        <p
+          className="text-3xl sm:text-4xl text-emerald-700 italic"
+          style={{ fontFamily: "'Playfair Display', serif", fontWeight: 400 }}
+        >
+          Siamo live.
+        </p>
+        <p className="mt-2 text-[11px] tracking-[0.3em] uppercase text-emerald-800/60">
+          Il drop è iniziato — entra nel sito
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center justify-center gap-2.5 sm:gap-4">
+      <CountdownUnit value={time.days} label="Giorni" />
+      <CountdownUnit value={time.hours} label="Ore" />
+      <CountdownUnit value={time.minutes} label="Min" />
+      <CountdownUnit value={time.seconds} label="Sec" />
+    </div>
+  );
+}
 
 const particles = Array.from({ length: 18 }, (_, i) => ({
   id: i,
@@ -126,10 +222,26 @@ export function ComingSoonClient() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1, delay: 0.6 }}
-          className="text-emerald-800/70 font-sans text-base sm:text-lg tracking-wide mb-16 max-w-md"
+          className="text-emerald-800/70 font-sans text-base sm:text-lg tracking-wide mb-10 max-w-md"
         >
-          Un tocco di smeraldo sta per arrivare. Lascia i tuoi dati per essere il primo a scoprirlo.
+          Un tocco di smeraldo sta per arrivare. Iscriviti alla newsletter per accedere alle{" "}
+          <span className="font-semibold text-emerald-900">18:00 di giovedì</span>.
         </motion.p>
+
+        {/* Countdown */}
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, delay: 0.75 }}
+          className="mb-12 w-full flex flex-col items-center gap-3"
+        >
+          <p className="text-[10px] sm:text-[11px] tracking-[0.35em] uppercase text-emerald-700/65 flex items-center gap-2">
+            <span className="w-6 h-px bg-emerald-700/30" />
+            Drop ufficiale · 14 maggio · ore 18:00
+            <span className="w-6 h-px bg-emerald-700/30" />
+          </p>
+          <Countdown targetIso={DROP_AT_ISO} />
+        </motion.div>
 
         <motion.div
           initial={{ opacity: 0, y: 40 }}
@@ -211,7 +323,7 @@ export function ComingSoonClient() {
                   </>
                 ) : (
                   <>
-                    <Sparkles className="w-4 h-4" /> Avvisami al lancio
+                    <Sparkles className="w-4 h-4" /> Iscrivimi alla newsletter
                   </>
                 )}
               </HoverBorderGradient>
