@@ -235,6 +235,42 @@ const Navbar = () => {
                   </Link>
                 )
               )}
+
+              {/* Account section nel menu mobile */}
+              <div className="mt-6 pt-6 border-t border-emerald-100/60 flex flex-col gap-4">
+                <p className="text-[10px] tracking-[0.35em] uppercase text-emerald-700/60">Account</p>
+                {authState === "guest" ? (
+                  <Link
+                    href="/login"
+                    onClick={() => setMobileOpen(false)}
+                    className="font-serif text-xl flex items-center gap-3"
+                  >
+                    <LogIn className="w-5 h-5" />
+                    Accedi
+                  </Link>
+                ) : (
+                  <>
+                    <Link
+                      href="/profilo"
+                      onClick={() => setMobileOpen(false)}
+                      className="font-serif text-xl flex items-center gap-3"
+                    >
+                      <User className="w-5 h-5" />
+                      Area Personale
+                    </Link>
+                    {authState === "admin" && (
+                      <Link
+                        href="/admin"
+                        onClick={() => setMobileOpen(false)}
+                        className="font-serif text-xl flex items-center gap-3 text-emerald-700"
+                      >
+                        <Shield className="w-5 h-5" />
+                        Admin
+                      </Link>
+                    )}
+                  </>
+                )}
+              </div>
             </nav>
           </motion.div>
         )}
