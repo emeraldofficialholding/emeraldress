@@ -83,7 +83,7 @@ const Navbar = () => {
   return (
     <>
       <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        className={`fixed top-8 left-0 right-0 z-50 transition-all duration-500 ${
           transparent
             ? "bg-transparent text-white"
             : "bg-background/80 backdrop-blur-md text-foreground shadow-sm"
@@ -188,7 +188,7 @@ const Navbar = () => {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed inset-0 z-40 bg-background pt-20 px-8 lg:hidden"
+            className="fixed inset-0 z-40 bg-background pt-28 px-8 lg:hidden"
           >
             <nav className="flex flex-col gap-6">
               {links.map((link) =>

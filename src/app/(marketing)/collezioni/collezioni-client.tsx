@@ -95,7 +95,7 @@ export function CollezioniClient() {
         </motion.div>
       </div>
 
-      <div className="sticky top-[70px] z-30 bg-white/70 backdrop-blur-xl border-y border-emerald-100/50 mb-12 py-4">
+      <div className="sticky top-[102px] z-30 bg-white/70 backdrop-blur-xl border-y border-emerald-100/50 mb-12 py-4">
         <div className="container mx-auto px-6 lg:px-12 flex justify-between items-center">
           <span className="text-[9px] text-neutral-400 tracking-[0.2em] uppercase font-sans">
             {sortedProducts.length} Pezzi Unici

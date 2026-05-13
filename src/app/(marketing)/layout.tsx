@@ -3,6 +3,7 @@ import Footer from "@/components/Footer";
 import CookieBanner from "@/components/CookieBanner";
 import { PageTracker } from "@/components/PageTracker";
 import { CartDrawer } from "@/components/CartDrawer";
+import { PreOrderBanner } from "@/components/PreOrderBanner";
 
 // Layout pubblico: navbar fissa in alto, footer in fondo, cookie banner persistente.
 // Usato per /, /collezioni, /chi-siamo, /sostenibilita, /emeraldscanner, /product/[slug],
@@ -10,6 +11,7 @@ import { CartDrawer } from "@/components/CartDrawer";
 export default function MarketingLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
+      <PreOrderBanner />
       <Navbar />
       <PageTracker />
       {children}

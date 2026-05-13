@@ -627,7 +627,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
         />
       )}</AnimatePresence>
 
-      <main className="pt-20 pb-32 lg:pb-24" style={{ backgroundColor: "#f7fdf9" }}>
+      <main className="pt-28 pb-32 lg:pb-24" style={{ backgroundColor: "#f7fdf9" }}>
         <div className="max-w-[1400px] mx-auto px-4 md:px-8">
           {/* Breadcrumb */}
           <nav aria-label="Breadcrumb" className="mb-6 md:mb-8">
@@ -648,7 +648,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
               transition={{ duration: 0.6, ease: "easeOut" }}
               className="lg:min-h-screen"
             >
-              <div className="hidden lg:block h-[88vh] sticky top-20">
+              <div className="hidden lg:block h-[88vh] sticky top-28">
                 <DesktopGallery
                   images={images}
                   activeImage={activeImage}
@@ -675,7 +675,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
               initial={{ opacity: 0, x: 16 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, ease: "easeOut", delay: 0.15 }}
-              className="lg:sticky lg:top-20 lg:h-fit pt-8 lg:pt-0 flex flex-col"
+              className="lg:sticky lg:top-28 lg:h-fit pt-8 lg:pt-0 flex flex-col"
             >
               {/* Eyebrow */}
               <div className="flex items-center justify-between mb-3">
