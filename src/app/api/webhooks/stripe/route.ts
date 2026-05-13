@@ -9,6 +9,10 @@ export const dynamic = "force-dynamic";
 
 const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
 const N8N_WEBHOOK_URL = process.env.N8N_ORDER_WEBHOOK_URL; // opzionale
+// Notifica admin nuovo ordine — entrambi opzionali, indipendenti.
+const ADMIN_ORDER_WEBHOOK_URL = process.env.ADMIN_ORDER_WEBHOOK_URL; // Discord/Slack/Zapier/qualsiasi POST endpoint
+const TELEGRAM_BOT_TOKEN = process.env.ADMIN_TELEGRAM_BOT_TOKEN;
+const TELEGRAM_CHAT_ID = process.env.ADMIN_TELEGRAM_CHAT_ID;
 
 type CompactCartItem = { p: string; s: string; q: number; a: number };
 
@@ -289,6 +293,82 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     } catch (e) {
       // eslint-disable-next-line no-console
       console.warn("[stripe webhook] n8n notify failed:", e);
+    }
+  }
+
+  // ── Notifica admin nuovo ordine (best effort, non blocca) ──────────────
+  // Costruzione payload riassuntivo
+  const itemSummary = cart
+    .map((line) => {
+      const name = productMap.get(line.p)?.name?.trim?.() ?? "Prodotto";
+      return `${line.q}× ${name} (${line.s})`;
+    })
+    .join(", ");
+
+  const adminPayload = {
+    event: "order.created",
+    order_id: orderId,
+    order_number: orderNumber,
+    customer_email: orderInsert.customer_email,
+    customer_name: orderInsert.customer_name,
+    total_amount: totalAmount,
+    currency: orderInsert.currency,
+    items_count: cart.reduce((acc, l) => acc + l.q, 0),
+    items_summary: itemSummary,
+    items: cart.map((l) => ({
+      product_id: l.p,
+      product_name: productMap.get(l.p)?.name?.trim?.() ?? null,
+      size: l.s,
+      quantity: l.q,
+      unit_price: l.a / 100,
+    })),
+    shipping_country: shipping?.address?.country ?? null,
+    stripe_session_id: session.id,
+  };
+
+  // 1. Webhook generico (Discord/Slack/Zapier/N8N admin)
+  if (ADMIN_ORDER_WEBHOOK_URL) {
+    try {
+      await fetch(ADMIN_ORDER_WEBHOOK_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(adminPayload),
+      });
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.warn("[stripe webhook] admin webhook notify failed:", e);
+    }
+  }
+
+  // 2. Telegram diretto (se bot configurato)
+  if (TELEGRAM_BOT_TOKEN && TELEGRAM_CHAT_ID) {
+    try {
+      const msg = [
+        `🟢 *Nuovo ordine* \`${orderNumber}\``,
+        ``,
+        `💰 *€${totalAmount.toFixed(2)}* · ${adminPayload.items_count} ${adminPayload.items_count === 1 ? "capo" : "capi"}`,
+        `👤 ${adminPayload.customer_name ?? "—"}`,
+        `✉️ ${adminPayload.customer_email ?? "—"}`,
+        adminPayload.shipping_country ? `🌍 ${adminPayload.shipping_country}` : "",
+        ``,
+        `🧾 ${itemSummary}`,
+      ]
+        .filter(Boolean)
+        .join("\n");
+
+      await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chat_id: TELEGRAM_CHAT_ID,
+          text: msg,
+          parse_mode: "Markdown",
+          disable_web_page_preview: true,
+        }),
+      });
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.warn("[stripe webhook] telegram notify failed:", e);
     }
   }
 }

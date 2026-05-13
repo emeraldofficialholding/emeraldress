@@ -31,6 +31,16 @@ const Navbar = () => {
   const pathname = usePathname() ?? "/";
   const isHome = pathname === "/";
 
+  // Cart icon bump: re-trigger ad ogni incremento di totalItems
+  const [bumpKey, setBumpKey] = useState(0);
+  const prevTotalRef = useRef(totalItems);
+  useEffect(() => {
+    if (totalItems > prevTotalRef.current) {
+      setBumpKey((k) => k + 1);
+    }
+    prevTotalRef.current = totalItems;
+  }, [totalItems]);
+
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -195,11 +205,18 @@ const Navbar = () => {
                 />
               )}
             </Link>
-            <button
+            <motion.button
               type="button"
               onClick={openCart}
               aria-label={`Apri carrello${totalItems > 0 ? ` (${totalItems} articoli)` : ""}`}
               className="relative hover:opacity-70 transition-opacity"
+              key={bumpKey}
+              animate={
+                bumpKey > 0
+                  ? { scale: [1, 1.25, 0.95, 1.1, 1], rotate: [0, -6, 6, -3, 0] }
+                  : { scale: 1, rotate: 0 }
+              }
+              transition={{ duration: 0.55, ease: "easeOut" }}
             >
               <ShoppingBag className="w-5 h-5" />
               {totalItems > 0 && (
@@ -210,7 +227,7 @@ const Navbar = () => {
                   {totalItems > 9 ? "9+" : totalItems}
                 </span>
               )}
-            </button>
+            </motion.button>
             <button
               className="lg:hidden hover:opacity-70"
               onClick={() => setMobileOpen(!mobileOpen)}

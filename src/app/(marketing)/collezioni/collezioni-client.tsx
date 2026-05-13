@@ -28,7 +28,23 @@ const CollectionCard = ({
 }) => {
   const href = `/product/${product.slug ?? product.id}`;
 
+  // Total stock = somma di tutte le taglie (per badge urgency)
+  const totalStock = useMemo(() => {
+    const sbs = product.stock_by_size ?? {};
+    return Object.values(sbs).reduce<number>(
+      (acc, v) => acc + (typeof v === "number" ? Math.max(0, v) : 0),
+      0,
+    );
+  }, [product.stock_by_size]);
+
+  const soldOut = totalStock === 0;
+  const lowStock = totalStock > 0 && totalStock <= 3;
+
   const handleClick = (e: React.MouseEvent) => {
+    if (soldOut) {
+      // Su esaurito su mobile lasciamo che il viewer mostri comunque la card,
+      // ma sopra lg lo lasciamo navigare al PDP per leggere descrizione/lista d'attesa.
+    }
     // Mobile/tablet (<lg): apri viewer fullscreen con swipe siblings
     if (typeof window !== "undefined" && window.matchMedia("(max-width: 1023px)").matches) {
       e.preventDefault();
@@ -49,7 +65,9 @@ const CollectionCard = ({
           <img
             src={product.images?.[0]}
             alt={product.name}
-            className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
+            className={`w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 ${
+              soldOut ? "grayscale opacity-70" : ""
+            }`}
           />
 
           {product.images[1] && (
@@ -57,8 +75,22 @@ const CollectionCard = ({
             <img
               src={product.images[1]}
               alt={product.name}
-              className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-1000"
+              className={`absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-1000 ${
+                soldOut ? "grayscale" : ""
+              }`}
             />
+          )}
+
+          {/* Badge urgency in alto a sinistra */}
+          {soldOut && (
+            <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-stone-900/90 backdrop-blur-sm text-white text-[9px] tracking-[0.2em] uppercase font-medium">
+              Esaurito
+            </div>
+          )}
+          {!soldOut && lowStock && (
+            <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-rose-600/95 backdrop-blur-sm text-white text-[9px] tracking-[0.2em] uppercase font-medium shadow-sm">
+              {totalStock === 1 ? "Ultimo pezzo" : `Solo ${totalStock} pezzi`}
+            </div>
           )}
         </div>
 
