@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence, useMotionValue, useTransform, type PanInfo } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Heart, ShoppingBag, X, ChevronUp, ChevronLeft, ChevronRight } from "lucide-react";
+import useEmblaCarousel from "embla-carousel-react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { useWishlist } from "@/contexts/WishlistContext";
 import { AuthDialog } from "./AuthDialog";
@@ -18,14 +19,11 @@ interface FullscreenProductViewerProps {
   product?: Product;
   /** Chiusura silenziosa del viewer. */
   onDismiss: () => void;
-  /** @deprecated kept for backwards compat with ProductCard. */
+  /** @deprecated mantenuto per retrocompatibilità con ProductCard precedente. */
   onClose?: () => void;
 }
 
 const supabase = getSupabaseBrowserClient();
-
-const SWIPE_THRESHOLD_X = 60;
-const SWIPE_THRESHOLD_Y = 90;
 
 export default function FullscreenProductViewer({
   products,
@@ -42,11 +40,24 @@ export default function FullscreenProductViewer({
     return [];
   }, [products, singleProduct]);
 
-  const [index, setIndex] = useState(() => {
-    const safe = Math.max(0, Math.min(initialIndex, list.length - 1));
-    return safe;
+  const startIndex = useMemo(
+    () => Math.max(0, Math.min(initialIndex, list.length - 1)),
+    [initialIndex, list.length],
+  );
+
+  // Embla: una sola istanza, slide affiancate, loop circolare.
+  // - `loop`: scorrere oltre l'ultimo torna al primo (e viceversa)
+  // - `containScroll: 'trimSnaps'`: niente "bounce" finale strano
+  // - `duration`: animazione fluida (~25 = ~250ms)
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    startIndex,
+    loop: list.length > 1,
+    align: "center",
+    containScroll: false,
+    duration: 25,
   });
-  const [direction, setDirection] = useState<1 | -1>(1);
+
+  const [index, setIndex] = useState(startIndex);
   const [authOpen, setAuthOpen] = useState(false);
   const [hasUser, setHasUser] = useState<boolean | null>(null);
 
@@ -55,11 +66,20 @@ export default function FullscreenProductViewer({
   const productHref = product ? `/product/${product.slug ?? product.id}` : "/";
   const cover = product?.images?.[0] ?? "";
 
-  // Drag motion values per feedback visivo (immagine si muove durante swipe)
-  const dragX = useMotionValue(0);
-  const dragY = useMotionValue(0);
-  const overlayOpacity = useTransform(dragY, [-180, 0, 180], [0.85, 0, 0.85]);
+  // Sync emblaApi → React state (per indicatore, info bottom, etc.)
+  useEffect(() => {
+    if (!emblaApi) return;
+    const onSelect = () => setIndex(emblaApi.selectedScrollSnap());
+    onSelect();
+    emblaApi.on("select", onSelect);
+    emblaApi.on("reInit", onSelect);
+    return () => {
+      emblaApi.off("select", onSelect);
+      emblaApi.off("reInit", onSelect);
+    };
+  }, [emblaApi]);
 
+  // Lock body scroll mentre il viewer è aperto + auth probe
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setHasUser(!!data.session?.user));
     document.body.style.overflow = "hidden";
@@ -68,51 +88,12 @@ export default function FullscreenProductViewer({
     };
   }, []);
 
-  // Reset drag values al cambio prodotto
-  useEffect(() => {
-    dragX.set(0);
-    dragY.set(0);
-  }, [index, dragX, dragY]);
+  const goPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
+  const goNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
 
-  const canPrev = list.length > 1;
-  const canNext = list.length > 1;
-
-  const goPrev = () => {
-    if (!canPrev) return;
-    setDirection(-1);
-    setIndex((i) => (i - 1 + list.length) % list.length);
-  };
-
-  const goNext = () => {
-    if (!canNext) return;
-    setDirection(1);
-    setIndex((i) => (i + 1) % list.length);
-  };
-
-  const openDetail = () => {
+  const openDetail = useCallback(() => {
     router.push(productHref);
-  };
-
-  const handleDragEnd = (_: unknown, info: PanInfo) => {
-    const { offset, velocity } = info;
-    const absX = Math.abs(offset.x);
-    const absY = Math.abs(offset.y);
-
-    // Direzione dominante
-    if (absX > absY) {
-      // Swipe orizzontale → prev/next
-      if (offset.x < -SWIPE_THRESHOLD_X || velocity.x < -400) {
-        goNext();
-      } else if (offset.x > SWIPE_THRESHOLD_X || velocity.x > 400) {
-        goPrev();
-      }
-    } else {
-      // Swipe verticale → entra nel dettaglio (qualsiasi direzione, su o giù)
-      if (absY > SWIPE_THRESHOLD_Y || Math.abs(velocity.y) > 500) {
-        openDetail();
-      }
-    }
-  };
+  }, [router, productHref]);
 
   const toggleLike = () => {
     if (!product) return;
@@ -141,49 +122,42 @@ export default function FullscreenProductViewer({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        transition={{ duration: 0.25 }}
+        transition={{ duration: 0.2 }}
         className="fixed inset-0 z-[100] bg-black lg:hidden"
         role="dialog"
         aria-modal="true"
         aria-label={`Anteprima ${product.name}`}
       >
-        {/* Slide container: aria-live polite per screen reader sul cambio */}
-        <div className="absolute inset-0" aria-live="polite">
-          <AnimatePresence custom={direction} initial={false} mode="popLayout">
-            <motion.div
-              key={product.id}
-              custom={direction}
-              initial={{ x: direction === 1 ? "100%" : "-100%", opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: direction === 1 ? "-100%" : "100%", opacity: 0 }}
-              transition={{ type: "tween", duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-              style={{ x: dragX, y: dragY }}
-              drag
-              dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
-              dragElastic={{ top: 0.6, bottom: 0.6, left: 0.6, right: 0.6 }}
-              dragMomentum={false}
-              onDragEnd={handleDragEnd}
-              className="absolute inset-0 select-none"
-            >
-              {/* Immagine edge-to-edge: object-contain con bande nere sopra/sotto
-                  che ospitano top close + bottom info gradient (l'immagine resta
-                  intera, nessun taglio di corpo/orlo). */}
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={cover}
-                alt={product.name}
-                className="absolute inset-0 w-full h-full object-contain pointer-events-none"
-                draggable={false}
-              />
-            </motion.div>
-          </AnimatePresence>
+        {/* Carousel: tutte le slide nel DOM contemporaneamente.
+            Niente unmount/remount → niente flash nero, immagini caricate in
+            parallelo dal browser. */}
+        <div className="absolute inset-0 overflow-hidden" ref={emblaRef}>
+          <div className="flex h-full">
+            {list.map((p, i) => {
+              const isAdjacent = Math.abs(i - index) <= 1 || (list.length > 2 && (Math.abs(i - index) === list.length - 1));
+              return (
+                <div
+                  key={p.id}
+                  className="relative min-w-0 shrink-0 grow-0 basis-full h-full"
+                  onClick={openDetail}
+                  role="button"
+                  aria-label={`Apri scheda ${p.name}`}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={p.images?.[0] ?? ""}
+                    alt={p.name}
+                    // Eager su prodotto corrente e vicini; lazy sugli altri
+                    loading={isAdjacent ? "eager" : "lazy"}
+                    decoding="async"
+                    draggable={false}
+                    className="absolute inset-0 w-full h-full object-contain select-none pointer-events-none"
+                  />
+                </div>
+              );
+            })}
+          </div>
         </div>
-
-        {/* Overlay scuro durante swipe verticale per dare hint "stai entrando" */}
-        <motion.div
-          className="absolute inset-0 bg-emerald-950 pointer-events-none"
-          style={{ opacity: overlayOpacity }}
-        />
 
         {/* Top gradient + close */}
         <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black/70 to-transparent pointer-events-none" />
@@ -195,14 +169,14 @@ export default function FullscreenProductViewer({
           <X size={18} />
         </button>
 
-        {/* Indicatore pagina (1/N) */}
+        {/* Indicatore pagina */}
         {list.length > 1 && (
           <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md text-white text-[10px] tracking-[0.25em] font-medium">
             {index + 1} / {list.length}
           </div>
         )}
 
-        {/* Hint laterali (visibili 2s al primo open o se più di 1 prodotto) */}
+        {/* Frecce laterali (tap fallback per chi non swipa) */}
         {list.length > 1 && (
           <>
             <button
@@ -223,14 +197,14 @@ export default function FullscreenProductViewer({
         )}
 
         {/* Bottom info + actions */}
-        <div className="absolute inset-x-0 bottom-0 pb-[env(safe-area-inset-bottom)] bg-gradient-to-t from-black/85 via-black/50 to-transparent pt-12">
+        <div className="absolute inset-x-0 bottom-0 z-10 pb-[env(safe-area-inset-bottom)] bg-gradient-to-t from-black/85 via-black/50 to-transparent pt-12">
           <div className="px-5 pb-5">
             <button
               onClick={openDetail}
               className="flex items-center gap-1.5 text-white/70 text-[10px] tracking-[0.25em] uppercase mb-3 active:text-white"
             >
               <ChevronUp size={14} />
-              Apri scheda · scorri su/giù
+              Apri scheda · tocca l&apos;immagine
             </button>
 
             <div className="flex items-end justify-between gap-4">
