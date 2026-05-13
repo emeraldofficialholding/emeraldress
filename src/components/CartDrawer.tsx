@@ -1,19 +1,68 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingBag, X, Minus, Plus, Trash2, Loader2, Lock, Truck } from "lucide-react";
+import { ShoppingBag, X, Minus, Plus, Trash2, Loader2, Lock, Truck, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { useCart } from "@/contexts/CartContext";
+import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
 const FREE_SHIPPING_THRESHOLD = 200;
 
 export function CartDrawer() {
-  const { items, isOpen, closeCart, updateQuantity, removeItem, totalItems, totalPrice } =
-    useCart();
+  const {
+    items,
+    isOpen,
+    closeCart,
+    updateQuantity,
+    removeItem,
+    totalItems,
+    totalPrice,
+    stockByLine,
+    setStockForLine,
+  } = useCart();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
+
+  // Quando il drawer si apre: rilegge lo stock REALE dal DB per ogni line.
+  // Se uno stock e' inferiore alla qty in carrello → cap automatico + toast.
+  useEffect(() => {
+    if (!isOpen || items.length === 0) return;
+    let cancelled = false;
+    (async () => {
+      const supabase = getSupabaseBrowserClient();
+      const productIds = Array.from(new Set(items.map((i) => i.productId)));
+      const { data, error } = await supabase
+        .from("products")
+        .select("id, stock_by_size")
+        .in("id", productIds);
+      if (cancelled || error || !data) return;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const stockMap = new Map<string, Record<string, number>>(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (data as any[]).map((p) => [p.id, (p.stock_by_size ?? {}) as Record<string, number>]),
+      );
+      let cappedAny = false;
+      for (const item of items) {
+        const stock = Number(stockMap.get(item.productId)?.[item.size] ?? 0);
+        setStockForLine(item.lineId, stock);
+        if (item.quantity > stock) {
+          updateQuantity(item.lineId, stock); // cap (rimuove se 0)
+          cappedAny = true;
+        }
+      }
+      if (cappedAny) {
+        toast.warning("Quantità adeguata alla disponibilità", {
+          description: "Alcune taglie sono in esaurimento e abbiamo aggiornato il carrello.",
+        });
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   const remainingForFreeShipping = Math.max(0, FREE_SHIPPING_THRESHOLD - totalPrice);
   const progressPct = Math.min(100, (totalPrice / FREE_SHIPPING_THRESHOLD) * 100);
@@ -134,70 +183,99 @@ export function CartDrawer() {
           ) : (
             <ul className="space-y-4">
               <AnimatePresence initial={false}>
-                {items.map((item) => (
-                  <motion.li
-                    key={item.lineId}
-                    layout
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, x: 40 }}
-                    transition={{ duration: 0.2 }}
-                    className="flex gap-3 p-3 rounded-xl border border-emerald-100 bg-white"
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="w-20 h-24 sm:w-24 sm:h-28 object-contain rounded-lg bg-emerald-50/50 shrink-0"
-                    />
-                    <div className="flex-1 min-w-0 flex flex-col">
-                      <div className="flex items-start justify-between gap-2 mb-1">
-                        <p
-                          className="text-sm text-emerald-950 leading-tight"
-                          style={{ fontFamily: "'Playfair Display', serif", fontWeight: 500 }}
-                        >
-                          {item.name}
-                        </p>
-                        <button
-                          onClick={() => removeItem(item.lineId)}
-                          aria-label="Rimuovi articolo"
-                          className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-emerald-800/50 hover:text-red-600 hover:bg-red-50 transition-colors"
-                        >
-                          <Trash2 size={13} />
-                        </button>
-                      </div>
-                      <p className="text-[10px] tracking-[0.2em] uppercase text-emerald-700/60 mb-2">
-                        Taglia · {item.size}
-                      </p>
-
-                      <div className="mt-auto flex items-center justify-between gap-2">
-                        <div className="inline-flex items-center rounded-full border border-emerald-200 bg-white">
-                          <button
-                            onClick={() => updateQuantity(item.lineId, item.quantity - 1)}
-                            aria-label="Diminuisci"
-                            className="w-8 h-8 flex items-center justify-center text-emerald-800 hover:text-emerald-950 disabled:opacity-40"
-                            disabled={item.quantity <= 1}
+                {items.map((item) => {
+                  const stockKnown = stockByLine[item.lineId];
+                  const atMax = typeof stockKnown === "number" && item.quantity >= stockKnown;
+                  const lowStock =
+                    typeof stockKnown === "number" && stockKnown > 0 && stockKnown <= 3;
+                  return (
+                    <motion.li
+                      key={item.lineId}
+                      layout
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, x: 40 }}
+                      transition={{ duration: 0.2 }}
+                      className="flex gap-3 p-3 rounded-xl border border-emerald-100 bg-white"
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="w-20 h-24 sm:w-24 sm:h-28 object-contain rounded-lg bg-emerald-50/50 shrink-0"
+                      />
+                      <div className="flex-1 min-w-0 flex flex-col">
+                        <div className="flex items-start justify-between gap-2 mb-1">
+                          <p
+                            className="text-sm text-emerald-950 leading-tight"
+                            style={{ fontFamily: "'Playfair Display', serif", fontWeight: 500 }}
                           >
-                            <Minus size={12} />
-                          </button>
-                          <span className="w-7 text-center text-sm tabular-nums text-emerald-950">
-                            {item.quantity}
-                          </span>
+                            {item.name}
+                          </p>
                           <button
-                            onClick={() => updateQuantity(item.lineId, item.quantity + 1)}
-                            aria-label="Aumenta"
-                            className="w-8 h-8 flex items-center justify-center text-emerald-800 hover:text-emerald-950"
+                            onClick={() => removeItem(item.lineId)}
+                            aria-label="Rimuovi articolo"
+                            className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-emerald-800/50 hover:text-red-600 hover:bg-red-50 transition-colors"
                           >
-                            <Plus size={12} />
+                            <Trash2 size={13} />
                           </button>
                         </div>
-                        <span className="text-sm font-medium text-emerald-950 tabular-nums">
-                          €{(item.price * item.quantity).toFixed(2)}
-                        </span>
+                        <p className="text-[10px] tracking-[0.2em] uppercase text-emerald-700/60 mb-1">
+                          Taglia · {item.size}
+                        </p>
+                        {lowStock && (
+                          <p className="text-[10px] tracking-[0.15em] uppercase text-rose-600 mb-2 flex items-center gap-1">
+                            <AlertTriangle size={10} />
+                            {stockKnown === 1
+                              ? "Ultimo pezzo disponibile"
+                              : `Solo ${stockKnown} disponibili`}
+                          </p>
+                        )}
+
+                        <div className="mt-auto flex items-center justify-between gap-2">
+                          <div className="inline-flex items-center rounded-full border border-emerald-200 bg-white">
+                            <button
+                              onClick={() => updateQuantity(item.lineId, item.quantity - 1)}
+                              aria-label="Diminuisci"
+                              className="w-8 h-8 flex items-center justify-center text-emerald-800 hover:text-emerald-950 disabled:opacity-40"
+                              disabled={item.quantity <= 1}
+                            >
+                              <Minus size={12} />
+                            </button>
+                            <span className="w-7 text-center text-sm tabular-nums text-emerald-950">
+                              {item.quantity}
+                            </span>
+                            <button
+                              onClick={() => {
+                                if (atMax) {
+                                  toast.error("Hai raggiunto la disponibilità", {
+                                    description: `Solo ${stockKnown} pezzi disponibili in taglia ${item.size}.`,
+                                  });
+                                  return;
+                                }
+                                updateQuantity(item.lineId, item.quantity + 1);
+                              }}
+                              aria-label="Aumenta"
+                              className={cn(
+                                "w-8 h-8 flex items-center justify-center transition-colors",
+                                atMax
+                                  ? "text-emerald-300 cursor-not-allowed"
+                                  : "text-emerald-800 hover:text-emerald-950",
+                              )}
+                              disabled={atMax}
+                              title={atMax ? "Stock massimo raggiunto" : undefined}
+                            >
+                              <Plus size={12} />
+                            </button>
+                          </div>
+                          <span className="text-sm font-medium text-emerald-950 tabular-nums">
+                            €{(item.price * item.quantity).toFixed(2)}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  </motion.li>
-                ))}
+                    </motion.li>
+                  );
+                })}
               </AnimatePresence>
             </ul>
           )}

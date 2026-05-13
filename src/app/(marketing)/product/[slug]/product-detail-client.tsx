@@ -474,7 +474,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
   const [stickyVisible, setStickyVisible] = useState(false);
 
   const { addItem, removeItem, hasItem } = useWishlist();
-  const { addItem: addToCart, openCart } = useCart();
+  const { addItem: addToCart, openCart, getCartQuantity, setStockForLine } = useCart();
   const liked = hasItem(product.id);
   const reviewsRef = useRef<HTMLDivElement>(null);
   const buyPanelRef = useRef<HTMLDivElement>(null);
@@ -571,6 +571,18 @@ export function ProductDetailClient({ product }: { product: Product }) {
       toast.error("Taglia non disponibile");
       return;
     }
+    // Vincolo: qty totale nel carrello (esistenti + 1) <= stock reale.
+    const alreadyInCart = getCartQuantity(product.id, selectedSize);
+    if (alreadyInCart >= stockForSelected) {
+      toast.error("Disponibilità raggiunta", {
+        description: `Hai già ${alreadyInCart} pezz${alreadyInCart === 1 ? "o" : "i"} nel carrello (max ${stockForSelected} per taglia ${selectedSize}).`,
+      });
+      openCart();
+      return;
+    }
+    // Sincronizza lo stock noto al CartContext: il drawer cap automaticamente.
+    const lineId = `${product.id}::${selectedSize}`;
+    setStockForLine(lineId, stockForSelected);
     addToCart({
       productId: product.id,
       slug: product.slug ?? product.id,
