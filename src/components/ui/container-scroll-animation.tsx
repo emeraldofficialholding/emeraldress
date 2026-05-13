@@ -13,34 +13,45 @@ export const ContainerScroll = ({
   const { scrollYProgress } = useScroll({
     target: containerRef,
   });
-  const [isMobile, setIsMobile] = React.useState(false);
+  const [isDesktop, setIsDesktop] = React.useState(false);
 
   React.useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
+    const check = () => {
+      // Effetto "laptop chrome" solo su desktop (≥ lg = 1024px).
+      // Sotto, tablet/mobile renderizzano il contenuto in un container fluido.
+      setIsDesktop(window.innerWidth >= 1024);
     };
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
+    check();
+    window.addEventListener("resize", check);
     return () => {
-      window.removeEventListener("resize", checkMobile);
+      window.removeEventListener("resize", check);
     };
   }, []);
 
-  const scaleDimensions = () => {
-    return isMobile ? [0.7, 0.9] : [1.05, 1];
-  };
-
   const rotate = useTransform(scrollYProgress, [0, 1], [20, 0]);
-  const scale = useTransform(scrollYProgress, [0, 1], scaleDimensions());
+  const scale = useTransform(scrollYProgress, [0, 1], [1.05, 1]);
   const translate = useTransform(scrollYProgress, [0, 1], [0, -100]);
+
+  // Mobile / iPad: niente effetto 3D, niente altezza fissa, no monitor finto.
+  // Il contenuto rispetta il suo flow naturale e scorre con la pagina.
+  if (!isDesktop) {
+    return (
+      <div className="w-full relative px-4 py-8" ref={containerRef}>
+        <div className="max-w-5xl mx-auto">{titleComponent}</div>
+        <div className="mt-6 max-w-5xl mx-auto w-full bg-background rounded-2xl border border-neutral-200 overflow-hidden">
+          {children}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
-      className="h-[60rem] md:h-[80rem] flex items-center justify-center relative p-2 md:p-20"
+      className="h-[80rem] flex items-center justify-center relative p-20"
       ref={containerRef}
     >
       <div
-        className="py-10 md:py-40 w-full relative"
+        className="py-40 w-full relative"
         style={{
           perspective: "1000px",
         }}

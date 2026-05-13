@@ -4,8 +4,9 @@ import { useState, useMemo } from "react";
 import Link from "next/link";
 import { useProducts, type Product } from "@/hooks/useProducts";
 import GemLoader from "@/components/GemLoader";
+import FullscreenProductViewer from "@/components/FullscreenProductViewer";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, Sparkles } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import RelatedLinks from "@/components/RelatedLinks";
 import {
   DropdownMenu,
@@ -16,8 +17,25 @@ import {
 
 const logoET = "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/emeraldress-logo-touch-collection.svg";
 
-const CollectionCard = ({ product, index }: { product: Product; index: number }) => {
+const CollectionCard = ({
+  product,
+  index,
+  onOpenViewer,
+}: {
+  product: Product;
+  index: number;
+  onOpenViewer: (id: string) => void;
+}) => {
   const href = `/product/${product.slug ?? product.id}`;
+
+  const handleClick = (e: React.MouseEvent) => {
+    // Mobile/tablet (<lg): apri viewer fullscreen con swipe siblings
+    if (typeof window !== "undefined" && window.matchMedia("(max-width: 1023px)").matches) {
+      e.preventDefault();
+      onOpenViewer(product.id);
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -25,7 +43,7 @@ const CollectionCard = ({ product, index }: { product: Product; index: number })
       transition={{ duration: 0.6, delay: index * 0.05 }}
       className="group relative"
     >
-      <Link href={href} className="flex flex-col gap-4 cursor-pointer">
+      <Link href={href} onClick={handleClick} className="flex flex-col gap-4 cursor-pointer">
         <div className="relative w-full aspect-[3/4.5] overflow-hidden bg-[#fdfdfd]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -62,6 +80,7 @@ const CollectionCard = ({ product, index }: { product: Product; index: number })
 
 export function CollezioniClient() {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc" | "none">("none");
+  const [viewerProductId, setViewerProductId] = useState<string | null>(null);
 
   const { data: allProducts, isLoading } = useProducts();
   const products = useMemo(
@@ -80,6 +99,10 @@ export function CollezioniClient() {
     if (sortOrder === "desc") return items.sort((a, b) => b.price - a.price);
     return items;
   }, [products, sortOrder]);
+
+  const viewerIndex = viewerProductId
+    ? sortedProducts.findIndex((p) => p.id === viewerProductId)
+    : -1;
 
   return (
     <main className="pt-28 pb-20 min-h-screen bg-[#e4ffec]/20 transition-colors duration-500">
@@ -146,7 +169,12 @@ export function CollezioniClient() {
               className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-12 md:gap-y-20"
             >
               {sortedProducts.map((product, i) => (
-                <CollectionCard key={product.id} product={product} index={i} />
+                <CollectionCard
+                  key={product.id}
+                  product={product}
+                  index={i}
+                  onOpenViewer={setViewerProductId}
+                />
               ))}
             </motion.div>
           </AnimatePresence>
@@ -171,6 +199,14 @@ export function CollezioniClient() {
           { to: "/chi-siamo", label: "Chi Siamo", desc: "Vision, mission e filiera 100% Made in Italy.", eyebrow: "Manifesto" },
         ]}
       />
+
+      {viewerIndex >= 0 && (
+        <FullscreenProductViewer
+          products={sortedProducts}
+          initialIndex={viewerIndex}
+          onDismiss={() => setViewerProductId(null)}
+        />
+      )}
     </main>
   );
 }

@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import ImageFallback from "./ImageFallback";
@@ -11,11 +10,12 @@ import type { Product } from "@/hooks/useProducts";
 interface ProductCardProps {
   product: Product;
   index?: number;
+  /** Lista completa per swipe orizzontale tra prodotti nel viewer. */
+  siblings?: Product[];
 }
 
-const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
+const ProductCard = ({ product, index = 0, siblings }: ProductCardProps) => {
   const href = `/product/${product.slug ?? product.id}`;
-  const router = useRouter();
   const [fullscreen, setFullscreen] = useState(false);
 
   const handleClick = (e: React.MouseEvent) => {
@@ -26,6 +26,12 @@ const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
       setFullscreen(true);
     }
   };
+
+  const list = siblings && siblings.length > 0 ? siblings : [product];
+  const initialIndex = Math.max(
+    0,
+    list.findIndex((p) => p.id === product.id),
+  );
 
   return (
     <>
@@ -51,11 +57,8 @@ const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
 
       {fullscreen && (
         <FullscreenProductViewer
-          product={product}
-          onClose={() => {
-            setFullscreen(false);
-            router.push(href);
-          }}
+          products={list}
+          initialIndex={initialIndex}
           onDismiss={() => setFullscreen(false)}
         />
       )}
