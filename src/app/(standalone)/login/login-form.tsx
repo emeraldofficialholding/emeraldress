@@ -7,14 +7,25 @@ import { Loader2, Eye, EyeOff } from "lucide-react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 // ── Shimmer particles ─────────────────────────────────────────────────────────
-const particles = Array.from({ length: 12 }, (_, i) => ({
-  id: i,
-  x: Math.random() * 100,
-  y: Math.random() * 100,
-  size: 2 + Math.random() * 4,
-  delay: Math.random() * 4,
-  duration: 2.5 + Math.random() * 3,
-}));
+// Generati solo lato client (Math.random a livello modulo causa hydration mismatch).
+function useParticles(count = 12) {
+  const [particles, setParticles] = useState<
+    { id: number; x: number; y: number; size: number; delay: number; duration: number }[]
+  >([]);
+  useEffect(() => {
+    setParticles(
+      Array.from({ length: count }, (_, i) => ({
+        id: i,
+        x: Math.random() * 100,
+        y: Math.random() * 100,
+        size: 2 + Math.random() * 4,
+        delay: Math.random() * 4,
+        duration: 2.5 + Math.random() * 3,
+      })),
+    );
+  }, [count]);
+  return particles;
+}
 
 // ── Google Icon ───────────────────────────────────────────────────────────────
 const GoogleIcon = () => (
@@ -44,6 +55,7 @@ export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const supabase = getSupabaseBrowserClient();
+  const particles = useParticles(12);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

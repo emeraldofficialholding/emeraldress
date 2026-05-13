@@ -107,18 +107,32 @@ function Countdown({ targetIso }: { targetIso: string }) {
   );
 }
 
-const particles = Array.from({ length: 18 }, (_, i) => ({
-  id: i,
-  x: Math.random() * 100,
-  y: Math.random() * 100,
-  size: 3 + Math.random() * 5,
-  delay: Math.random() * 4,
-  duration: 2.5 + Math.random() * 3,
-}));
+// I particles erano generati a livello modulo con Math.random() → SSR e client
+// producevano array diversi → hydration mismatch (React error #418).
+// Ora vengono generati solo dopo mount via useParticles().
+function useParticles(count = 18) {
+  const [particles, setParticles] = useState<
+    { id: number; x: number; y: number; size: number; delay: number; duration: number }[]
+  >([]);
+  useEffect(() => {
+    setParticles(
+      Array.from({ length: count }, (_, i) => ({
+        id: i,
+        x: Math.random() * 100,
+        y: Math.random() * 100,
+        size: 3 + Math.random() * 5,
+        delay: Math.random() * 4,
+        duration: 2.5 + Math.random() * 3,
+      })),
+    );
+  }, [count]);
+  return particles;
+}
 
 export function ComingSoonClient() {
   const [formData, setFormData] = useState({ nome: "", email: "", telefono: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const particles = useParticles(18);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
