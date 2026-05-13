@@ -219,15 +219,24 @@ export async function POST(request: NextRequest) {
     s: v.size,
     q: v.quantity,
   }));
+  // Serializzo p_items come stringa JSON: la function ora accetta `text` e
+  // fa il cast a jsonb internamente (più robusto del param `jsonb` diretto,
+  // che PostgREST a volte non castava correttamente).
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: reserveResult, error: reserveError } = await (supabaseAdmin as any).rpc(
     "reserve_cart",
-    { p_items: reserveItems, p_ttl_seconds: RESERVATION_TTL_SECONDS },
+    { p_items: JSON.stringify(reserveItems), p_ttl_seconds: RESERVATION_TTL_SECONDS },
   );
   if (reserveError) {
     // eslint-disable-next-line no-console
-    console.error("[/api/checkout] reserve_cart error:", reserveError);
-    return NextResponse.json({ error: "Errore prenotazione stock" }, { status: 500 });
+    console.error(
+      "[/api/checkout] reserve_cart error:",
+      JSON.stringify(reserveError, null, 2),
+    );
+    return NextResponse.json(
+      { error: "Errore prenotazione stock", debug: reserveError.message ?? "rpc failed" },
+      { status: 500 },
+    );
   }
   if (reserveResult?.ok === false) {
     const firstMissing = Array.isArray(reserveResult.missing) ? reserveResult.missing[0] : null;
