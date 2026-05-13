@@ -283,29 +283,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     }
   }
 
-  // Notifica n8n (best effort, non blocca)
-  if (N8N_WEBHOOK_URL) {
-    try {
-      await fetch(N8N_WEBHOOK_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          event: "order.created",
-          order_id: orderId,
-          stripe_session_id: session.id,
-          customer_email: orderInsert.customer_email,
-          total_amount: totalAmount,
-          source: "cart-checkout-v1",
-        }),
-      });
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.warn("[stripe webhook] n8n notify failed:", e);
-    }
-  }
-
-  // ── Notifica admin nuovo ordine (best effort, non blocca) ──────────────
-  // Costruzione payload riassuntivo
+  // ── Payload ordine completo (usato per N8N orchestrator + admin + Telegram) ──
   const itemSummary = cart
     .map((line) => {
       const name = productMap.get(line.p)?.name?.trim?.() ?? "Prodotto";
@@ -313,14 +291,19 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     })
     .join(", ");
 
-  const adminPayload = {
+  const orderPayload = {
     event: "order.created",
     order_id: orderId,
     order_number: orderNumber,
+    stripe_session_id: session.id,
     customer_email: orderInsert.customer_email,
     customer_name: orderInsert.customer_name,
+    customer_phone: orderInsert.customer_phone,
     total_amount: totalAmount,
+    subtotal,
+    shipping_cost: shippingCost,
     currency: orderInsert.currency,
+    locale: orderInsert.locale,
     items_count: cart.reduce((acc, l) => acc + l.q, 0),
     items_summary: itemSummary,
     items: cart.map((l) => ({
@@ -329,12 +312,44 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       size: l.s,
       quantity: l.q,
       unit_price: l.a / 100,
+      line_total: (l.a / 100) * l.q,
     })),
+    shipping: shipping
+      ? {
+          name: shipping.name ?? null,
+          address: shipping.address ?? null,
+        }
+      : null,
+    billing: customer
+      ? {
+          name: customer.name ?? null,
+          address: customer.address ?? null,
+        }
+      : null,
     shipping_country: shipping?.address?.country ?? null,
-    stripe_session_id: session.id,
+    source: "cart-checkout-v1",
   };
 
-  // 1. Webhook generico (Discord/Slack/Zapier/N8N admin)
+  // Alias retro-compat (alcuni consumer del vecchio adminPayload usano questi nomi)
+  const adminPayload = orderPayload;
+
+  // 1. Notifica n8n orchestrator (email cliente + email admin + trigger shipping)
+  //    Best-effort: se n8n risponde 404 o timeout, il pagamento è già confermato
+  //    e l'ordine in DB. L'admin riceverà comunque Telegram.
+  if (N8N_WEBHOOK_URL) {
+    try {
+      await fetch(N8N_WEBHOOK_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(orderPayload),
+      });
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.warn("[stripe webhook] n8n notify failed:", e);
+    }
+  }
+
+  // 2. Webhook admin generico (Discord/Slack/Zapier — separato da n8n orchestrator)
   if (ADMIN_ORDER_WEBHOOK_URL) {
     try {
       await fetch(ADMIN_ORDER_WEBHOOK_URL, {
