@@ -103,6 +103,14 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   // Ignoriamo sessioni non pagate (es. async payment in pending)
   if (session.payment_status !== "paid") return;
 
+  // Sessioni test create da /api/checkout-test: NON creano ordini in DB.
+  // Servono solo per verificare l'integrazione Stripe + arrivo dei soldi.
+  if (session.metadata?.source === "checkout-test") {
+    // eslint-disable-next-line no-console
+    console.log("[stripe webhook] Test session paid (no order created):", session.id);
+    return;
+  }
+
   const supabase = createSupabaseAdminClient();
 
   // Check idempotenza (cast: idempotency_key non e' ancora nei types generati)
