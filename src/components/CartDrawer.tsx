@@ -8,6 +8,7 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { useCart } from "@/contexts/CartContext";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
+import RecentlyViewed from "@/components/RecentlyViewed";
 
 const FREE_SHIPPING_THRESHOLD = 200;
 
@@ -179,6 +180,10 @@ export function CartDrawer() {
               >
                 Esplora la collezione
               </button>
+
+              <div className="w-full mt-10 text-left" onClick={closeCart}>
+                <RecentlyViewed title="Hai guardato di recente" compact />
+              </div>
             </div>
           ) : (
             <ul className="space-y-4">

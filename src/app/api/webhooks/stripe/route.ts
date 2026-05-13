@@ -74,6 +74,24 @@ export async function POST(request: NextRequest) {
     }
   }
 
+  // Sessione scaduta o cancellata: rilascia le reservation per liberare lo stock.
+  if (
+    event.type === "checkout.session.expired" ||
+    event.type === "checkout.session.async_payment_failed"
+  ) {
+    const session = event.data.object as Stripe.Checkout.Session;
+    try {
+      const supabase = createSupabaseAdminClient();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (supabase as any).rpc("release_reservations_for_session", {
+        p_stripe_session_id: session.id,
+      });
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.warn("[stripe webhook] release_reservations error:", e);
+    }
+  }
+
   return NextResponse.json({ received: true });
 }
 
@@ -169,6 +187,19 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   }
   const orderId = insertedOrder.id as string;
 
+  // Consume le reservation legate a questa session (anti-oversell): atomicamente
+  // marca le righe come 'consumed' e linka l'order_id.
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (supabase as any).rpc("consume_reservations_for_session", {
+      p_stripe_session_id: session.id,
+      p_order_id: orderId,
+    });
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.warn("[stripe webhook] consume_reservations error (non-blocking):", e);
+  }
+
   // order_items + decrement stock
   for (const line of cart) {
     const p = productMap.get(line.p);
@@ -200,6 +231,43 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
         .eq("id", line.p);
       // aggiorna mappa locale per multi-line dello stesso prodotto
       productMap.set(line.p, { ...p, stock_by_size: nextSbs });
+    }
+  }
+
+  // Salva shipping address come user_address se l'utente è autenticato e non ne ha già uno.
+  // Stripe hosted checkout non permette pre-fill, quindi il valore è gestionale (visibile in /profilo).
+  const clientRefId = fullSession.client_reference_id;
+  if (clientRefId && shipping?.address) {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const sb = supabase as any;
+      const { data: existingAddresses } = await sb
+        .from("user_addresses")
+        .select("id")
+        .eq("user_id", clientRefId)
+        .limit(1);
+      if (!existingAddresses || existingAddresses.length === 0) {
+        const addr = shipping.address;
+        const nameParts = (shipping.name ?? customer?.name ?? "").trim().split(/\s+/);
+        const firstName = nameParts[0] ?? "";
+        const lastName = nameParts.slice(1).join(" ") || firstName;
+        await sb.from("user_addresses").insert({
+          user_id: clientRefId,
+          first_name: firstName || "—",
+          last_name: lastName || "—",
+          phone: customer?.phone ?? null,
+          line1: addr.line1 ?? "",
+          line2: addr.line2 ?? null,
+          city: addr.city ?? "",
+          postal_code: addr.postal_code ?? "",
+          state: addr.state ?? null,
+          country: (addr.country ?? "IT").toUpperCase(),
+          is_default: true,
+        });
+      }
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.warn("[stripe webhook] save user_address failed:", e);
     }
   }
 

@@ -256,6 +256,7 @@ export function ComingSoonClient() {
                   type="text"
                   name="nome"
                   id="cs-nome"
+                  autoComplete="name"
                   value={formData.nome}
                   onChange={handleInputChange}
                   className="block w-full bg-transparent border-b border-emerald-900/20 py-4 text-emerald-950 text-base placeholder-transparent focus:border-emerald-700 focus:outline-none transition-colors peer"
@@ -275,6 +276,8 @@ export function ComingSoonClient() {
                   type="email"
                   name="email"
                   id="cs-email"
+                  autoComplete="email"
+                  inputMode="email"
                   value={formData.email}
                   onChange={handleInputChange}
                   className="block w-full bg-transparent border-b border-emerald-900/20 py-4 text-emerald-950 text-base placeholder-transparent focus:border-emerald-700 focus:outline-none transition-colors peer"
@@ -294,6 +297,8 @@ export function ComingSoonClient() {
                   type="tel"
                   name="telefono"
                   id="cs-telefono"
+                  autoComplete="tel"
+                  inputMode="tel"
                   value={formData.telefono}
                   onChange={handleInputChange}
                   className="block w-full bg-transparent border-b border-emerald-900/20 py-4 text-emerald-950 text-base placeholder-transparent focus:border-emerald-700 focus:outline-none transition-colors peer"

@@ -25,14 +25,17 @@ import {
 } from "lucide-react";
 import useEmblaCarousel from "embla-carousel-react";
 import { toast } from "sonner";
+import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 
 import ImageFallback from "@/components/ImageFallback";
 import RelatedProducts from "@/components/RelatedProducts";
 import ProductReviews from "@/components/ProductReviews";
 import RelatedLinks from "@/components/RelatedLinks";
+import RecentlyViewed from "@/components/RecentlyViewed";
 import { AuthDialog } from "@/components/AuthDialog";
 import { useWishlist } from "@/contexts/WishlistContext";
 import { useCart } from "@/contexts/CartContext";
+import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import {
   Accordion,
@@ -397,7 +400,34 @@ const ZoomViewer = ({
   onClose: () => void;
   productName: string;
 }) => {
-  const [emblaRef] = useEmblaCarousel({ startIndex, loop: true });
+  const [zoomed, setZoomed] = useState(false);
+  const [hintVisible, setHintVisible] = useState(false);
+  const [emblaRef, emblaApi] = useEmblaCarousel({ startIndex, loop: true });
+
+  useEffect(() => {
+    try {
+      const seen = window.localStorage.getItem("pdp_zoom_hint_seen");
+      if (!seen) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setHintVisible(true);
+        window.localStorage.setItem("pdp_zoom_hint_seen", "1");
+        const t = setTimeout(() => setHintVisible(false), 2200);
+        return () => clearTimeout(t);
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    if (zoomed) {
+      emblaApi.reInit({ watchDrag: false });
+    } else {
+      emblaApi.reInit({ watchDrag: true });
+    }
+  }, [zoomed, emblaApi]);
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -408,23 +438,52 @@ const ZoomViewer = ({
       <button
         onClick={onClose}
         aria-label="Chiudi"
-        className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-white/15 backdrop-blur-md text-white flex items-center justify-center"
+        className="absolute top-4 right-4 z-10 w-11 h-11 rounded-full bg-white/15 backdrop-blur-md text-white flex items-center justify-center"
       >
         <X size={18} />
       </button>
       <div ref={emblaRef} className="overflow-hidden h-full">
         <div className="flex h-full">
           {images.map((img, i) => (
-            <div key={i} className="min-w-0 shrink-0 grow-0 basis-full flex items-center justify-center p-4">
-              <ImageFallback
-                src={img}
-                alt={`${productName} ${i + 1}`}
-                className="max-w-full max-h-full object-contain"
-              />
+            <div key={i} className="min-w-0 shrink-0 grow-0 basis-full flex items-center justify-center">
+              <TransformWrapper
+                minScale={1}
+                maxScale={3}
+                doubleClick={{ mode: "toggle", step: 1.5 }}
+                pinch={{ step: 5 }}
+                wheel={{ step: 0.2 }}
+                onZoom={(ref) => setZoomed(ref.state.scale > 1.01)}
+                onZoomStop={(ref) => setZoomed(ref.state.scale > 1.01)}
+              >
+                <TransformComponent
+                  wrapperStyle={{ width: "100%", height: "100%" }}
+                  contentStyle={{ width: "100%", height: "100%" }}
+                >
+                  <div className="w-full h-full flex items-center justify-center p-4">
+                    <ImageFallback
+                      src={img}
+                      alt={`${productName} ${i + 1}`}
+                      className="max-w-full max-h-full object-contain select-none"
+                    />
+                  </div>
+                </TransformComponent>
+              </TransformWrapper>
             </div>
           ))}
         </div>
       </div>
+      <AnimatePresence>
+        {hintVisible && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            className="absolute bottom-8 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full bg-white/15 backdrop-blur-md text-white text-[10px] tracking-[0.25em] uppercase pointer-events-none"
+          >
+            Pizzica per zoomare · doppio tap
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 };
@@ -475,6 +534,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
 
   const { addItem, removeItem, hasItem } = useWishlist();
   const { addItem: addToCart, openCart, getCartQuantity, setStockForLine } = useCart();
+  const { addProduct: trackRecentlyViewed } = useRecentlyViewed();
   const liked = hasItem(product.id);
   const reviewsRef = useRef<HTMLDivElement>(null);
   const buyPanelRef = useRef<HTMLDivElement>(null);
@@ -507,6 +567,18 @@ export function ProductDetailClient({ product }: { product: Product }) {
   const allOutOfStock = totalStock <= 0;
   const lowStock = totalStock > 0 && totalStock <= 5;
   const stockForSelected = selectedSize ? product.stock_by_size?.[selectedSize] ?? 0 : 0;
+
+  // Track recently viewed
+  useEffect(() => {
+    trackRecentlyViewed({
+      id: product.id,
+      slug: product.slug ?? null,
+      name: product.name,
+      image: product.images?.[0] ?? "",
+      price: Number(product.price),
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product.id]);
 
   // Fetch reviews summary
   useEffect(() => {
@@ -685,9 +757,9 @@ export function ProductDetailClient({ product }: { product: Product }) {
                 <button
                   onClick={handleShare}
                   aria-label="Condividi"
-                  className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-emerald-50 text-emerald-800/70 hover:text-emerald-950 transition-colors"
+                  className="w-11 h-11 rounded-full flex items-center justify-center hover:bg-emerald-50 text-emerald-800/70 hover:text-emerald-950 transition-colors"
                 >
-                  <Share2 size={14} />
+                  <Share2 size={16} />
                 </button>
               </div>
 
@@ -1037,6 +1109,9 @@ export function ProductDetailClient({ product }: { product: Product }) {
 
           {/* Cross-sell */}
           <RelatedProducts currentProductId={product.id} category={product.category} />
+
+          {/* Recently viewed */}
+          <RecentlyViewed excludeId={product.id} />
         </div>
 
         <RelatedLinks

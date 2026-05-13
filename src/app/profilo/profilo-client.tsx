@@ -41,8 +41,9 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useWishlist } from "@/contexts/WishlistContext";
 import GemLoader from "@/components/GemLoader";
+import { AddressesSection } from "@/components/profile/AddressesSection";
 
-type SectionId = "ordini" | "wishlist" | "scanner" | "recensioni" | "impostazioni";
+type SectionId = "ordini" | "wishlist" | "scanner" | "recensioni" | "indirizzi" | "impostazioni";
 
 type Profile = {
   id: string;
@@ -89,6 +90,7 @@ const SECTIONS: { id: SectionId; label: string; icon: typeof Package; emoji: str
   { id: "wishlist", label: "Wishlist", icon: Heart, emoji: "💚" },
   { id: "scanner", label: "Le Mie Scansioni", icon: Sparkles, emoji: "📱" },
   { id: "recensioni", label: "Le Mie Recensioni", icon: Star, emoji: "⭐" },
+  { id: "indirizzi", label: "Indirizzi", icon: Home, emoji: "🏠" },
   { id: "impostazioni", label: "Impostazioni", icon: Settings, emoji: "⚙️" },
 ];
 
@@ -312,6 +314,24 @@ export function ProfiloClient() {
                 {section === "wishlist" && <WishlistSection />}
                 {section === "scanner" && <ScansSection />}
                 {section === "recensioni" && <ReviewsSection />}
+                {section === "indirizzi" && userId && (
+                  <div className="group relative rounded-2xl border border-emerald-100/80 bg-white p-5 sm:p-8 shadow-[0_4px_20px_-8px_rgba(6,95,70,0.10)]">
+                    <span
+                      aria-hidden
+                      className="absolute left-0 top-6 bottom-6 w-[2px] rounded-full bg-gradient-to-b from-emerald-400/40 via-emerald-600/30 to-transparent"
+                    />
+                    <div className="flex items-center gap-2.5 mb-5">
+                      <span className="text-xl leading-none">🏠</span>
+                      <h2
+                        className="text-lg sm:text-xl text-emerald-950"
+                        style={{ fontFamily: "'Playfair Display', serif", fontWeight: 400 }}
+                      >
+                        Indirizzi salvati
+                      </h2>
+                    </div>
+                    <AddressesSection userId={userId} />
+                  </div>
+                )}
                 {section === "impostazioni" && (
                   <SettingsSection
                     userId={userId!}
@@ -1084,19 +1104,19 @@ function SettingsSection({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <Label htmlFor="fn" className="text-xs text-emerald-900/70">Nome</Label>
-            <Input id="fn" value={firstName} onChange={(e) => setFirstName(e.target.value)} className="mt-1" />
+            <Input id="fn" autoComplete="given-name" value={firstName} onChange={(e) => setFirstName(e.target.value)} className="mt-1" />
           </div>
           <div>
             <Label htmlFor="ln" className="text-xs text-emerald-900/70">Cognome</Label>
-            <Input id="ln" value={lastName} onChange={(e) => setLastName(e.target.value)} className="mt-1" />
+            <Input id="ln" autoComplete="family-name" value={lastName} onChange={(e) => setLastName(e.target.value)} className="mt-1" />
           </div>
           <div className="sm:col-span-2">
             <Label htmlFor="ph" className="text-xs text-emerald-900/70">Telefono</Label>
-            <Input id="ph" value={phone} onChange={(e) => setPhone(e.target.value)} className="mt-1" placeholder="+39 ..." />
+            <Input id="ph" type="tel" autoComplete="tel" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className="mt-1" placeholder="+39 ..." />
           </div>
           <div className="sm:col-span-2">
             <Label className="text-xs text-emerald-900/70">Email</Label>
-            <Input value={email ?? ""} disabled className="mt-1 bg-emerald-50/40" />
+            <Input type="email" autoComplete="email" value={email ?? ""} disabled className="mt-1 bg-emerald-50/40" />
           </div>
         </div>
         <div className="mt-5">
@@ -1126,6 +1146,7 @@ function SettingsSection({
             <Input
               id="np"
               type="password"
+              autoComplete="new-password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               className="mt-1"

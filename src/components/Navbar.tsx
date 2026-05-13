@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { User, Menu, X, ChevronDown, Shield, LogIn, ShoppingBag } from "lucide-react";
@@ -24,7 +24,9 @@ const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collezioniOpen, setCollezioniOpen] = useState(false);
+  const [desktopCollezioniOpen, setDesktopCollezioniOpen] = useState(false);
   const [authState, setAuthState] = useState<AuthState>("guest");
+  const desktopCollezioniRef = useRef<HTMLDivElement>(null);
   const { totalItems, openCart } = useCart();
   const pathname = usePathname() ?? "/";
   const isHome = pathname === "/";
@@ -36,8 +38,22 @@ const Navbar = () => {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMobileOpen(false);
+    setDesktopCollezioniOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    if (!desktopCollezioniOpen) return;
+    const onPointerDown = (e: PointerEvent) => {
+      if (!desktopCollezioniRef.current) return;
+      if (!desktopCollezioniRef.current.contains(e.target as Node)) {
+        setDesktopCollezioniOpen(false);
+      }
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => document.removeEventListener("pointerdown", onPointerDown);
+  }, [desktopCollezioniOpen]);
 
   // Stato auth + ruolo per decidere dove punta l'icona utente.
   useEffect(() => {
@@ -97,18 +113,42 @@ const Navbar = () => {
           <nav className="hidden lg:flex items-center gap-8">
             {links.map((link) =>
               link.to === "/collezioni" ? (
-                <div key={link.to} className="relative group flex items-center">
-                  <Link
-                    href={link.to}
-                    className={`text-xs tracking-[0.15em] uppercase font-sans font-medium transition-opacity hover:opacity-70 leading-none ${
+                <div
+                  key={link.to}
+                  ref={desktopCollezioniRef}
+                  className="relative flex items-center"
+                  onMouseEnter={() => setDesktopCollezioniOpen(true)}
+                  onMouseLeave={() => setDesktopCollezioniOpen(false)}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setDesktopCollezioniOpen((v) => !v)}
+                    aria-haspopup="menu"
+                    aria-expanded={desktopCollezioniOpen}
+                    className={`flex items-center gap-1 text-xs tracking-[0.15em] uppercase font-sans font-medium transition-opacity hover:opacity-70 leading-none ${
                       pathname === link.to ? "opacity-100" : "opacity-80"
                     }`}
                   >
                     {link.label}
-                  </Link>
-                  <div className="absolute top-full left-1/2 -translate-x-1/2 pt-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
+                    <ChevronDown
+                      className={`w-3 h-3 transition-transform duration-300 ${desktopCollezioniOpen ? "rotate-180" : ""}`}
+                      aria-hidden
+                    />
+                  </button>
+                  <div
+                    role="menu"
+                    className={`absolute top-full left-1/2 -translate-x-1/2 pt-3 transition-all duration-300 ${
+                      desktopCollezioniOpen
+                        ? "opacity-100 visible"
+                        : "opacity-0 invisible pointer-events-none"
+                    }`}
+                  >
                     <div className="bg-white/95 backdrop-blur-md shadow-lg border border-emerald-100/50 px-6 py-4 min-w-[180px] flex justify-center">
-                      <Link href="/collezioni" className="hover:opacity-70 transition-opacity">
+                      <Link
+                        href="/collezioni"
+                        onClick={() => setDesktopCollezioniOpen(false)}
+                        className="hover:opacity-70 transition-opacity"
+                      >
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={logoET} alt="Emerald Touch" className="h-8 object-contain" />
                       </Link>

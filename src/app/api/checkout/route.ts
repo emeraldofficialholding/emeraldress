@@ -1,9 +1,23 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { createHash } from "node:crypto";
 import { getStripe } from "@/lib/stripe";
 import { createSupabasePublicClient } from "@/lib/supabase/public";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+const RATE_LIMIT_WINDOW_SECONDS = 60;
+const RATE_LIMIT_MAX_REQUESTS = 10;
+const RESERVATION_TTL_SECONDS = 30 * 60; // 30 minuti
+
+function getClientIpHash(request: NextRequest): string {
+  const fwd = request.headers.get("x-forwarded-for");
+  const ip = fwd?.split(",")[0]?.trim() || request.headers.get("x-real-ip") || "unknown";
+  // Hash per privacy / GDPR (non salviamo l'IP in chiaro).
+  return createHash("sha256").update(ip).digest("hex").slice(0, 32);
+}
 
 interface CartLineRequest {
   productId: string;
@@ -19,6 +33,31 @@ const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.emeraldress.com";
 
 export async function POST(request: NextRequest) {
+  // ── Rate limiting (anti-DOS) ──────────────────────────────────────────
+  const ipHash = getClientIpHash(request);
+  const supabaseAdmin = createSupabaseAdminClient();
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: allowed, error: rlError } = await (supabaseAdmin as any).rpc("check_rate_limit", {
+      p_ip_hash: ipHash,
+      p_route: "checkout",
+      p_window_seconds: RATE_LIMIT_WINDOW_SECONDS,
+      p_max_requests: RATE_LIMIT_MAX_REQUESTS,
+    });
+    if (rlError) {
+      // eslint-disable-next-line no-console
+      console.warn("[/api/checkout] rate limit check failed (fail-open):", rlError);
+    } else if (allowed === false) {
+      return NextResponse.json(
+        { error: "Troppe richieste. Riprova tra un minuto." },
+        { status: 429, headers: { "Retry-After": String(RATE_LIMIT_WINDOW_SECONDS) } },
+      );
+    }
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.warn("[/api/checkout] rate limit exception (fail-open):", e);
+  }
+
   let body: CheckoutPayload;
   try {
     body = (await request.json()) as CheckoutPayload;
@@ -160,14 +199,67 @@ export async function POST(request: NextRequest) {
     metadata.cart_chunks = String(Math.ceil(cartJson.length / 480));
   }
 
+  // Recupera l'utente loggato (se presente) per associare la session via client_reference_id.
+  // Lo userId serve al webhook per salvare lo shipping address in user_addresses.
+  let authedUserId: string | null = null;
+  try {
+    const sbServer = await createSupabaseServerClient();
+    const { data } = await sbServer.auth.getUser();
+    authedUserId = data.user?.id ?? null;
+  } catch {
+    // Anonimo: ok, checkout guest.
+  }
+
+  // ── Reservation atomica (anti-oversell) ────────────────────────────────
+  // Lock + check + insert in una transazione PostgreSQL. Se anche un solo item
+  // non è disponibile (per stock o altre reservation attive), nessuna riga viene
+  // scritta e Stripe non viene chiamato.
+  const reserveItems = validated.map((v) => ({
+    p: v.productId,
+    s: v.size,
+    q: v.quantity,
+  }));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: reserveResult, error: reserveError } = await (supabaseAdmin as any).rpc(
+    "reserve_cart",
+    { p_items: reserveItems, p_ttl_seconds: RESERVATION_TTL_SECONDS },
+  );
+  if (reserveError) {
+    // eslint-disable-next-line no-console
+    console.error("[/api/checkout] reserve_cart error:", reserveError);
+    return NextResponse.json({ error: "Errore prenotazione stock" }, { status: 500 });
+  }
+  if (reserveResult?.ok === false) {
+    const firstMissing = Array.isArray(reserveResult.missing) ? reserveResult.missing[0] : null;
+    const productName = firstMissing
+      ? (byId.get(firstMissing.p)?.name?.trim?.() ?? "il prodotto")
+      : "un prodotto";
+    const available = firstMissing?.available ?? 0;
+    const size = firstMissing?.s ?? "";
+    return NextResponse.json(
+      {
+        error: `Stock non più disponibile per ${productName}${size ? ` taglia ${size}` : ""} (disponibili: ${available}). Aggiorna il carrello e riprova.`,
+        missing: reserveResult.missing,
+      },
+      { status: 409 },
+    );
+  }
+  const reservationIds: string[] = Array.isArray(reserveResult?.reservation_ids)
+    ? reserveResult.reservation_ids
+    : [];
+
   try {
     const stripe = getStripe();
+    // Stripe minimum expires_at = now + 30 min, max = now + 24h. Allineato alla reservation.
+    const sessionExpiresAt = Math.floor(Date.now() / 1000) + RESERVATION_TTL_SECONDS;
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       payment_method_types: ["card"],
       line_items,
+      expires_at: sessionExpiresAt,
       success_url: `${SITE_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${SITE_URL}/checkout/cancel`,
+      ...(authedUserId ? { client_reference_id: authedUserId } : {}),
       billing_address_collection: "required",
       shipping_address_collection: {
         allowed_countries: ["IT", "AT", "BE", "DE", "ES", "FR", "NL", "PT", "GB", "CH", "US"],
@@ -204,11 +296,34 @@ export async function POST(request: NextRequest) {
     });
 
     if (!session.url) {
+      // Rilascia le reservation: la session non è andata a buon fine.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (supabaseAdmin as any)
+        .from("reservations")
+        .update({ status: "released" })
+        .in("id", reservationIds);
       return NextResponse.json({ error: "Sessione senza URL" }, { status: 500 });
     }
 
+    // Linka le reservation alla session.id (così il webhook può consumarle/rilasciarle).
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (supabaseAdmin as any).rpc("link_reservations_to_session", {
+      p_reservation_ids: reservationIds,
+      p_stripe_session_id: session.id,
+    });
+
     return NextResponse.json({ url: session.url, sessionId: session.id });
   } catch (e) {
+    // Stripe ha fallito → rilascia le reservation create poco fa.
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (supabaseAdmin as any)
+        .from("reservations")
+        .update({ status: "released" })
+        .in("id", reservationIds);
+    } catch {
+      // best-effort, le reservation scadranno comunque
+    }
     // eslint-disable-next-line no-console
     console.error("[/api/checkout] Stripe error:", e);
     const msg = e instanceof Error ? e.message : "Errore Stripe";

@@ -280,6 +280,8 @@ export function LoginForm() {
                 </p>
                 <input
                   type="email"
+                  autoComplete="email"
+                  inputMode="email"
                   required
                   value={forgotEmail}
                   onChange={(e) => setForgotEmail(e.target.value)}
