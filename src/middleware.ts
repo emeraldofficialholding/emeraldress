@@ -4,7 +4,7 @@ import { updateSupabaseSession } from "@/lib/supabase/middleware";
 const BETA_GATE_ENABLED = process.env.NEXT_PUBLIC_BETA_GATE === "true";
 
 // Path pubblici accessibili anche con beta-gate attivo.
-const PUBLIC_BYPASS = ["/coming-soon", "/login", "/reset-password", "/auth", "/unsubscribe", "/api"];
+const PUBLIC_BYPASS = ["/coming-soon", "/login", "/reset-password", "/auth", "/unsubscribe", "/api", "/checkout"];
 
 const PROTECTED_PREFIX = {
   admin: "/admin",
