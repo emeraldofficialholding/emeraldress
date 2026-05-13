@@ -114,6 +114,28 @@ export function ProfiloClient() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Deep-linking via URL hash: /profilo#wishlist apre direttamente la wishlist
+  useEffect(() => {
+    const applyHash = () => {
+      const raw = window.location.hash.replace("#", "");
+      const validIds: SectionId[] = ["ordini", "wishlist", "scanner", "recensioni", "impostazioni"];
+      if ((validIds as string[]).includes(raw)) {
+        setSection(raw as SectionId);
+      }
+    };
+    applyHash();
+    window.addEventListener("hashchange", applyHash);
+    return () => window.removeEventListener("hashchange", applyHash);
+  }, []);
+
+  // Aggiorna l'URL hash quando cambia sezione (senza scroll jump).
+  const goToSection = (id: SectionId) => {
+    setSection(id);
+    if (typeof window !== "undefined" && window.location.hash !== `#${id}`) {
+      history.replaceState(null, "", `#${id}`);
+    }
+  };
+
   // Auth + profile fetch
   useEffect(() => {
     let active = true;
@@ -195,7 +217,7 @@ export function ProfiloClient() {
           <button
             key={id}
             onClick={() => {
-              setSection(id);
+              goToSection(id);
               onSelect?.();
             }}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-all ${
@@ -246,8 +268,36 @@ export function ProfiloClient() {
           </aside>
 
           {/* Main */}
-          <main className="flex-1 w-full max-w-full overflow-x-hidden p-4 lg:p-10 pb-32 lg:pb-16">
+          <main className="flex-1 w-full max-w-full overflow-x-hidden px-4 sm:px-6 lg:p-10 pt-3 sm:pt-5 lg:pt-10 pb-28 sm:pb-10 lg:pb-16">
             <SectionHeader displayName={displayName} avatarUrl={profile?.avatar_url ?? null} initials={initials} />
+
+            {/* Tab strip orizzontale per tablet / medium screens (sm-lg) */}
+            <nav
+              aria-label="Sezioni profilo"
+              className="hidden sm:flex lg:hidden mt-6 -mx-1 overflow-x-auto scrollbar-none"
+              style={{ scrollbarWidth: "none" }}
+            >
+              <div className="flex gap-2 px-1 min-w-max">
+                {SECTIONS.map(({ id, label, icon: Icon }) => {
+                  const active = section === id;
+                  return (
+                    <button
+                      key={id}
+                      onClick={() => goToSection(id)}
+                      aria-current={active ? "page" : undefined}
+                      className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-xs tracking-[0.15em] uppercase font-medium transition-all whitespace-nowrap ${
+                        active
+                          ? "bg-emerald-900 text-emerald-50 shadow-[0_4px_12px_-2px_rgba(6,95,70,0.35)]"
+                          : "bg-white/70 text-emerald-900/70 border border-emerald-200/60 hover:border-emerald-700 hover:text-emerald-950"
+                      }`}
+                    >
+                      <Icon className="w-3.5 h-3.5" />
+                      {label.replace("I Miei ", "").replace("Le Mie ", "")}
+                    </button>
+                  );
+                })}
+              </div>
+            </nav>
 
             <AnimatePresence mode="wait">
               <motion.div
@@ -256,7 +306,7 @@ export function ProfiloClient() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.25 }}
-                className="mt-8"
+                className="mt-6 sm:mt-7"
               >
                 {section === "ordini" && <OrdersSection email={email} />}
                 {section === "wishlist" && <WishlistSection />}
@@ -277,9 +327,9 @@ export function ProfiloClient() {
           </main>
         </div>
 
-        {/* Mobile bottom nav (app-style) */}
+        {/* Bottom nav: solo smartphone vero (<sm). Tablet usa la tab strip top. */}
         <nav
-          className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-emerald-100 shadow-[0_-4px_20px_-8px_rgba(6,95,70,0.15)] px-1 pb-[env(safe-area-inset-bottom)]"
+          className="sm:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-emerald-100 shadow-[0_-4px_20px_-8px_rgba(6,95,70,0.15)] px-1 pb-[env(safe-area-inset-bottom)]"
           aria-label="Navigazione profilo"
         >
           <ul className="flex items-stretch justify-between">
@@ -288,8 +338,8 @@ export function ProfiloClient() {
               return (
                 <li key={id} className="flex-1 relative">
                   <button
-                    onClick={() => setSection(id)}
-                    className={`w-full flex flex-col items-center justify-center gap-1 pt-2.5 pb-2 transition-colors ${
+                    onClick={() => goToSection(id)}
+                    className={`w-full flex flex-col items-center justify-center gap-0.5 pt-2 pb-1.5 transition-colors ${
                       active ? "text-emerald-900" : "text-emerald-900/45"
                     }`}
                     aria-current={active ? "page" : undefined}
@@ -301,9 +351,9 @@ export function ProfiloClient() {
                           : ""
                       }`}
                     >
-                      <Icon className="w-[18px] h-[18px]" />
+                      <Icon className="w-[17px] h-[17px]" />
                     </span>
-                    <span className="text-[9px] tracking-wide truncate max-w-full px-1">
+                    <span className="text-[9px] tracking-wide truncate max-w-full px-0.5">
                       {label.replace("I Miei ", "").replace("Le Mie ", "")}
                     </span>
                   </button>
@@ -427,7 +477,7 @@ function SectionHeader({
   initials: string;
 }) {
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-emerald-100/80 bg-gradient-to-br from-white via-white to-emerald-50/60 px-5 py-6 sm:px-8 sm:py-7 shadow-[0_10px_30px_-15px_rgba(6,95,70,0.18)]">
+    <div className="relative overflow-hidden rounded-2xl border border-emerald-100/80 bg-gradient-to-br from-white via-white to-emerald-50/60 px-4 py-5 sm:px-7 sm:py-7 shadow-[0_10px_30px_-15px_rgba(6,95,70,0.18)]">
       <div
         aria-hidden
         className="pointer-events-none absolute -top-16 -right-16 w-56 h-56 rounded-full opacity-50"
@@ -436,21 +486,26 @@ function SectionHeader({
             "radial-gradient(50% 50% at 50% 50%, rgba(16,185,129,0.18) 0%, transparent 70%)",
         }}
       />
-      <div className="relative flex items-center gap-4 sm:gap-5">
-        <Avatar avatarUrl={avatarUrl} initials={initials} size="lg" />
-        <div className="min-w-0">
-          <p className="text-[10px] tracking-[0.35em] uppercase text-emerald-700/60 mb-1.5">
+      <div className="relative flex items-center gap-3.5 sm:gap-5">
+        <div className="shrink-0 sm:hidden">
+          <Avatar avatarUrl={avatarUrl} initials={initials} size="sm" />
+        </div>
+        <div className="shrink-0 hidden sm:block">
+          <Avatar avatarUrl={avatarUrl} initials={initials} size="lg" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-[9px] sm:text-[10px] tracking-[0.3em] sm:tracking-[0.35em] uppercase text-emerald-700/60 mb-1">
             Area Personale
           </p>
           <h1
-            className="text-2xl sm:text-3xl text-emerald-950 truncate"
+            className="text-xl sm:text-3xl text-emerald-950 truncate leading-tight"
             style={{ fontFamily: "'Playfair Display', serif", fontWeight: 400 }}
           >
             Ciao, <span className="italic text-emerald-800">{displayName}</span>
           </h1>
-          <div className="mt-3 flex items-center gap-2">
-            <span className="w-10 h-px bg-emerald-400/60" />
-            <span className="text-[10px] tracking-[0.25em] uppercase text-emerald-700/50">
+          <div className="mt-2 sm:mt-3 flex items-center gap-2">
+            <span className="w-8 sm:w-10 h-px bg-emerald-400/60" />
+            <span className="text-[9px] sm:text-[10px] tracking-[0.2em] sm:tracking-[0.25em] uppercase text-emerald-700/50 truncate">
               Benvenuta nel tuo mondo
             </span>
           </div>
@@ -518,20 +573,55 @@ function Card({ title, emoji, children, action }: { title: string; emoji?: strin
   );
 }
 
-function EmptyState({ icon: Icon, title, message }: { icon: typeof Package; title: string; message: string }) {
+function EmptyState({
+  icon: Icon,
+  title,
+  message,
+  ctaLabel,
+  ctaHref,
+  ctaIcon,
+}: {
+  icon: typeof Package;
+  title: string;
+  message: string;
+  ctaLabel?: string;
+  ctaHref?: string;
+  ctaIcon?: typeof Package;
+}) {
+  const CtaIcon = ctaIcon;
   return (
-    <div className="text-center py-12">
+    <div className="text-center py-10 sm:py-14 px-2">
       <div
-        className="mx-auto w-14 h-14 rounded-full flex items-center justify-center mb-4 ring-1 ring-emerald-100"
+        className="mx-auto w-16 h-16 rounded-2xl flex items-center justify-center mb-5 shadow-[0_12px_30px_-12px_rgba(6,95,70,0.35)]"
         style={{
-          background:
-            "radial-gradient(60% 60% at 50% 40%, rgba(16,185,129,0.12) 0%, rgba(247,253,249,0.6) 70%)",
+          background: "linear-gradient(135deg, #064e3b 0%, #047857 50%, #059669 100%)",
         }}
       >
-        <Icon className="w-5 h-5 text-emerald-700/80" />
+        <Icon className="w-6 h-6 text-emerald-50" strokeWidth={1.5} />
       </div>
-      <p className="text-sm font-medium text-emerald-950">{title}</p>
-      <p className="text-xs text-emerald-900/55 mt-1.5 max-w-xs mx-auto leading-relaxed">{message}</p>
+      <p
+        className="text-xl sm:text-2xl text-emerald-950 mb-2"
+        style={{ fontFamily: "'Playfair Display', serif", fontWeight: 400 }}
+      >
+        {title}
+      </p>
+      <p className="text-sm text-emerald-900/60 max-w-sm mx-auto leading-relaxed mb-6">
+        {message}
+      </p>
+      {ctaLabel && ctaHref && (
+        <Link
+          href={ctaHref}
+          className="inline-flex items-center justify-center gap-2 px-7 py-3 rounded-full text-[11px] tracking-[0.25em] uppercase font-medium transition-all hover:opacity-95 active:scale-[0.98]"
+          style={{
+            background: "linear-gradient(135deg, #052e1f 0%, #064e3b 45%, #047857 100%)",
+            color: "#f0fdf4",
+            boxShadow: "0 10px 28px -10px rgba(5,150,105,0.5)",
+          }}
+        >
+          {CtaIcon && <CtaIcon className="w-3.5 h-3.5" />}
+          {ctaLabel}
+        </Link>
+      )}
     </div>
   );
 }
@@ -593,7 +683,14 @@ function OrdersSection({ email }: { email: string | null }) {
       {orders === null ? (
         <div className="flex justify-center py-10"><Loader2 className="w-5 h-5 animate-spin text-emerald-700" /></div>
       ) : orders.length === 0 ? (
-        <EmptyState icon={Package} title="Nessun ordine ancora" message="Quando completerai un acquisto lo troverai qui con tracking e dettagli." />
+        <EmptyState
+          icon={Package}
+          title="Nessun ordine ancora"
+          message="Esplora la capsule Emerald Touch: cinque capi iconici fatti per essere indossati con orgoglio."
+          ctaLabel="Esplora la collezione"
+          ctaHref="/collezioni"
+          ctaIcon={Sparkles}
+        />
       ) : (
         <ul className="divide-y divide-emerald-100">
           {orders.map((o) => {
@@ -675,9 +772,16 @@ function WishlistSection() {
   return (
     <Card title="Wishlist" emoji="💚">
       {items.length === 0 ? (
-        <EmptyState icon={Heart} title="Wishlist vuota" message="Salva i tuoi capi preferiti dal sito e li ritroverai qui." />
+        <EmptyState
+          icon={Heart}
+          title="Wishlist vuota"
+          message="Tocca il cuore sui capi che ami: li ritrovi tutti qui, sempre a portata di mano."
+          ctaLabel="Trova i tuoi preferiti"
+          ctaHref="/collezioni"
+          ctaIcon={Heart}
+        />
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
           {items.map((it) => (
             <div key={it.id} className="group relative rounded-xl overflow-hidden border border-emerald-100 bg-white">
               <Link href={`/product/${it.id}`} className="block aspect-[3/4] bg-emerald-50/50">
@@ -734,9 +838,16 @@ function ScansSection() {
       {rows === null ? (
         <div className="flex justify-center py-10"><Loader2 className="w-5 h-5 animate-spin text-emerald-700" /></div>
       ) : rows.length === 0 ? (
-        <EmptyState icon={Sparkles} title="Nessuna scansione" message="Usa l'Emerald Scanner per analizzare la sostenibilità di un capo: troverai qui lo storico." />
+        <EmptyState
+          icon={Sparkles}
+          title="Nessuna scansione ancora"
+          message="Scansiona un capo del tuo armadio e scopri la sua impronta reale. Ogni analisi resta salvata qui."
+          ctaLabel="Avvia la prima scansione"
+          ctaHref="/emeraldscanner"
+          ctaIcon={Sparkles}
+        />
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
           {rows.map((s) => (
             <div key={s.id} className="rounded-xl overflow-hidden border border-emerald-100 bg-white">
               <div className="aspect-square bg-emerald-50/50">
@@ -776,7 +887,14 @@ function ReviewsSection() {
       {rows === null ? (
         <div className="flex justify-center py-10"><Loader2 className="w-5 h-5 animate-spin text-emerald-700" /></div>
       ) : rows.length === 0 ? (
-        <EmptyState icon={Star} title="Nessuna recensione" message="Dopo aver acquistato un capo potrai lasciare una recensione e la troverai qui." />
+        <EmptyState
+          icon={Star}
+          title="La tua voce manca"
+          message="Dopo un acquisto puoi raccontare la tua esperienza. Le tue recensioni ispirano la community Emeraldress."
+          ctaLabel="Scopri la collezione"
+          ctaHref="/collezioni"
+          ctaIcon={Star}
+        />
       ) : (
         <ul className="space-y-4">
           {rows.map((r) => (

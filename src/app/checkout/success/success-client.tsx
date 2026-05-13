@@ -82,7 +82,7 @@ export function CheckoutSuccessClient({ sessionId }: { sessionId: string | null 
 
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Link
-            href="/profilo"
+            href="/profilo#ordini"
             className="inline-flex items-center justify-center gap-2 px-7 py-3 rounded-full text-[11px] tracking-[0.25em] uppercase font-medium transition-all hover:opacity-95"
             style={{
               background: "linear-gradient(135deg, #052e1f 0%, #064e3b 45%, #047857 100%)",
