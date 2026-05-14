@@ -28,7 +28,10 @@ export interface Product {
   stripe_payment_link?: string | null;
 }
 
-export const useProducts = (category?: string) =>
+export const useProducts = (
+  category?: string,
+  options?: { initialData?: Product[] },
+) =>
   useQuery({
     queryKey: ["products", category],
     queryFn: async () => {
@@ -39,6 +42,10 @@ export const useProducts = (category?: string) =>
       if (error) throw error;
       return ((data as Record<string, unknown>[]) || []).map(normalizeProduct) as unknown as Product[];
     },
+    initialData: options?.initialData,
+    // Se passiamo initialData (da SSR), evitiamo refetch al mount: i dati
+    // sono freschi appena renderizzati. Refetch automatico dopo 1 min.
+    staleTime: options?.initialData ? 60_000 : 0,
   });
 
 export const useProduct = (idOrSlug: string) =>

@@ -110,11 +110,11 @@ const CollectionCard = ({
   );
 };
 
-export function CollezioniClient() {
+export function CollezioniClient({ initialProducts }: { initialProducts?: Product[] }) {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc" | "none">("none");
   const [viewerProductId, setViewerProductId] = useState<string | null>(null);
 
-  const { data: allProducts, isLoading } = useProducts();
+  const { data: allProducts, isLoading } = useProducts(undefined, { initialData: initialProducts });
   const products = useMemo(
     () =>
       (allProducts || []).filter((p) => {
