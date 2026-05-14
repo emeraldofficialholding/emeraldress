@@ -681,6 +681,62 @@ ${bodyContent}
     })();
   }, [authState]);
 
+  // ── Realtime subscription: nuovi ordini live ─────────────────────────────
+  // Quando il webhook Stripe (Vercel) crea un ordine, l'INSERT è inviato in
+  // tempo reale all'admin via WebSocket. Niente refresh, ordine in cima alla
+  // lista con badge "🆕" animato per 8 secondi + toast notification.
+  const [newOrderIds, setNewOrderIds] = useState<Set<string>>(new Set());
+  useEffect(() => {
+    if (authState !== "admin") return;
+    const channel = supabase
+      .channel("admin-orders-realtime")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "orders" },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (payload: any) => {
+          const o = payload.new;
+          if (!o) return;
+          const newOrder: Order = {
+            id: o.id,
+            customer_email: o.customer_email ?? o.guest_email ?? "",
+            total_amount: Number(o.total_amount ?? 0),
+            status: o.status ?? "pending",
+            created_at: o.created_at,
+            items: [],
+            tracking_number: o.tracking_number ?? undefined,
+            tracking_url: o.tracking_url ?? undefined,
+            return_status: o.return_status ?? undefined,
+          };
+          // Prepend nuovo ordine (no duplicati)
+          setOrders((prev) => {
+            if (prev.some((p) => p.id === newOrder.id)) return prev;
+            return [newOrder, ...prev];
+          });
+          // Mark "fresh" per 8 secondi → badge animato
+          setNewOrderIds((prev) => new Set(prev).add(newOrder.id));
+          setTimeout(() => {
+            setNewOrderIds((prev) => {
+              const next = new Set(prev);
+              next.delete(newOrder.id);
+              return next;
+            });
+          }, 8000);
+          // Toast
+          const orderNum =
+            (o.order_number as string | undefined) ?? newOrder.id.slice(0, 8);
+          toast.success(`🆕 Nuovo ordine ${orderNum}`, {
+            description: `${newOrder.customer_email} · €${newOrder.total_amount.toFixed(2)}`,
+            duration: 6000,
+          });
+        },
+      )
+      .subscribe();
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [authState]);
+
   // ── Image helpers ─────────────────────────────────────────────────────────────
   const addFiles = useCallback((files: FileList | File[]) => {
     const newItems: ImageItem[] = Array.from(files).map((file) => ({
@@ -2000,10 +2056,23 @@ ${bodyContent}
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-neutral-50">
-                            {orders.map((o) => (
-                              <tr key={o.id} className="hover:bg-neutral-50 transition-colors cursor-pointer" onClick={() => { setSelectedOrder(o); setShippingForm({ tracking_number: o.tracking_number || "", tracking_url: o.tracking_url || "" }); }}>
+                            {orders.map((o) => {
+                              const isFresh = newOrderIds.has(o.id);
+                              return (
+                              <tr
+                                key={o.id}
+                                className={`hover:bg-neutral-50 transition-colors cursor-pointer ${isFresh ? "animate-pulse bg-emerald-50/60" : ""}`}
+                                onClick={() => { setSelectedOrder(o); setShippingForm({ tracking_number: o.tracking_number || "", tracking_url: o.tracking_url || "" }); }}
+                              >
                                 <td className="px-4 py-3 text-sm text-neutral-600">
-                                  {new Date(o.created_at).toLocaleDateString("it-IT")}
+                                  <div className="flex items-center gap-2">
+                                    {isFresh && (
+                                      <span className="inline-flex items-center text-[9px] tracking-[0.2em] uppercase px-1.5 py-0.5 rounded-full bg-emerald-700 text-white font-bold">
+                                        Nuovo
+                                      </span>
+                                    )}
+                                    {new Date(o.created_at).toLocaleDateString("it-IT")}
+                                  </div>
                                 </td>
                                 <td className="px-4 py-3 text-sm text-neutral-900">{o.customer_email}</td>
                                 <td className="px-4 py-3 text-sm font-medium text-neutral-900">
@@ -2018,7 +2087,8 @@ ${bodyContent}
                                   <ChevronRight className="w-4 h-4 text-neutral-300" />
                                 </td>
                               </tr>
-                            ))}
+                              );
+                            })}
                             {orders.length === 0 && (
                               <tr>
                                 <td colSpan={5} className="px-4 py-12 text-center text-sm text-neutral-400">
