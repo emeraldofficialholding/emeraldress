@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { RichTextEditor } from "@/components/RichTextEditor";
+import { AnalyticsDashboard } from "@/components/admin/AnalyticsDashboard";
 
 // TECH DEBT: cast a any per workaround known issue @supabase/ssr generic inference.
 // Sicurezza preservata: tutte le operazioni passano per RLS lato server.
@@ -83,7 +84,7 @@ interface Collection {
   is_active: boolean;
 }
 
-type AdminSection = "dashboard" | "products" | "orders" | "clients" | "reviews" | "newsletter" | "collections" | "settings" | "scanner" | "marketing" | "email_templates";
+type AdminSection = "dashboard" | "analytics" | "products" | "orders" | "clients" | "reviews" | "newsletter" | "collections" | "settings" | "scanner" | "marketing" | "email_templates";
 
 interface EmailTemplate {
   id: string;
@@ -1027,6 +1028,7 @@ ${bodyContent}
   // ── Sidebar nav items ────────────────────────────────────────────────────────
   const nav = [
     { id: "dashboard" as AdminSection, icon: LayoutDashboard, label: "Dashboard" },
+    { id: "analytics" as AdminSection, icon: BarChart3, label: "Analytics" },
     { id: "collections" as AdminSection, icon: Layers, label: "Collezioni" },
     { id: "products" as AdminSection, icon: Package, label: "Prodotti" },
     { id: "orders" as AdminSection, icon: ShoppingBag, label: "Ordini" },
@@ -1238,6 +1240,19 @@ ${bodyContent}
           {/* ── Main Content ── */}
           <main className="flex-1 overflow-auto overflow-x-hidden p-3 lg:p-6">
             <AnimatePresence mode="wait">
+
+              {/* ══ ANALYTICS ══════════════════════════════════════════════════ */}
+              {section === "analytics" && (
+                <motion.div
+                  key="analytics"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.25 }}
+                >
+                  <AnalyticsDashboard />
+                </motion.div>
+              )}
 
               {/* ══ DASHBOARD ══════════════════════════════════════════════════ */}
               {section === "dashboard" && (
