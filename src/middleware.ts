@@ -3,12 +3,9 @@ import { updateSupabaseSession } from "@/lib/supabase/middleware";
 
 const BETA_GATE_FLAG = process.env.NEXT_PUBLIC_BETA_GATE === "true";
 
-// Data ufficiale del drop: dopo questo istante il beta-gate si auto-disabilita
-// anche se NEXT_PUBLIC_BETA_GATE è ancora "true". Sicurezza per dimenticanza
-// di redeploy a ridosso del lancio.
-// Anticipato di 2 min (17:58) per dare ai clienti già in attesa sulla coming-soon
-// il tempo di refresh prima delle 18:00 ufficiali.
-const DROP_AT_MS = new Date("2026-05-14T17:58:00+02:00").getTime();
+// Drop ufficialmente aperto: cutoff impostato nel passato → beta-gate
+// disabilitato indipendentemente dal flag env. Il sito è LIVE.
+const DROP_AT_MS = 0;
 
 // Path pubblici accessibili anche con beta-gate attivo.
 const PUBLIC_BYPASS = ["/coming-soon", "/login", "/reset-password", "/auth", "/unsubscribe", "/api", "/checkout"];
