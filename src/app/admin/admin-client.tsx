@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { RichTextEditor } from "@/components/RichTextEditor";
 import { AnalyticsDashboard } from "@/components/admin/AnalyticsDashboard";
+import { ReturnsAdminSection } from "@/components/admin/ReturnsAdminSection";
 
 // TECH DEBT: cast a any per workaround known issue @supabase/ssr generic inference.
 // Sicurezza preservata: tutte le operazioni passano per RLS lato server.
@@ -17,7 +18,7 @@ import {
   Lock, GripVertical, ImageIcon, Mail, Download, Users, Archive, Send, Loader2,
   Code, Type, Layers, Settings, Palette, ScanSearch, Tag, Percent, Copy,
   BarChart3, MousePointerClick, RotateCcw, ExternalLink, AlertTriangle, Megaphone, Link as LinkIcon,
-  Star, MessageSquare, Home, ArrowLeft, Menu,
+  Star, MessageSquare, Home, ArrowLeft, Menu, PackageCheck,
 } from "lucide-react";
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle,
@@ -84,7 +85,7 @@ interface Collection {
   is_active: boolean;
 }
 
-type AdminSection = "dashboard" | "analytics" | "products" | "orders" | "clients" | "reviews" | "newsletter" | "collections" | "settings" | "scanner" | "marketing" | "email_templates";
+type AdminSection = "dashboard" | "analytics" | "products" | "orders" | "returns" | "clients" | "reviews" | "newsletter" | "collections" | "settings" | "scanner" | "marketing" | "email_templates";
 
 interface EmailTemplate {
   id: string;
@@ -508,38 +509,76 @@ ${bodyContent}
 
   async function handleSaveShipping() {
     if (!selectedOrder) return;
+    if (!shippingForm.tracking_number) {
+      toast.error("Tracking number obbligatorio");
+      return;
+    }
     setShippingSaving(true);
     try {
-      const { error } = await supabase
-        .from("orders")
-        .update({
-          tracking_number: shippingForm.tracking_number || null,
-          tracking_url: shippingForm.tracking_url || null,
-          status: "shipped",
-        } as any)
-        .eq("id", selectedOrder.id);
-      if (error) throw error;
+      const res = await fetch(`/api/admin/orders/${selectedOrder.id}/shipping`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "update_tracking",
+          tracking_number: shippingForm.tracking_number,
+          tracking_url: shippingForm.tracking_url || undefined,
+        }),
+      });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.error || "Salvataggio fallito");
 
-      const webhookUrl = process.env.NEXT_PUBLIC_N8N_SHIPPING_URL;
-      if (webhookUrl) {
-        await fetch(webhookUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            order_id: selectedOrder.id,
-            customer_email: selectedOrder.customer_email,
-            customer_name: selectedOrder.customer_email.split("@")[0],
-            tracking_number: shippingForm.tracking_number,
-            tracking_url: shippingForm.tracking_url,
-          }),
-        });
-      }
-
-      setSelectedOrder({ ...selectedOrder, tracking_number: shippingForm.tracking_number, tracking_url: shippingForm.tracking_url, status: "shipped" });
-      setOrders((prev) => prev.map((o) => o.id === selectedOrder.id ? { ...o, tracking_number: shippingForm.tracking_number, tracking_url: shippingForm.tracking_url, status: "shipped" } : o));
-      toast.success("Dati spedizione salvati e notifica inviata a n8n");
+      setSelectedOrder({
+        ...selectedOrder,
+        tracking_number: shippingForm.tracking_number,
+        tracking_url: shippingForm.tracking_url,
+        status: "shipped",
+      });
+      setOrders((prev) =>
+        prev.map((o) =>
+          o.id === selectedOrder.id
+            ? {
+                ...o,
+                tracking_number: shippingForm.tracking_number,
+                tracking_url: shippingForm.tracking_url,
+                status: "shipped",
+              }
+            : o,
+        ),
+      );
+      toast.success("Tracking salvato. Email cliente inviata.");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       toast.error("Errore: " + (err.message || "Salvataggio fallito"));
+    } finally {
+      setShippingSaving(false);
+    }
+  }
+
+  async function handleMarkDelivered() {
+    if (!selectedOrder) return;
+    if (selectedOrder.status !== "shipped") {
+      toast.error("L'ordine non è ancora stato spedito.");
+      return;
+    }
+    if (!confirm("Confermi la consegna? Il cliente riceverà email di notifica.")) return;
+    setShippingSaving(true);
+    try {
+      const res = await fetch(`/api/admin/orders/${selectedOrder.id}/shipping`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "mark_delivered" }),
+      });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.error || "Errore");
+
+      setSelectedOrder({ ...selectedOrder, status: "delivered" });
+      setOrders((prev) =>
+        prev.map((o) => (o.id === selectedOrder.id ? { ...o, status: "delivered" } : o)),
+      );
+      toast.success("Ordine marcato come consegnato. Email cliente inviata.");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      toast.error("Errore: " + (err.message || "Operazione fallita"));
     } finally {
       setShippingSaving(false);
     }
@@ -1032,6 +1071,7 @@ ${bodyContent}
     { id: "collections" as AdminSection, icon: Layers, label: "Collezioni" },
     { id: "products" as AdminSection, icon: Package, label: "Prodotti" },
     { id: "orders" as AdminSection, icon: ShoppingBag, label: "Ordini" },
+    { id: "returns" as AdminSection, icon: RotateCcw, label: "Resi" },
     { id: "clients" as AdminSection, icon: Users, label: "Clienti" },
     { id: "reviews" as AdminSection, icon: MessageSquare, label: "Recensioni" },
     { id: "marketing" as AdminSection, icon: Tag, label: "Marketing" },
@@ -1251,6 +1291,19 @@ ${bodyContent}
                   transition={{ duration: 0.25 }}
                 >
                   <AnalyticsDashboard />
+                </motion.div>
+              )}
+
+              {/* ══ RETURNS ══════════════════════════════════════════════════ */}
+              {section === "returns" && (
+                <motion.div
+                  key="returns"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.25 }}
+                >
+                  <ReturnsAdminSection />
                 </motion.div>
               )}
 
@@ -1834,14 +1887,27 @@ ${bodyContent}
                               />
                             </div>
                           </div>
-                          <Button
-                            onClick={handleSaveShipping}
-                            disabled={shippingSaving || (!shippingForm.tracking_number && !shippingForm.tracking_url)}
-                            className="rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white gap-2"
-                          >
-                            {shippingSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                            Salva e Notifica Cliente
-                          </Button>
+                          <div className="flex flex-wrap gap-3">
+                            <Button
+                              onClick={handleSaveShipping}
+                              disabled={shippingSaving || !shippingForm.tracking_number}
+                              className="rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white gap-2"
+                            >
+                              {shippingSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                              Salva tracking e notifica cliente
+                            </Button>
+                            {selectedOrder.status === "shipped" && (
+                              <Button
+                                onClick={handleMarkDelivered}
+                                disabled={shippingSaving}
+                                variant="outline"
+                                className="rounded-xl border-emerald-300 text-emerald-800 hover:bg-emerald-50 gap-2"
+                              >
+                                <PackageCheck className="w-4 h-4" />
+                                Marca come consegnato
+                              </Button>
+                            )}
+                          </div>
                         </div>
 
                         {/* Return management */}

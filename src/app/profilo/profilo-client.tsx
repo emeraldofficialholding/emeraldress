@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -651,51 +651,100 @@ function OrdersSection({ email }: { email: string | null }) {
   const [orders, setOrders] = useState<Order[] | null>(null);
   const { toast } = useToast();
   const [requestingId, setRequestingId] = useState<string | null>(null);
+  const [cancellingId, setCancellingId] = useState<string | null>(null);
+
+  const fetchOrders = useCallback(async () => {
+    const { data } = await supabase
+      .from("orders")
+      .select(
+        "id, created_at, status, total_amount, guest_email, customer_email, order_number, tracking_number, tracking_url, return_status",
+      )
+      .order("created_at", { ascending: false });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const mapped: Order[] = ((data as any[]) ?? []).map((o) => ({
+      id: o.id,
+      created_at: o.created_at,
+      status: o.status,
+      total_amount: Number(o.total_amount ?? 0),
+      items: [],
+      customer_email: o.customer_email ?? o.guest_email ?? "",
+      tracking_number: o.tracking_number ?? null,
+      tracking_url: o.tracking_url ?? null,
+      return_status: o.return_status ?? null,
+    }));
+    setOrders(mapped);
+  }, []);
 
   useEffect(() => {
     if (!email) return;
-    (async () => {
-      // RLS lets us read user_id-linked orders, guest_email orders and customer_email orders.
-      // customer_email è il nuovo standard popolato dal Modulo 1 n8n. guest_email è legacy.
-      const { data } = await supabase
-        .from("orders")
-        .select(
-          "id, created_at, status, total_amount, guest_email, customer_email, order_number, tracking_number, tracking_url, return_status",
-        )
-        .order("created_at", { ascending: false });
-      const mapped: Order[] = ((data as any[]) ?? []).map((o) => ({
-        id: o.id,
-        created_at: o.created_at,
-        status: o.status,
-        total_amount: Number(o.total_amount ?? 0),
-        items: [],
-        customer_email: o.customer_email ?? o.guest_email ?? "",
-        tracking_number: o.tracking_number ?? null,
-        tracking_url: o.tracking_url ?? null,
-        return_status: o.return_status ?? null,
-      }));
-      setOrders(mapped);
-    })();
-  }, [email]);
+    void fetchOrders();
+  }, [email, fetchOrders]);
 
   const requestReturn = async (orderId: string) => {
     setRequestingId(orderId);
     try {
-      const res = await fetch("https://n8n.kreareweb.com/webhook/return-request", {
+      const res = await fetch(`/api/orders/${orderId}/return`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ order_id: orderId, customer_email: email, source: "profilo" }),
+        body: JSON.stringify({
+          customer_notes: "",
+          items: [], // empty = full return (lo gestiremo nell'API)
+        }),
       });
-      if (!res.ok) throw new Error("Webhook ko");
-      toast({ title: "Richiesta inviata", description: "Ti contatteremo via email per i prossimi passi." });
+      const body = await res.json().catch(() => ({ error: "Errore" }));
+      if (!res.ok) throw new Error(body.error || "Richiesta fallita");
+      toast({
+        title: "Richiesta reso inviata",
+        description: "Riceverai una email con i prossimi passi entro 24h.",
+      });
       setOrders((prev) =>
         prev ? prev.map((o) => (o.id === orderId ? { ...o, return_status: "requested" } : o)) : prev,
       );
-    } catch {
-      toast({ title: "Errore", description: "Impossibile inviare la richiesta. Riprova.", variant: "destructive" });
+    } catch (e) {
+      toast({
+        title: "Errore",
+        description: e instanceof Error ? e.message : "Riprova tra qualche minuto.",
+        variant: "destructive",
+      });
     } finally {
       setRequestingId(null);
     }
+  };
+
+  const cancelOrder = async (orderId: string) => {
+    const confirm = window.confirm(
+      "Confermi la cancellazione dell'ordine? Verrà rimborsato l'intero importo (5-10 giorni lavorativi).",
+    );
+    if (!confirm) return;
+    setCancellingId(orderId);
+    try {
+      const res = await fetch(`/api/orders/${orderId}/cancel`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      const body = await res.json().catch(() => ({ error: "Errore" }));
+      if (!res.ok) throw new Error(body.error || "Cancellazione fallita");
+      toast({
+        title: "Ordine cancellato",
+        description: `Rimborso emesso: €${body.refund_amount?.toFixed(2) ?? "0.00"}`,
+      });
+      void fetchOrders();
+    } catch (e) {
+      toast({
+        title: "Impossibile cancellare",
+        description: e instanceof Error ? e.message : "Riprova.",
+        variant: "destructive",
+      });
+    } finally {
+      setCancellingId(null);
+    }
+  };
+
+  // Eligibility helpers
+  const isCancellable = (o: Order): boolean => {
+    if (!["processing", "pending"].includes(o.status)) return false;
+    const hoursElapsed = (Date.now() - new Date(o.created_at).getTime()) / 3600_000;
+    return hoursElapsed <= 24;
   };
 
   return (
@@ -747,11 +796,20 @@ function OrdersSection({ email }: { email: string | null }) {
                     </a>
                   )}
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex items-center gap-2 shrink-0 flex-wrap">
+                  {isCancellable(o) && (
+                    <button
+                      disabled={cancellingId === o.id}
+                      className="text-xs px-3 py-1.5 rounded-full border border-rose-200 text-rose-700 hover:bg-rose-50 disabled:opacity-60"
+                      onClick={() => cancelOrder(o.id)}
+                    >
+                      {cancellingId === o.id ? "Cancellazione…" : "Cancella ordine"}
+                    </button>
+                  )}
                   {isDelivered && !hasReturn && (
                     <button
                       disabled={requestingId === o.id}
-                      className="text-xs px-3 py-1.5 rounded-full border border-emerald-200 text-emerald-900 hover:bg-emerald-50"
+                      className="text-xs px-3 py-1.5 rounded-full border border-emerald-200 text-emerald-900 hover:bg-emerald-50 disabled:opacity-60"
                       onClick={() => requestReturn(o.id)}
                     >
                       {requestingId === o.id ? "Invio…" : "Richiedi Reso"}
