@@ -1004,8 +1004,11 @@ export function ProductDetailClient({ product }: { product: Product }) {
                     Sostenibilità & Origine
                   </AccordionTrigger>
                   <AccordionContent className="text-sm text-emerald-900/75 leading-relaxed pb-5">
-                    Realizzato in Italia con tessuto ECONYL®, fibra rigenerata da reti da pesca
-                    abbandonate. Filiera tracciata, manodopera etica, zero microplastiche.
+                    Realizzato in Italia con tessuto ECONYL®, fibra di nylon rigenerata
+                    attraverso un processo di depolimerizzazione molecolare che parte da
+                    reti da pesca recuperate dagli oceani, scarti tessili industriali e
+                    rifiuti plastici post-consumo. Filiera 100% tracciata, manodopera
+                    artigianale italiana, zero microplastiche rilasciate in lavaggio.
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
