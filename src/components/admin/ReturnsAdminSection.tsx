@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Loader2, CheckCircle2, XCircle, RefreshCw, Euro } from "lucide-react";
+import { toast } from "sonner";
+import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 interface ReturnItemRow {
   id: string;
@@ -57,6 +59,7 @@ export function ReturnsAdminSection() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actingId, setActingId] = useState<string | null>(null);
+  const [freshIds, setFreshIds] = useState<Set<string>>(new Set());
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -76,6 +79,40 @@ export function ReturnsAdminSection() {
 
   useEffect(() => {
     void fetchData();
+  }, [fetchData]);
+
+  // Realtime: nuova richiesta reso → refetch + toast + badge "NUOVO" 8s
+  useEffect(() => {
+    const supabase = getSupabaseBrowserClient();
+    const channel = supabase
+      .channel("admin-returns-realtime")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "returns" },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (payload: any) => {
+          const r = payload.new;
+          if (!r) return;
+          // Refetch (la lista è con JOIN, non posso ricostruire il payload completo)
+          void fetchData();
+          setFreshIds((prev) => new Set(prev).add(r.id));
+          setTimeout(() => {
+            setFreshIds((prev) => {
+              const next = new Set(prev);
+              next.delete(r.id);
+              return next;
+            });
+          }, 8000);
+          toast.success("🆕 Nuova richiesta reso", {
+            description: `Rimborso stimato: €${Number(r.estimated_refund ?? 0).toFixed(2)}`,
+            duration: 6000,
+          });
+        },
+      )
+      .subscribe();
+    return () => {
+      void supabase.removeChannel(channel);
+    };
   }, [fetchData]);
 
   const handleAction = async (
@@ -161,11 +198,22 @@ export function ReturnsAdminSection() {
           {rows.map((r) => {
             const orderNum = r.orders?.order_number ?? r.order_id.slice(0, 8);
             const totalItems = r.return_items.reduce((a, i) => a + i.quantity, 0);
+            const isFresh = freshIds.has(r.id);
             return (
-              <li key={r.id} className="bg-white rounded-2xl border border-neutral-100 p-5 shadow-sm">
+              <li
+                key={r.id}
+                className={`bg-white rounded-2xl border p-5 shadow-sm transition-all ${
+                  isFresh ? "border-emerald-400 ring-2 ring-emerald-100 animate-pulse" : "border-neutral-100"
+                }`}
+              >
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap mb-2">
+                      {isFresh && (
+                        <span className="inline-flex items-center text-[9px] tracking-[0.2em] uppercase px-1.5 py-0.5 rounded-full bg-emerald-700 text-white font-bold">
+                          Nuovo
+                        </span>
+                      )}
                       <span className={`inline-flex items-center text-[10px] tracking-[0.15em] uppercase px-2 py-0.5 rounded-full border ${STATUS_STYLES[r.status]}`}>
                         {STATUS_LABEL[r.status]}
                       </span>

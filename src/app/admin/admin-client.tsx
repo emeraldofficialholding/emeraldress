@@ -681,6 +681,36 @@ ${bodyContent}
     })();
   }, [authState]);
 
+  // ── Reservations live (clienti in checkout adesso) ──────────────────────
+  const [activeReservations, setActiveReservations] = useState(0);
+  useEffect(() => {
+    if (authState !== "admin") return;
+    let cancelled = false;
+    const refresh = async () => {
+      const { count } = await supabase
+        .from("reservations" as any)
+        .select("*", { count: "exact", head: true })
+        .eq("status", "active")
+        .gt("expires_at", new Date().toISOString());
+      if (!cancelled) setActiveReservations(count ?? 0);
+    };
+    void refresh();
+    const channel = supabase
+      .channel("admin-reservations-realtime")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "reservations" },
+        () => {
+          void refresh();
+        },
+      )
+      .subscribe();
+    return () => {
+      cancelled = true;
+      void supabase.removeChannel(channel);
+    };
+  }, [authState]);
+
   // ── Realtime subscription: nuovi ordini live ─────────────────────────────
   // Quando il webhook Stripe (Vercel) crea un ordine, l'INSERT è inviato in
   // tempo reale all'admin via WebSocket. Niente refresh, ordine in cima alla
@@ -1380,8 +1410,17 @@ ${bodyContent}
                   </div>
 
                   {/* KPI Cards */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 lg:gap-4 mb-4 lg:mb-8">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 lg:gap-4 mb-4 lg:mb-8">
                     {[
+                      {
+                        icon: MousePointerClick,
+                        label: "In checkout",
+                        value: activeReservations.toString(),
+                        sub: activeReservations === 1 ? "cliente attivo ora" : "clienti attivi ora",
+                        color: activeReservations > 0 ? "text-emerald-700" : "text-neutral-500",
+                        bg: activeReservations > 0 ? "bg-emerald-50" : "bg-neutral-50",
+                        live: true,
+                      },
                       {
                         icon: ShoppingBag,
                         label: "Totale Ordini",
@@ -1406,8 +1445,14 @@ ${bodyContent}
                         color: "text-emerald-700",
                         bg: "bg-emerald-50",
                       },
-                    ].map(({ icon: Icon, label, value, sub, color, bg }) => (
-                      <div key={label} className="bg-white rounded-xl lg:rounded-2xl border border-neutral-100 p-3 lg:p-5 shadow-sm flex items-center gap-3 sm:block">
+                    ].map(({ icon: Icon, label, value, sub, color, bg, live }) => (
+                      <div key={label} className="bg-white rounded-xl lg:rounded-2xl border border-neutral-100 p-3 lg:p-5 shadow-sm flex items-center gap-3 sm:block relative">
+                        {live && (
+                          <span className="absolute top-2 right-2 flex h-2 w-2">
+                            <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${activeReservations > 0 ? "bg-emerald-400" : "bg-neutral-300"} opacity-75`}></span>
+                            <span className={`relative inline-flex rounded-full h-2 w-2 ${activeReservations > 0 ? "bg-emerald-500" : "bg-neutral-400"}`}></span>
+                          </span>
+                        )}
                         <div className={`w-8 h-8 lg:w-10 lg:h-10 ${bg} rounded-lg lg:rounded-xl flex items-center justify-center sm:mb-3`}>
                           <Icon className={`w-4 h-4 lg:w-5 lg:h-5 ${color}`} />
                         </div>
