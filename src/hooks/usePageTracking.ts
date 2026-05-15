@@ -23,9 +23,18 @@ export function usePageTracking() {
     const visitorId = getVisitorId();
     const supabase = getSupabaseBrowserClient();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    void (supabase.from("site_analytics") as any).insert({
-      page_path: pathname,
-      visitor_id: visitorId,
-    });
+    (supabase.from("site_analytics") as any)
+      .insert({
+        page_path: pathname,
+        visitor_id: visitorId,
+      })
+      // Log error in console invece di silenziare: ci permette di debuggare
+      // problemi RLS / network. Non interrompe l'UX (insert è fire-and-forget).
+      .then((res: { error: unknown }) => {
+        if (res?.error) {
+          // eslint-disable-next-line no-console
+          console.warn("[pageTracking] insert failed:", res.error);
+        }
+      });
   }, [pathname]);
 }
