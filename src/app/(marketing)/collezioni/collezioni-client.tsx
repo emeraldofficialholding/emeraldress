@@ -114,7 +114,7 @@ export function CollezioniClient({ initialProducts }: { initialProducts?: Produc
   const [sortOrder, setSortOrder] = useState<"asc" | "desc" | "none">("none");
   const [viewerProductId, setViewerProductId] = useState<string | null>(null);
 
-  const { data: allProducts, isLoading } = useProducts(undefined, { initialData: initialProducts });
+  const { data: allProducts, isLoading, isError, refetch } = useProducts(undefined, { initialData: initialProducts });
   const products = useMemo(
     () =>
       (allProducts || []).filter((p) => {
@@ -187,7 +187,22 @@ export function CollezioniClient({ initialProducts }: { initialProducts?: Produc
       </div>
 
       <div className="container mx-auto px-6 lg:px-12">
-        {isLoading ? (
+        {isError ? (
+          <div className="text-center py-32 max-w-md mx-auto">
+            <p className="font-serif text-xl text-neutral-700 mb-3">
+              Impossibile caricare la collezione
+            </p>
+            <p className="text-sm text-neutral-500 mb-6">
+              Si è verificato un problema temporaneo. Riprova tra qualche secondo.
+            </p>
+            <button
+              onClick={() => refetch()}
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-full text-[11px] tracking-[0.25em] uppercase font-medium border border-emerald-900 text-emerald-950 hover:bg-emerald-900 hover:text-emerald-50 transition-all"
+            >
+              Riprova
+            </button>
+          </div>
+        ) : isLoading && sortedProducts.length === 0 ? (
           <div className="flex justify-center py-32">
             <GemLoader />
           </div>

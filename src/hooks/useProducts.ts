@@ -28,6 +28,17 @@ export interface Product {
   stripe_payment_link?: string | null;
 }
 
+// Timeout di sicurezza: se Supabase non risponde entro 8s, throw error.
+// Senza questo, isLoading resta true forever su rete lenta/RLS error silenzioso.
+async function fetchWithTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error("Timeout: il server impiega troppo tempo a rispondere")), ms),
+    ),
+  ]);
+}
+
 export const useProducts = (
   category?: string,
   options?: { initialData?: Product[] },
@@ -38,7 +49,7 @@ export const useProducts = (
       const supabase = getSupabaseBrowserClient();
       let query = supabase.from("products").select("*");
       if (category) query = query.eq("category", category);
-      const { data, error } = await query;
+      const { data, error } = await fetchWithTimeout(Promise.resolve(query), 8000);
       if (error) throw error;
       return ((data as Record<string, unknown>[]) || []).map(normalizeProduct) as unknown as Product[];
     },
@@ -46,6 +57,9 @@ export const useProducts = (
     // Se passiamo initialData (da SSR), evitiamo refetch al mount: i dati
     // sono freschi appena renderizzati. Refetch automatico dopo 1 min.
     staleTime: options?.initialData ? 60_000 : 0,
+    // Limit retry per non ciclare infinito su errori persistenti
+    retry: 2,
+    retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 5000),
   });
 
 export const useProduct = (idOrSlug: string) =>

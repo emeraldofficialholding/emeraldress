@@ -1249,69 +1249,13 @@ ${bodyContent}
             </div>
           )}
 
-          {/* ── Login form ── */}
+          {/* ── Auto-redirect a /login ─────────────────────────────────────
+              Il middleware redirige già a /login se non sei admin, ma se
+              per qualche edge case (cookie stantio, race condition) la
+              pagina viene comunque montata, redirezziamo lato client.
+              Niente LoginForm interna duplicata.                          */}
           {(authState === "unauthenticated" || authState === "not-admin") && (
-            <div className="flex-1 flex items-center justify-center p-8">
-              <motion.div
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4 }}
-                className="w-full max-w-sm"
-              >
-                {/* Logo */}
-                <div className="text-center mb-10">
-                  <div className="w-14 h-14 rounded-2xl bg-emerald-950 flex items-center justify-center mx-auto mb-5">
-                    <Lock className="w-6 h-6 text-white" />
-                  </div>
-                  <h2 style={{ fontFamily: "var(--font-serif)" }} className="text-2xl font-semibold text-neutral-900">
-                    Accesso Riservato
-                  </h2>
-                  <p className="text-sm text-neutral-400 mt-1">Inserisci le tue credenziali per continuare</p>
-                </div>
-
-                <form onSubmit={handleLogin} className="space-y-4">
-                  {authState === "not-admin" && (
-                    <div className="bg-amber-50 border border-amber-200 text-amber-800 text-xs rounded-xl px-4 py-3">
-                      Account non autorizzato per l'accesso admin.
-                    </div>
-                  )}
-                  {loginError && (
-                    <div className="bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl px-4 py-3">
-                      {loginError}
-                    </div>
-                  )}
-                  <div>
-                    <label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">Email</label>
-                    <Input
-                      type="email"
-                      value={loginEmail}
-                      onChange={(e) => setLoginEmail(e.target.value)}
-                      placeholder="admin@emeraldress.com"
-                      required
-                      className="rounded-xl border-neutral-200 focus:ring-emerald-600 bg-white"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs text-neutral-500 uppercase tracking-wider mb-1.5 block">Password</label>
-                    <Input
-                      type="password"
-                      value={loginPassword}
-                      onChange={(e) => setLoginPassword(e.target.value)}
-                      placeholder="••••••••"
-                      required
-                      className="rounded-xl border-neutral-200 focus:ring-emerald-600 bg-white"
-                    />
-                  </div>
-                  <Button
-                    type="submit"
-                    disabled={loginLoading}
-                    className="w-full bg-emerald-950 hover:bg-emerald-900 text-white rounded-xl h-11 mt-2"
-                  >
-                    {loginLoading ? "Accesso in corso..." : "Accedi alla Dashboard"}
-                  </Button>
-                </form>
-              </motion.div>
-            </div>
+            <AdminRedirectGuard mode={authState} />
           )}
 
           {/* ── Admin dashboard (sidebar + content) ── */}
@@ -3916,5 +3860,33 @@ ${bodyContent}
       </AnimatePresence>
     </div>
     </>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Auto-redirect a /login quando middleware non ha già fatto il lavoro
+// (es. cookie stantio, race condition). Niente login form duplicata.
+function AdminRedirectGuard({ mode }: { mode: "unauthenticated" | "not-admin" }) {
+  useEffect(() => {
+    const target =
+      mode === "not-admin"
+        ? "/profilo?error=not_admin"
+        : "/login?redirectTo=/admin";
+    // Piccolo delay per evitare flash + permettere a Supabase di settle
+    const t = setTimeout(() => {
+      window.location.href = target;
+    }, 300);
+    return () => clearTimeout(t);
+  }, [mode]);
+
+  return (
+    <div className="flex-1 flex items-center justify-center p-8 bg-neutral-50">
+      <div className="text-center">
+        <div className="w-12 h-12 mx-auto mb-4 rounded-full border-2 border-emerald-200 border-t-emerald-700 animate-spin" />
+        <p className="text-sm text-neutral-500">
+          {mode === "not-admin" ? "Account non autorizzato, ti rimando al profilo…" : "Reindirizzamento al login…"}
+        </p>
+      </div>
+    </div>
   );
 }
