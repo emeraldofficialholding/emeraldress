@@ -41,7 +41,37 @@ export function ResetPasswordForm() {
 
   useEffect(() => {
     let active = true;
+
     const init = async () => {
+      // CASO 1: link arriva da email reset password con token_hash query param.
+      // Supabase Auth Hook + flusso PKCE genera un token_hash che NON funziona
+      // con /auth/v1/verify cross-browser (richiede code_verifier dal cookie
+      // del browser originale). verifyOtp() invece lo valida server-side senza
+      // bisogno del cookie → funziona da qualsiasi device.
+      const params = new URLSearchParams(window.location.search);
+      const tokenHash = params.get("token_hash");
+      const otpType = params.get("type");
+
+      if (tokenHash && otpType === "recovery") {
+        const { error: otpError } = await supabase.auth.verifyOtp({
+          token_hash: tokenHash,
+          type: "recovery",
+        });
+        if (!active) return;
+        if (otpError) {
+          setError("Link non valido o scaduto. Richiedi un nuovo reset.");
+          setReady(true);
+          return;
+        }
+        setHasRecoverySession(true);
+        setReady(true);
+        // Pulizia URL: rimuovi token_hash dalla barra browser per evitare
+        // refresh accidentale che riusa lo stesso token (one-time use).
+        window.history.replaceState({}, "", window.location.pathname);
+        return;
+      }
+
+      // CASO 2: già loggato con sessione recovery (es. arrivo da /auth/callback)
       const {
         data: { session },
       } = await supabase.auth.getSession();
@@ -49,7 +79,7 @@ export function ResetPasswordForm() {
       if (session?.user) setHasRecoverySession(true);
       setReady(true);
     };
-    init();
+    void init();
 
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "PASSWORD_RECOVERY" || (event === "SIGNED_IN" && session?.user)) {
