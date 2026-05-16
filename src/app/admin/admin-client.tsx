@@ -366,8 +366,38 @@ export function AdminClient() {
   }
 
   // ── Data fetching ────────────────────────────────────────────────────────────
+  // Helper: race fetchAll contro un timeout 10s. Se anche solo una query
+  // resta appesa (Supabase cold start, rete instabile), evitiamo loader
+  // infinito mostrando un errore esplicito.
+  function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+    return Promise.race([
+      promise,
+      new Promise<T>((_, reject) =>
+        setTimeout(() => reject(new Error(`Timeout: ${label} > ${ms / 1000}s`)), ms),
+      ),
+    ]);
+  }
+
+  // Detect 401 / session expired error da Supabase + redirect auto
+  function isSessionExpiredError(err: unknown): boolean {
+    if (!err) return false;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const e = err as any;
+    const code = e?.code ?? e?.status;
+    const msg = String(e?.message ?? "").toLowerCase();
+    return (
+      code === 401 ||
+      code === "PGRST301" ||
+      msg.includes("jwt") ||
+      msg.includes("session") ||
+      msg.includes("expired") ||
+      msg.includes("invalid refresh token")
+    );
+  }
+
   async function fetchAll() {
-     const [
+    try {
+      const [
       { data: prods, error: prodsError },
       { data: ords, error: ordsError },
       { data: subs, error: subscribersError },
@@ -377,7 +407,8 @@ export function AdminClient() {
       { data: cpns, error: cpnsError },
       { data: ets, error: etsError },
       { data: revs, error: revsError },
-    ] = await Promise.all([
+    ] = await withTimeout(
+      Promise.all([
       supabase.from("products").select("*").order("created_at", { ascending: false }),
       supabase.from("orders").select("*").order("created_at", { ascending: false }),
       supabase.from("subscribers").select("*"),
@@ -387,7 +418,25 @@ export function AdminClient() {
       supabase.from("coupons" as any).select("*").order("code"),
       supabase.from("email_templates" as any).select("*").order("updated_at", { ascending: false }),
       supabase.from("reviews" as any).select("*").order("created_at", { ascending: false }),
-    ]);
+    ]),
+      10_000,
+      "fetchAll",
+    );
+
+    // Detect sessione scaduta da una qualsiasi delle query → redirect login
+    const firstSessionExpired = [
+      prodsError, ordsError, subscribersError, colsError, settingsError,
+      scansError, cpnsError, etsError, revsError,
+    ].find(isSessionExpiredError);
+    if (firstSessionExpired) {
+      // eslint-disable-next-line no-console
+      console.warn("[admin] sessione scaduta, redirect a /login", firstSessionExpired);
+      toast.error("Sessione scaduta. Effettua di nuovo l'accesso.");
+      setTimeout(() => {
+        window.location.href = "/login?redirectTo=/admin&error=session_expired";
+      }, 1500);
+      return;
+    }
 
     if (prodsError) toast.error("Errore nel caricamento prodotti");
     if (ordsError) toast.error("Errore nel caricamento ordini");
@@ -438,6 +487,25 @@ export function AdminClient() {
 
     // Carica history invii newsletter
     await loadRecentSends();
+    } catch (err) {
+      // Timeout o errore network: l'utente vede comunque l'admin con dati
+      // parziali (se primo load) o stantii (se refresh). Mostriamo toast.
+      // eslint-disable-next-line no-console
+      console.warn("[admin] fetchAll error:", err);
+      if (isSessionExpiredError(err)) {
+        toast.error("Sessione scaduta. Effettua di nuovo l'accesso.");
+        setTimeout(() => {
+          window.location.href = "/login?redirectTo=/admin&error=session_expired";
+        }, 1500);
+        return;
+      }
+      const msg = err instanceof Error ? err.message : "Errore caricamento dati";
+      toast.error("Errore caricamento dashboard", {
+        description: msg.includes("Timeout")
+          ? "Connessione lenta. Ricarica per riprovare."
+          : msg,
+      });
+    }
   }
 
   // ── Newsletter helpers ──────────────────────────────────────────────────────
