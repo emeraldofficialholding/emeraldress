@@ -95,16 +95,14 @@ const TrustMarquee = () => {
       <div className="relative z-10">
         <MarqueeBand baseVelocity={0.8} direction="left" className="bg-[#e4ffec] border-y border-emerald-100/50">
           <div className="text-emerald-950 font-sans font-medium text-base md:text-lg tracking-[0.15em] flex items-center shrink-0 gap-6 pr-8">
-            {highlights.map((word, index) => (
+            {highlights.map((word) => (
               <Fragment key={word}>
                 <span className="inline-flex items-center whitespace-nowrap">{word}</span>
-                {index < highlights.length - 1 && (
-                  <img
-                    src={logoED}
-                    alt="Emerald divider"
-                    className="h-7 w-auto object-contain shrink-0 self-center"
-                  />
-                )}
+                <img
+                  src={logoED}
+                  alt="Emerald divider"
+                  className="h-7 w-auto object-contain shrink-0 self-center"
+                />
               </Fragment>
             ))}
           </div>
