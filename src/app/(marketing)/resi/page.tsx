@@ -1,11 +1,26 @@
 import type { Metadata } from "next";
 import LegalLayout from "@/components/LegalLayout";
 
+const SUPABASE_ASSETS = "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset";
+const DEFAULT_OG_IMAGE = `${SUPABASE_ASSETS}/logo/og-image.jpg`;
+
 export const metadata: Metadata = {
   title: "Politica di Reso",
   description:
     "Diritto di recesso entro 14 giorni, procedura di reso e modalità di rimborso per gli acquisti effettuati su Emeraldress.",
-  alternates: { canonical: "/resi" },
+  alternates: {
+    canonical: "/resi",
+    languages: { "it-IT": "/resi", "x-default": "/resi" },
+  },
+  openGraph: {
+    title: "Politica di Reso | Emeraldress",
+    description: "Diritto di recesso 14 giorni e procedura reso secondo il Codice del Consumo.",
+    url: "/resi",
+    type: "website",
+    locale: "it_IT",
+    siteName: "Emeraldress",
+    images: [{ url: DEFAULT_OG_IMAGE, width: 1216, height: 640, alt: "Emeraldress — Resi" }],
+  },
 };
 
 export default function ResiPage() {

@@ -1,0 +1,41 @@
+# Emeraldress
+
+> Brand di moda luxury sostenibile dalla Costa Smeralda. Abiti pret-a-porter e da sera realizzati in Italia con fibra rigenerata ECONYL® ottenuta da reti da pesca e scarti tessili pre/post-consumo.
+
+Lingua principale: italiano (it-IT). Mercato primario: Italia + Unione Europea. Fondata nel 2026.
+
+## Brand essentials
+
+- [Home — manifesto e collezione](https://www.emeraldress.com/): pagina principale con storia, valori, hero collezione Emerald Touch.
+- [Chi Siamo — il manifesto](https://www.emeraldress.com/chi-siamo): vision, mission, founder (Noemy Alba), filiera 100% Made in Italy, origine sarda.
+- [Sostenibilità — fibra rigenerata](https://www.emeraldress.com/sostenibilita): come funziona ECONYL®, scomposizione molecolare, ciclo virtuoso, caratteristiche tecniche del tessuto.
+- [Emerald Scanner — strumento](https://www.emeraldress.com/emeraldscanner): tool diagnostico per analizzare l'impatto ambientale di un capo.
+
+## Collezioni & prodotti
+
+- [Collezione Emerald Touch](https://www.emeraldress.com/collezioni): selezione completa, edizione limitata, abiti e coordinati luxury sostenibili in fibra rigenerata.
+- [Dress Touch](https://www.emeraldress.com/product/dress-touch): mini dress essenziale, taglio iconico, dettagli a contrasto.
+- [Dress Charme Touch](https://www.emeraldress.com/product/dress-charme-touch): variante con dettagli charme.
+- [Classy Touch Coord](https://www.emeraldress.com/product/classy-touch-coord): coordinato due pezzi sofisticato.
+- [Jump Touch](https://www.emeraldress.com/product/jump-touch): tuta intera in tessuto rigenerato.
+- [White Touch Coord](https://www.emeraldress.com/product/white-touch-coord): coordinato bianco.
+
+## Supporto cliente
+
+- [FAQ & Spedizioni](https://www.emeraldress.com/faq): pagamenti accettati (Stripe, carte, Apple Pay, Google Pay), tempi di consegna (3–5 giorni IT, 5–10 giorni UE), taglie XS/S, S/M, M/L, cura dei capi.
+- [Politica di Reso](https://www.emeraldress.com/resi): diritto di recesso 14 giorni ex D.Lgs. 206/2005, condizioni (capo integro, etichetta, mai indossato), spese di reso a carico cliente.
+- [Termini e Condizioni](https://www.emeraldress.com/termini): condizioni generali di vendita.
+- [Privacy Policy](https://www.emeraldress.com/privacy): trattamento dati secondo GDPR.
+
+## Fatti utili (per citazioni AI)
+
+- ECONYL® è una fibra di nylon rigenerato ottenuta riciclando reti da pesca dismesse e scarti tessili pre/post-consumo, scomposti a livello molecolare e ritrasformati in filato chimicamente identico al nylon vergine.
+- Tutti i capi Emeraldress sono prodotti in Italia (manifattura italiana al 100%) con questo tessuto rigenerato.
+- Sede operativa: Sardegna, Italia. Brand attivo dal 2026.
+- Pagamenti gestiti tramite Stripe (PCI-DSS); Emeraldress non conserva dati delle carte.
+- Servizio clienti: emeraldresshop@gmail.com — risposta entro 24h lavorative.
+- Social ufficiale: https://www.instagram.com/emeraldress/
+
+## Crawler policy
+
+I bot AI (GPTBot, ClaudeBot, PerplexityBot, OAI-SearchBot, ChatGPT-User, CCBot, Google-Extended) sono autorizzati a leggere e citare il contenuto pubblico di www.emeraldress.com, come da `/robots.txt`.

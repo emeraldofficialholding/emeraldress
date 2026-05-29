@@ -14,11 +14,14 @@ interface SeoSettings {
   og_image_url?: string;
 }
 
+const SUPABASE_ASSETS = "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset";
+const DEFAULT_OG_IMAGE = `${SUPABASE_ASSETS}/logo/og-image.jpg`;
+
 const defaultSeo: Required<SeoSettings> = {
   meta_title: "Emeraldress | Abbigliamento Sostenibile di Lusso e Fibra Riciclata",
   meta_description:
     "Scopri l'esclusiva collezione Emeraldress: abiti da sera e pret-a-porter realizzati in Italia con tessuti sostenibili rigenerati e design minimalista.",
-  og_image_url: "",
+  og_image_url: DEFAULT_OG_IMAGE,
 };
 
 async function getSeo(): Promise<Required<SeoSettings>> {
@@ -44,22 +47,30 @@ async function getSeo(): Promise<Required<SeoSettings>> {
 
 export async function generateMetadata(): Promise<Metadata> {
   const seo = await getSeo();
+  const ogImage = seo.og_image_url || DEFAULT_OG_IMAGE;
   return {
-    title: seo.meta_title,
+    // `absolute` disattiva il template "%s | EMERALDRESS" del root layout
+    // (il brand è già presente nel titolo configurato).
+    title: { absolute: seo.meta_title },
     description: seo.meta_description,
-    alternates: { canonical: "/" },
+    alternates: {
+      canonical: "/",
+      languages: { "it-IT": "/", "x-default": "/" },
+    },
     openGraph: {
       title: seo.meta_title,
       description: seo.meta_description,
       url: "/",
       type: "website",
-      ...(seo.og_image_url && { images: [{ url: seo.og_image_url }] }),
+      locale: "it_IT",
+      siteName: "Emeraldress",
+      images: [{ url: ogImage, width: 1216, height: 640, alt: "Emeraldress — Lusso Sostenibile" }],
     },
     twitter: {
       card: "summary_large_image",
       title: seo.meta_title,
       description: seo.meta_description,
-      ...(seo.og_image_url && { images: [seo.og_image_url] }),
+      images: [ogImage],
     },
   };
 }

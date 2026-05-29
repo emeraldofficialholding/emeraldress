@@ -3,16 +3,32 @@ import { CollezioniClient } from "./collezioni-client";
 import { createSupabasePublicClient } from "@/lib/supabase/public";
 import type { Product } from "@/hooks/useProducts";
 
+const SITE_URL = "https://www.emeraldress.com";
+const SUPABASE_ASSETS = "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset";
+const DEFAULT_OG_IMAGE = `${SUPABASE_ASSETS}/logo/og-image.jpg`;
+
 export const metadata: Metadata = {
-  title: "Le Collezioni",
+  title: "Collezione Emerald Touch — Abiti Sostenibili",
   description:
-    "Esplora le collezioni Emeraldress: abbigliamento luxury sostenibile in fibra riciclata, manifattura italiana.",
-  alternates: { canonical: "/collezioni" },
+    "Esplora le collezioni Emeraldress: abiti luxury sostenibili in fibra rigenerata ECONYL®, manifattura italiana. Edizione limitata Emerald Touch.",
+  alternates: {
+    canonical: "/collezioni",
+    languages: { "it-IT": "/collezioni", "x-default": "/collezioni" },
+  },
   openGraph: {
-    title: "Le Collezioni | Emeraldress",
+    title: "Collezione Emerald Touch | Emeraldress",
     description: "Abiti luxury italiani con tessuti sostenibili rigenerati. Scopri Emerald Touch.",
     url: "/collezioni",
     type: "website",
+    locale: "it_IT",
+    siteName: "Emeraldress",
+    images: [{ url: DEFAULT_OG_IMAGE, width: 1216, height: 640, alt: "Collezione Emerald Touch — Emeraldress" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Collezione Emerald Touch | Emeraldress",
+    description: "Abiti luxury italiani con tessuti sostenibili rigenerati. Scopri Emerald Touch.",
+    images: [DEFAULT_OG_IMAGE],
   },
 };
 
@@ -26,10 +42,33 @@ const breadcrumbSchema = {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   itemListElement: [
-    { "@type": "ListItem", position: 1, name: "Home", item: "https://www.emeraldress.com/" },
-    { "@type": "ListItem", position: 2, name: "Collezioni", item: "https://www.emeraldress.com/collezioni" },
+    { "@type": "ListItem", position: 1, name: "Home", item: `${SITE_URL}/` },
+    { "@type": "ListItem", position: 2, name: "Collezioni", item: `${SITE_URL}/collezioni` },
   ],
 };
+
+function buildCollectionSchema(products: Product[]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: "Collezione Emerald Touch",
+    description:
+      "La selezione Emerald Touch: abiti luxury sostenibili in fibra rigenerata ECONYL®, manifattura italiana, edizione limitata.",
+    url: `${SITE_URL}/collezioni`,
+    inLanguage: "it-IT",
+    isPartOf: { "@type": "WebSite", name: "Emeraldress", url: SITE_URL },
+    mainEntity: {
+      "@type": "ItemList",
+      numberOfItems: products.length,
+      itemListElement: products.map((p, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        url: `${SITE_URL}/product/${p.slug ?? p.id}`,
+        name: p.name,
+      })),
+    },
+  };
+}
 
 /**
  * Server Component: fa il fetch dei prodotti lato server con anon key + RLS
@@ -67,12 +106,17 @@ async function fetchInitialProducts(): Promise<Product[]> {
 
 export default async function CollezioniPage() {
   const initialProducts = await fetchInitialProducts();
+  const collectionSchema = buildCollectionSchema(initialProducts);
 
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionSchema) }}
       />
       <CollezioniClient initialProducts={initialProducts} />
     </>

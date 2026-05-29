@@ -138,7 +138,7 @@ const ScrollExpandMedia = ({
               boxShadow: '0px 0px 50px rgba(0, 0, 0, 0.3)'
             }}>
                 {mediaType === 'video' ? <div className="relative w-full h-full">
-                    <video src={mediaSrc} poster={posterSrc} autoPlay muted loop playsInline className="w-full h-full object-cover rounded-xl" />
+                    <video src={mediaSrc} poster={posterSrc} autoPlay muted loop playsInline preload="metadata" className="w-full h-full object-cover rounded-xl" />
                     <motion.div className="absolute inset-0 bg-black/30 rounded-xl" initial={{
                   opacity: 0.7
                 }} animate={{

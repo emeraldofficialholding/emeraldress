@@ -36,6 +36,7 @@ const ClassicsSection = () => {
             muted
             loop
             playsInline
+            preload="metadata"
             className="absolute inset-0 w-full h-full object-cover"
           />
           <div className="absolute inset-0 hidden lg:block bg-gradient-to-r from-transparent via-transparent to-[#f5fef8]/40 pointer-events-none" />

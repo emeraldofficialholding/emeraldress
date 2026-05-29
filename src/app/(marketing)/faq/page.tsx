@@ -3,11 +3,26 @@ import LegalLayout from "@/components/LegalLayout";
 import { FaqAccordion } from "./faq-accordion";
 import { Truck, Package, Globe2, Clock } from "lucide-react";
 
+const SUPABASE_ASSETS = "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset";
+const DEFAULT_OG_IMAGE = `${SUPABASE_ASSETS}/logo/og-image.jpg`;
+
 export const metadata: Metadata = {
   title: "FAQ & Spedizioni",
   description:
     "Tempi di consegna, metodi di pagamento, taglie e cura dei capi Emeraldress. Tutte le risposte ufficiali del nostro servizio clienti.",
-  alternates: { canonical: "/faq" },
+  alternates: {
+    canonical: "/faq",
+    languages: { "it-IT": "/faq", "x-default": "/faq" },
+  },
+  openGraph: {
+    title: "FAQ & Spedizioni | Emeraldress",
+    description: "Tempi di consegna, pagamenti, taglie e cura dei capi luxury sostenibili.",
+    url: "/faq",
+    type: "website",
+    locale: "it_IT",
+    siteName: "Emeraldress",
+    images: [{ url: DEFAULT_OG_IMAGE, width: 1216, height: 640, alt: "Emeraldress — FAQ" }],
+  },
 };
 
 const shippingHighlights = [
