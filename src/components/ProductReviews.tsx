@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState, useCallback, useMemo, FormEvent } from "react";
+import { useEffect, useState, useCallback, useMemo, FormEvent, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Star, Loader2, MessageCircle, BadgeCheck, ChevronDown, PenLine } from "lucide-react";
+import { Star, Loader2, MessageCircle, BadgeCheck, ChevronDown, PenLine, Camera, X } from "lucide-react";
 import { toast } from "sonner";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { AuthDialog } from "./AuthDialog";
@@ -15,6 +15,33 @@ interface Review {
   comment: string | null;
   created_at: string;
   user_id?: string | null;
+  photo_urls?: string[] | null;
+}
+
+const MAX_REVIEW_PHOTOS = 3;
+const PHOTO_BUCKET = "review-photos";
+
+// Compressione lato client: ridimensiona long-edge a 1600px e codifica WebP q=0.82.
+// Tipicamente porta 4-8 MB di foto smartphone a ~120-250 KB senza perdita visiva.
+async function compressToWebp(file: File, maxEdge = 1600, quality = 0.82): Promise<Blob> {
+  const bitmap = await createImageBitmap(file);
+  const scale = Math.min(1, maxEdge / Math.max(bitmap.width, bitmap.height));
+  const w = Math.round(bitmap.width * scale);
+  const h = Math.round(bitmap.height * scale);
+  const canvas = document.createElement("canvas");
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Canvas non disponibile");
+  ctx.drawImage(bitmap, 0, 0, w, h);
+  bitmap.close?.();
+  return new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob(
+      (b) => (b ? resolve(b) : reject(new Error("Compressione fallita"))),
+      "image/webp",
+      quality,
+    );
+  });
 }
 
 type SortMode = "recent" | "highest" | "lowest";
@@ -94,12 +121,46 @@ const ProductReviews = ({ productId }: { productId: string }) => {
   const [sort, setSort] = useState<SortMode>("recent");
   const [authOpen, setAuthOpen] = useState(false);
   const [authedUser, setAuthedUser] = useState<{ id: string; email: string | null } | null>(null);
+  const [photos, setPhotos] = useState<{ file: File; preview: string }[]>([]);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [lightbox, setLightbox] = useState<{ urls: string[]; index: number } | null>(null);
+
+  const addPhotos = useCallback((files: FileList | File[]) => {
+    const arr = Array.from(files).filter((f) => f.type.startsWith("image/"));
+    setPhotos((prev) => {
+      const space = MAX_REVIEW_PHOTOS - prev.length;
+      if (space <= 0) {
+        toast.error(`Max ${MAX_REVIEW_PHOTOS} foto per recensione`);
+        return prev;
+      }
+      const accepted = arr.slice(0, space);
+      const newOnes = accepted.map((file) => ({ file, preview: URL.createObjectURL(file) }));
+      return [...prev, ...newOnes];
+    });
+  }, []);
+
+  const removePhoto = useCallback((idx: number) => {
+    setPhotos((prev) => {
+      const next = [...prev];
+      const removed = next.splice(idx, 1)[0];
+      if (removed) URL.revokeObjectURL(removed.preview);
+      return next;
+    });
+  }, []);
+
+  // Cleanup preview URL on unmount
+  useEffect(() => {
+    return () => {
+      photos.forEach((p) => URL.revokeObjectURL(p.preview));
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const load = useCallback(async () => {
     setLoading(true);
     const { data } = await supabase
       .from("reviews")
-      .select("id, customer_name, rating, comment, created_at, user_id")
+      .select("id, customer_name, rating, comment, created_at, user_id, photo_urls")
       .eq("product_id", productId)
       .eq("is_approved", true);
     setReviews((data as Review[]) || []);
@@ -162,26 +223,64 @@ const ProductReviews = ({ productId }: { productId: string }) => {
       return;
     }
     setSubmitting(true);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabase.from("reviews") as any).insert({
-      product_id: productId,
-      customer_name: name.trim(),
-      rating,
-      comment: comment.trim() || null,
-      is_approved: false,
-      user_id: authedUser.id,
-    });
-    setSubmitting(false);
-    if (error) {
+    try {
+      // 1) Genero l'id review lato client cosi' posso linkare le foto con un
+      //    path stabile prima di insert. Se l'insert fallisce, le foto restano
+      //    orphan ma il trigger di delete review le pulira' su fix manuale.
+      const reviewId = (typeof crypto !== "undefined" && crypto.randomUUID)
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+      // 2) Comprimi e carica le foto a `review-photos/{user_id}/{review_id}-{i}.webp`
+      const photoUrls: string[] = [];
+      if (photos.length > 0) {
+        toast.loading("Carico le foto…", { id: "upload-photos" });
+        for (let i = 0; i < photos.length; i++) {
+          const blob = await compressToWebp(photos[i].file);
+          const path = `${authedUser.id}/${reviewId}-${i}.webp`;
+          const { error: upErr } = await supabase.storage
+            .from(PHOTO_BUCKET)
+            .upload(path, blob, { contentType: "image/webp", upsert: true });
+          if (upErr) throw upErr;
+          const { data: pub } = supabase.storage.from(PHOTO_BUCKET).getPublicUrl(path);
+          photoUrls.push(pub.publicUrl);
+        }
+        toast.dismiss("upload-photos");
+      }
+
+      // 3) Insert review con id pre-generato + photo_urls
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error } = await (supabase.from("reviews") as any).insert({
+        id: reviewId,
+        product_id: productId,
+        customer_name: name.trim(),
+        rating,
+        comment: comment.trim() || null,
+        is_approved: false,
+        user_id: authedUser.id,
+        photo_urls: photoUrls,
+      });
+      if (error) throw error;
+
+      toast.success("Grazie!", {
+        description: photoUrls.length > 0
+          ? `Recensione + ${photoUrls.length} ${photoUrls.length === 1 ? "foto inviata" : "foto inviate"}. Pubblicazione entro 24h.`
+          : "La tua recensione sarà pubblicata dopo l'approvazione.",
+      });
+      // Reset form
+      setComment("");
+      setRating(5);
+      photos.forEach((p) => URL.revokeObjectURL(p.preview));
+      setPhotos([]);
+      setShowForm(false);
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error("[reviews] submit error:", err);
+      toast.dismiss("upload-photos");
       toast.error("Errore. Riprova.");
-      return;
+    } finally {
+      setSubmitting(false);
     }
-    toast.success("Grazie!", {
-      description: "La tua recensione sarà pubblicata dopo l'approvazione.",
-    });
-    setComment("");
-    setRating(5);
-    setShowForm(false);
   };
 
   const avg =
@@ -350,6 +449,57 @@ const ProductReviews = ({ productId }: { productId: string }) => {
                   </p>
                 </div>
 
+                {/* Photo upload: max 3 foto, compressione WebP client-side */}
+                <div>
+                  <label className="block text-[10px] tracking-[0.25em] uppercase text-emerald-800/70 mb-2 font-medium">
+                    Le tue foto <span className="lowercase tracking-normal text-emerald-700/55 ml-1">(facoltative · max 3)</span>
+                  </label>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    onChange={(e) => {
+                      if (e.target.files) addPhotos(e.target.files);
+                      e.target.value = "";
+                    }}
+                  />
+                  <div className="grid grid-cols-3 gap-2">
+                    {photos.map((p, idx) => (
+                      <div
+                        key={p.preview}
+                        className="relative aspect-square rounded-lg overflow-hidden border border-emerald-200 group"
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={p.preview} alt="" className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => removePhoto(idx)}
+                          aria-label="Rimuovi foto"
+                          className="absolute top-1 right-1 w-6 h-6 rounded-full bg-emerald-950/80 text-emerald-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity focus:opacity-100"
+                        >
+                          <X size={12} />
+                        </button>
+                      </div>
+                    ))}
+                    {photos.length < MAX_REVIEW_PHOTOS && (
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="aspect-square rounded-lg border-2 border-dashed border-emerald-300 hover:border-emerald-600 hover:bg-emerald-50/50 flex flex-col items-center justify-center gap-1 transition-colors text-emerald-700"
+                        aria-label="Aggiungi foto"
+                      >
+                        <Camera size={20} strokeWidth={1.5} />
+                        <span className="text-[10px] tracking-[0.15em] uppercase">Aggiungi</span>
+                      </button>
+                    )}
+                  </div>
+                  <p className="text-[10px] text-emerald-800/55 mt-1.5 italic">
+                    Mostra il capo indossato — le foto sono visibili pubblicamente dopo l&apos;approvazione.
+                  </p>
+                </div>
+
                 <button
                   type="submit"
                   disabled={submitting}
@@ -513,11 +663,79 @@ const ProductReviews = ({ productId }: { productId: string }) => {
                 {r.comment && (
                   <p className="text-sm text-emerald-900/80 leading-relaxed pl-13">{r.comment}</p>
                 )}
+                {r.photo_urls && r.photo_urls.length > 0 && (
+                  <div className="mt-4 grid grid-cols-3 gap-2 max-w-md">
+                    {r.photo_urls.map((url, pIdx) => (
+                      <button
+                        key={url}
+                        type="button"
+                        onClick={() => setLightbox({ urls: r.photo_urls!, index: pIdx })}
+                        className="aspect-square rounded-lg overflow-hidden border border-emerald-100 hover:opacity-90 transition-opacity"
+                        aria-label={`Apri foto ${pIdx + 1} di ${r.customer_name}`}
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={url}
+                          alt={`Foto di ${r.customer_name}`}
+                          loading="lazy"
+                          className="w-full h-full object-cover"
+                        />
+                      </button>
+                    ))}
+                  </div>
+                )}
               </motion.li>
             ))}
           </ul>
         )}
       </div>
+
+      {/* Lightbox foto recensioni */}
+      <AnimatePresence>
+        {lightbox && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setLightbox(null)}
+            className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4 cursor-zoom-out"
+            role="dialog"
+            aria-label="Foto recensione"
+          >
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); setLightbox(null); }}
+              className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center"
+              aria-label="Chiudi"
+            >
+              <X size={20} />
+            </button>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={lightbox.urls[lightbox.index]}
+              alt=""
+              className="max-w-full max-h-[90vh] object-contain"
+              onClick={(e) => e.stopPropagation()}
+            />
+            {lightbox.urls.length > 1 && (
+              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
+                {lightbox.urls.map((_, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); setLightbox({ ...lightbox, index: i }); }}
+                    className={cn(
+                      "w-2 h-2 rounded-full transition-all",
+                      i === lightbox.index ? "bg-white w-6" : "bg-white/40"
+                    )}
+                    aria-label={`Foto ${i + 1}`}
+                  />
+                ))}
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <AuthDialog
         open={authOpen}

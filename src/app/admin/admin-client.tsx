@@ -238,6 +238,7 @@ export function AdminClient() {
     is_approved: boolean;
     created_at: string;
     product_name?: string;
+    photo_urls?: string[] | null;
   }
   const [reviews, setReviews] = useState<Review[]>([]);
 
@@ -2208,6 +2209,7 @@ ${bodyContent}
                               <th className="text-left py-3 px-4 font-medium text-neutral-500 text-xs uppercase tracking-wider">Cliente</th>
                               <th className="text-center py-3 px-4 font-medium text-neutral-500 text-xs uppercase tracking-wider">Voto</th>
                               <th className="text-left py-3 px-4 font-medium text-neutral-500 text-xs uppercase tracking-wider">Commento</th>
+                              <th className="text-center py-3 px-4 font-medium text-neutral-500 text-xs uppercase tracking-wider">Foto</th>
                               <th className="text-center py-3 px-4 font-medium text-neutral-500 text-xs uppercase tracking-wider">Stato</th>
                               <th className="text-center py-3 px-4 font-medium text-neutral-500 text-xs uppercase tracking-wider">Azioni</th>
                             </tr>
@@ -2232,6 +2234,27 @@ ${bodyContent}
                                 </td>
                                 <td className="py-3 px-4 text-neutral-600 text-xs max-w-[240px] truncate">
                                   {r.comment || <span className="italic text-neutral-300">Nessun commento</span>}
+                                </td>
+                                <td className="py-3 px-4 text-center">
+                                  {r.photo_urls && r.photo_urls.length > 0 ? (
+                                    <div className="flex items-center justify-center gap-1">
+                                      {r.photo_urls.slice(0, 3).map((url) => (
+                                        // eslint-disable-next-line @next/next/no-img-element
+                                        <a
+                                          key={url}
+                                          href={url}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="w-10 h-10 rounded-md overflow-hidden border border-neutral-200 hover:border-emerald-400 transition-colors block"
+                                          title="Apri foto"
+                                        >
+                                          <img src={url} alt="" className="w-full h-full object-cover" />
+                                        </a>
+                                      ))}
+                                    </div>
+                                  ) : (
+                                    <span className="text-neutral-300 text-xs">—</span>
+                                  )}
                                 </td>
                                 <td className="py-3 px-4 text-center">
                                   <div className="flex items-center justify-center gap-2">

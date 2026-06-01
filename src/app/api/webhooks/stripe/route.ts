@@ -9,6 +9,9 @@ export const dynamic = "force-dynamic";
 
 const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
 const N8N_WEBHOOK_URL = process.env.N8N_ORDER_WEBHOOK_URL; // opzionale
+// Webhook n8n separato per abbandoni Stripe (email di recupero a +1h).
+const N8N_ABANDONED_WEBHOOK_URL = process.env.N8N_ABANDONED_WEBHOOK_URL;
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.emeraldress.com";
 // Notifica admin nuovo ordine — entrambi opzionali, indipendenti.
 const ADMIN_ORDER_WEBHOOK_URL = process.env.ADMIN_ORDER_WEBHOOK_URL; // Discord/Slack/Zapier/qualsiasi POST endpoint
 const TELEGRAM_BOT_TOKEN = process.env.ADMIN_TELEGRAM_BOT_TOKEN;
@@ -94,9 +97,131 @@ export async function POST(request: NextRequest) {
       // eslint-disable-next-line no-console
       console.warn("[stripe webhook] release_reservations error:", e);
     }
+    // Cattura abbandono per email di recupero. Best-effort: se fallisce,
+    // l'evento principale (release stock) e' gia' andato a buon fine.
+    if (event.type === "checkout.session.expired") {
+      try {
+        await handleAbandonedCheckout(session);
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.warn("[stripe webhook] handleAbandonedCheckout error:", e);
+      }
+    }
   }
 
   return NextResponse.json({ received: true });
+}
+
+// ── Abbandono checkout ─────────────────────────────────────────────────────
+// Si triggera su checkout.session.expired (default 24h dopo creazione su Stripe).
+// Salva l'abbandono in abandoned_checkouts e notifica n8n per la sequenza email.
+async function handleAbandonedCheckout(session: Stripe.Checkout.Session) {
+  // Skip test sessions.
+  if (session.metadata?.source === "checkout-test") return;
+
+  const supabase = createSupabaseAdminClient();
+  const stripe = getStripe();
+
+  // Recupera dettagli completi (line items + customer details). customer_details
+  // popolato solo se l'utente ha digitato email/phone su Stripe Hosted Checkout.
+  const fullSession = await stripe.checkout.sessions.retrieve(session.id, {
+    expand: ["line_items.data.price.product", "customer_details"],
+  });
+
+  const email = fullSession.customer_details?.email ?? fullSession.customer_email ?? null;
+  // Senza email non possiamo mandare recovery: salviamo comunque per analytics
+  // ma marchiamo 'skipped' cosi' n8n non lo prende.
+  const emailStatus = email ? "pending" : "skipped";
+
+  // Reconstruisce gli items da Stripe line_items (no fallback metadata: piu' affidabile).
+  const lineItems = fullSession.line_items?.data ?? [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const items = lineItems.map((li: any) => {
+    const product = li.price?.product;
+    const productMeta = (typeof product === "object" && product?.metadata) || {};
+    const productId = productMeta.emeraldress_product_id ?? null;
+    const size = productMeta.emeraldress_size ?? li.description ?? null;
+    return {
+      product_id: productId,
+      name: typeof product === "object" ? product?.name : li.description,
+      image: typeof product === "object" && Array.isArray(product?.images) ? product.images[0] ?? null : null,
+      size,
+      quantity: li.quantity ?? 1,
+      unit_amount: li.price?.unit_amount ?? 0,
+    };
+  });
+
+  // Lookup slug per i product_id (serve per il link di recovery cart)
+  const productIds = items.map((i) => i.product_id).filter(Boolean) as string[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: products } = productIds.length
+    ? await supabase.from("products").select("id, slug, name").in("id", productIds)
+    : { data: [] };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const slugMap = new Map<string, string>(((products as any[]) ?? []).map((p) => [p.id, p.slug ?? p.id]));
+  const itemsEnriched = items.map((it) => ({
+    ...it,
+    slug: it.product_id ? slugMap.get(it.product_id) ?? null : null,
+  }));
+
+  // Upsert in abandoned_checkouts (ON CONFLICT su stripe_session_id NO-OP per idempotenza).
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const sb = supabase as any;
+  const { data: inserted, error: insErr } = await sb
+    .from("abandoned_checkouts")
+    .upsert(
+      {
+        stripe_session_id: session.id,
+        email,
+        phone: fullSession.customer_details?.phone ?? null,
+        customer_name: fullSession.customer_details?.name ?? null,
+        items: itemsEnriched,
+        amount_total: fullSession.amount_total ?? null,
+        currency: (fullSession.currency ?? "eur").toLowerCase(),
+        locale: fullSession.locale ?? "it",
+        email_status: emailStatus,
+      },
+      { onConflict: "stripe_session_id" },
+    )
+    .select("recovery_token")
+    .single();
+
+  if (insErr) {
+    // eslint-disable-next-line no-console
+    console.warn("[stripe webhook] abandoned upsert error:", insErr);
+    return;
+  }
+
+  const recoveryToken = (inserted as { recovery_token?: string } | null)?.recovery_token;
+  const recoveryUrl = recoveryToken
+    ? `${SITE_URL}/?recover=${recoveryToken}`
+    : `${SITE_URL}/collezioni`;
+
+  // Notifica n8n: il workflow su n8n applica il delay (+1h) e invia email.
+  if (N8N_ABANDONED_WEBHOOK_URL && email) {
+    try {
+      await fetch(N8N_ABANDONED_WEBHOOK_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          event: "abandoned_checkout",
+          stripe_session_id: session.id,
+          recovery_token: recoveryToken,
+          recovery_url: recoveryUrl,
+          email,
+          phone: fullSession.customer_details?.phone ?? null,
+          customer_name: fullSession.customer_details?.name ?? null,
+          locale: fullSession.locale ?? "it",
+          currency: fullSession.currency ?? "eur",
+          amount_total: fullSession.amount_total ?? null,
+          items: itemsEnriched,
+        }),
+      });
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.warn("[stripe webhook] n8n abandoned notify failed:", e);
+    }
+  }
 }
 
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
@@ -210,6 +335,19 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   } catch (e) {
     // eslint-disable-next-line no-console
     console.warn("[stripe webhook] consume_reservations error (non-blocking):", e);
+  }
+
+  // Se questa sessione era stata salvata come abbandono (es. utente torna via
+  // link recovery e completa) marchiamo l'abbandono come convertito.
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (supabase as any).rpc("mark_abandoned_converted", {
+      p_stripe_session_id: session.id,
+      p_order_id: orderId,
+    });
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.warn("[stripe webhook] mark_abandoned_converted error (non-blocking):", e);
   }
 
   // order_items + decrement stock

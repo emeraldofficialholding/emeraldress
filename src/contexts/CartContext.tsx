@@ -92,6 +92,17 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => window.removeEventListener("storage", onStorage);
   }, []);
 
+  // Auto-open su ?cart=open (usato dal flusso cart recovery, post-reload).
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const url = new URL(window.location.href);
+    if (url.searchParams.get("cart") === "open") {
+      setIsOpen(true);
+      url.searchParams.delete("cart");
+      window.history.replaceState({}, "", url.toString());
+    }
+  }, []);
+
   const getCartQuantity = useCallback(
     (productId: string, size: string) => {
       const lineId = makeLineId(productId, size);
