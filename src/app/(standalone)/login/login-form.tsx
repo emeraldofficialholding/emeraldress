@@ -3,8 +3,10 @@
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { Loader2, Eye, EyeOff } from "lucide-react";
+import { Loader2, Eye, EyeOff, ArrowUpToLine } from "lucide-react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
+
+const LOGO_ED = "https://jtmbnmpggzbucmgglisw.supabase.co/storage/v1/object/public/emerald-asset/emeraldress-icon-ed.svg";
 
 // ── Shimmer particles ─────────────────────────────────────────────────────────
 // Generati solo lato client (Math.random a livello modulo causa hydration mismatch).
@@ -71,23 +73,51 @@ export function LoginForm() {
   const [info, setInfo] = useState<string | null>(null);
   const [forgotMode, setForgotMode] = useState(false);
   const [forgotEmail, setForgotEmail] = useState("");
+  const [capsLock, setCapsLock] = useState(false);
 
-  // Role-based redirect helper
+  // Detect CAPS LOCK quando il cursore e' nel campo password (e/o globalmente
+  // mentre l'input password e' montato).
+  const checkCaps = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    setCapsLock(e.getModifierState && e.getModifierState("CapsLock"));
+  };
+
+  // Watchdog: la query user_roles a volte resta appesa subito dopo signIn
+  // (JWT non ancora propagato al PostgREST), causando loader infinito.
+  // Promise.race con timeout 3s.
+  const withTimeout = <T,>(p: Promise<T>, ms: number): Promise<T | null> =>
+    Promise.race([
+      p,
+      new Promise<null>((resolve) => setTimeout(() => resolve(null), ms)),
+    ]);
+
+  // Role-based redirect helper. Solo per signin: dopo signup l'utente non e'
+  // mai admin, quindi va dritto a /profilo senza query.
   const redirectByRole = async (userId: string) => {
-    const { data: roleData } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userId)
-      .eq("role", "admin")
-      .maybeSingle();
-
     const redirectTo = searchParams.get("redirectTo");
     if (redirectTo && redirectTo.startsWith("/")) {
       router.replace(redirectTo);
       return;
     }
-    if (roleData) router.replace("/admin");
-    else router.replace("/profilo");
+    const roleData = await withTimeout(
+      Promise.resolve(
+        supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", userId)
+          .eq("role", "admin")
+          .maybeSingle()
+          .then((r) => r.data),
+      ),
+      3000,
+    );
+    router.replace(roleData ? "/admin" : "/profilo");
+  };
+
+  // Redirect post-signup: salta totalmente la query user_roles (un account
+  // appena creato non e' admin) per evitare il loader infinito visto in prod.
+  const redirectAfterSignup = () => {
+    const redirectTo = searchParams.get("redirectTo");
+    router.replace(redirectTo && redirectTo.startsWith("/") ? redirectTo : "/profilo");
   };
 
   // Auto-redirect se già autenticato all'arrivo (es. dopo OAuth callback)
@@ -142,8 +172,9 @@ export function LoginForm() {
           return;
         }
         if (data.session) {
-          // Autoconferma email disabilitata su Supabase → entra subito.
-          await redirectByRole(data.session.user.id);
+          // Autoconferma email attiva su Supabase → entra subito.
+          // Skippiamo la query user_roles per evitare il caso loader-infinito.
+          redirectAfterSignup();
         } else {
           setInfo("Account creato! Controlla la tua email (anche lo spam) per confermarlo.");
           setPassword("");
@@ -244,6 +275,22 @@ export function LoginForm() {
           transition={{ delay: 0.2, duration: 0.7 }}
           className="text-center mb-8"
         >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.1, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            className="flex justify-center mb-4"
+          >
+            {/* Logo icona ED in cima — coerente col brand luxury */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={LOGO_ED}
+              alt="Emeraldress"
+              width={56}
+              height={56}
+              className="h-14 w-14 object-contain drop-shadow-sm"
+            />
+          </motion.div>
           <p className="text-[10px] tracking-[0.35em] uppercase text-emerald-700/60 mb-3">
             Emeraldress
           </p>
@@ -326,6 +373,9 @@ export function LoginForm() {
                     minLength={mode === "signup" ? 6 : undefined}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    onKeyDown={checkCaps}
+                    onKeyUp={checkCaps}
+                    onBlur={() => setCapsLock(false)}
                     className="w-full bg-white/60 border border-emerald-200 rounded-lg px-4 py-3 pr-11 text-sm text-emerald-950 placeholder:text-emerald-700/30 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-300 transition-all"
                     placeholder={mode === "signin" ? "••••••••" : "Almeno 6 caratteri"}
                   />
@@ -337,6 +387,16 @@ export function LoginForm() {
                     {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                   </button>
                 </div>
+                {capsLock && (
+                  <motion.p
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-2 flex items-center gap-1.5 text-[10px] tracking-[0.2em] uppercase text-amber-700/90 font-medium"
+                  >
+                    <ArrowUpToLine size={11} strokeWidth={2} />
+                    Maiuscolo attivo
+                  </motion.p>
+                )}
               </div>
 
               <SubmitButton
