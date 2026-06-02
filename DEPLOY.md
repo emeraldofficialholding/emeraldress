@@ -83,6 +83,10 @@ NEXT_PUBLIC_N8N_EMAIL_URL=https://n8n.kreareweb.com/webhook/email-send
 NEXT_PUBLIC_N8N_SHIPPING_URL=<URL se attivo, altrimenti vuoto>
 NEXT_PUBLIC_N8N_STOCK_URL=<URL se attivo, altrimenti vuoto>
 
+# Server-only (NON NEXT_PUBLIC_) — chiamati dai route handler API Next.js
+N8N_ORDER_WEBHOOK_URL=https://n8n.kreareweb.com/webhook/emerald/order-confirmation
+N8N_ABANDONED_WEBHOOK_URL=https://n8n.kreareweb.com/webhook/abandoned-recovery
+
 NEXT_PUBLIC_GA4_ID=G-XXXXXXXXXX
 
 NEXT_PUBLIC_BETA_GATE=true       # LASCIARE TRUE finché non si è pronti per il go-live pubblico

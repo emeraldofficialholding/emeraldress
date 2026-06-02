@@ -1,4 +1,66 @@
-# Workflow n8n da creare per Emeraldress
+# Workflow n8n Emeraldress
+
+## 📍 Stato attuale (aggiornato 2 giugno 2026)
+
+**Istanza n8n**: `https://n8n.kreareweb.com`  
+**Credenziali condivise**: `EMERALDRESS` (Gmail OAuth2 + Supabase API)  
+**Tag**: `EMERALD` (workflow attivi), `ARCHIVED` (legacy disattivati).
+
+### Workflow attivi (9)
+
+| # | Workflow | ID | Trigger | Scopo | Chiamato da |
+|---|---|---|---|---|---|
+| 1 | `EMERALD-Order-Confirmation` | `IE3k1dAi4iHa3Ke2` | webhook `/emerald/order-confirmation` | Email branded conferma ordine al cliente + alert admin | `src/app/api/webhooks/stripe/route.ts` (env `N8N_ORDER_WEBHOOK_URL`) |
+| 2 | `EMERALD-Welcome-Email` | `FlPNFOzvccqaZKpu` | webhook `/emerald/welcome-email` | Email benvenuto post-signup | Database trigger `notify_welcome_email` su `auth.users` INSERT |
+| 3 | `EMERALD-Review-Pending-Admin` | `d7RTly4XyRbFMcWf` | webhook `/emerald/review-pending-admin` | Alert admin nuova review da moderare | Database trigger `notify_review_pending_admin` su `public.reviews` INSERT |
+| 4 | `EMERALD-Review-Approved` | `c3sJmLTEU4p4pf1G` | webhook `/emerald/review-approved` | Email cliente: la tua review è online | Database trigger `notify_review_approved` su `public.reviews` UPDATE (false→true) |
+| 5 | `EMERALD-Abandoned-Recovery` | `offIyq9qDdNnyiw6` | webhook `/abandoned-recovery` | Email recovery carrello +1h dopo expired | `src/app/api/webhooks/stripe/route.ts` (env `N8N_ABANDONED_WEBHOOK_URL`) |
+| 6 | `EMERALD-Email-Send` | `vog74Yn9758OdYYn` | webhook `/emerald/email-send-…` | Motore email transazionale generico | `src/lib/notification-email.ts` (env `NEXT_PUBLIC_N8N_EMAIL_URL`) |
+| 7 | `EMERALD-Inventory` | `e8gYoWvRPto0xVnu` | 3 schedule (5m, 30m, 1h) + webhook `/emerald/stock-check` | Cleanup reservations, cancel pending orders, low stock alert | `admin-client.tsx` (env `NEXT_PUBLIC_N8N_STOCK_URL`) |
+| 8 | `EMERALD-Notifications` | `exzcRkWgiy5J94ZH` | schedule cron `0 10 * * *` (Process Review Requests) | Manda "lasciaci una recensione" ai clienti N giorni dopo l'acquisto. Schedule "Abandoned Cart" 15min e webhook `/emerald/save-cart` sono **disabilitati** (sostituiti da Abandoned-Recovery) | nessuno |
+| 9 | `EmeralDress Scanner` | `OJCYahdYYzSgfbbu` | webhook `/scanner-requests` | Tool Emerald Scanner (analisi capo) | `emerald-scanner-client.tsx` (env `NEXT_PUBLIC_N8N_SCANNER_URL`) |
+
+### Workflow archiviati (tag `ARCHIVED`, disattivati)
+
+| Workflow | ID | Motivo |
+|---|---|---|
+| `EMERALD-Checkout` | `RIal48c8gsIigekx` | Sostituito da `/api/checkout` + `/api/webhooks/stripe` lato Next.js |
+| `Emerald - Create Order & Payment` | `5OXzp15LgkxfzsXp` | Legacy PayPal |
+| `Emerald - Shipping Rates` | `Hdz26somscRgNeBH` | Legacy |
+| `Emerald Payment` | `a5FWvNBtC0t6OkLg` | Legacy |
+| `Emerald - PayPal Payment Confirmation` | `T8tkSfXslawbvMxx` | Legacy PayPal |
+
+### Database trigger Supabase → n8n
+
+Tre trigger `SECURITY DEFINER` chiamano n8n via `extensions.net.http_post()` (pg_net), best-effort con timeout 2000ms. Payload in **formato standard Supabase Database Webhook** (`{type, table, schema, record, old_record}`):
+
+| Trigger | Tabella | Evento | Funzione | URL n8n |
+|---|---|---|---|---|
+| `trg_notify_welcome_email` | `auth.users` | AFTER INSERT | `notify_welcome_email()` | `/webhook/emerald/welcome-email` |
+| `trg_notify_review_pending_admin` | `public.reviews` | AFTER INSERT | `notify_review_pending_admin()` | `/webhook/emerald/review-pending-admin` |
+| `trg_notify_review_approved` | `public.reviews` | AFTER UPDATE OF is_approved | `notify_review_approved()` | `/webhook/emerald/review-approved` |
+
+Migration: [supabase/migrations/20260602001000_n8n_database_webhooks.sql](supabase/migrations/20260602001000_n8n_database_webhooks.sql) + [supabase/migrations/20260602002000_n8n_webhooks_standard_payload.sql](supabase/migrations/20260602002000_n8n_webhooks_standard_payload.sql).
+
+### Env vars Vercel → n8n (mapping)
+
+| Env var (Vercel) | Server/client | Workflow target |
+|---|---|---|
+| `N8N_ORDER_WEBHOOK_URL` | server | EMERALD-Order-Confirmation |
+| `N8N_ABANDONED_WEBHOOK_URL` | server | EMERALD-Abandoned-Recovery |
+| `NEXT_PUBLIC_N8N_EMAIL_URL` | client | EMERALD-Email-Send |
+| `NEXT_PUBLIC_N8N_SCANNER_URL` | client | EmeralDress Scanner |
+| `NEXT_PUBLIC_N8N_NEWSLETTER_URL` | client | (workflow esterno: Newsletter Subscriber Registration) |
+| `NEXT_PUBLIC_N8N_STOCK_URL` | client | EMERALD-Inventory (`/emerald/stock-check`) |
+| `NEXT_PUBLIC_N8N_RETURN_URL` | client | (workflow esterno) |
+
+---
+
+## 📜 Documentazione storica — pre-migrazione 14 maggio 2026
+
+⚠️ La sezione sotto è il piano operativo originale per il go-live del 14 maggio 2026 con Stripe Payment Link statici. **Non riflette lo stato attuale** (oggi usiamo Stripe Hosted Checkout via API + webhook server-side). Mantenuta come archivio storico.
+
+---
 
 Documento operativo per il go-live del **14 maggio 2026 ore 18:00**.
 
