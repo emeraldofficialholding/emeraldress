@@ -15,7 +15,8 @@ const GoogleIcon = () => (
   </svg>
 );
 
-const SIGNUP_ENABLED = process.env.NEXT_PUBLIC_BETA_GATE !== "true";
+// Registrazioni sempre aperte (fase beta chiusa).
+const SIGNUP_ENABLED = true;
 
 interface AuthDialogProps {
   open: boolean;

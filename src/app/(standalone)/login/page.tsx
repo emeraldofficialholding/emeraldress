@@ -3,8 +3,9 @@ import { Suspense } from "react";
 import { LoginForm } from "./login-form";
 
 export const metadata: Metadata = {
-  title: "Accesso",
-  description: "Accedi al tuo account Emeraldress per gestire ordini, preferiti e profilo.",
+  title: "Accedi o Registrati",
+  description:
+    "Accedi al tuo account Emeraldress o crea un nuovo account per gestire ordini, preferiti, recensioni e profilo.",
   robots: { index: false, follow: false },
 };
 

@@ -49,14 +49,19 @@ const GoogleIcon = () => (
   </svg>
 );
 
-// La registrazione vive solo nel popup AuthDialog (azioni come "salva in wishlist").
-// La pagina /login e' dedicata SOLO all'accesso utenti esistenti (admin inclusi).
+// /login: gestisce login E registrazione (toggle in alto).
+// Le ragazze che ci arrivavano non trovavano come registrarsi.
+type AuthMode = "signin" | "signup";
+
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const supabase = getSupabaseBrowserClient();
   const particles = useParticles(12);
 
+  // Modalita' iniziale: ?mode=signup forza la registrazione (link dalla navbar / banner).
+  const initialMode: AuthMode = searchParams.get("mode") === "signup" ? "signup" : "signin";
+  const [mode, setMode] = useState<AuthMode>(initialMode);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -96,21 +101,54 @@ export function LoginForm() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleSignIn = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setInfo(null);
     setIsLoading(true);
     try {
-      const { data, error: authError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      if (authError || !data.user) {
-        setError("Credenziali non valide. Riprova.");
-        return;
+      if (mode === "signin") {
+        const { data, error: authError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        if (authError || !data.user) {
+          setError("Email o password non corretti. Se non hai ancora un account, premi 'Crea account' qui sopra.");
+          return;
+        }
+        await redirectByRole(data.user.id);
+      } else {
+        // Signup: lunghezza minima password gestita da Supabase (default 6).
+        if (password.length < 6) {
+          setError("La password deve avere almeno 6 caratteri.");
+          return;
+        }
+        const redirectTo = searchParams.get("redirectTo");
+        const next = redirectTo && redirectTo.startsWith("/")
+          ? `?next=${encodeURIComponent(redirectTo)}`
+          : "";
+        const { data, error: signupError } = await supabase.auth.signUp({
+          email,
+          password,
+          options: { emailRedirectTo: `${window.location.origin}/auth/callback${next}` },
+        });
+        if (signupError) {
+          const msg = signupError.message.toLowerCase();
+          if (msg.includes("registered") || msg.includes("already")) {
+            setError("Questa email è già registrata. Passa ad 'Accedi'.");
+          } else {
+            setError(signupError.message);
+          }
+          return;
+        }
+        if (data.session) {
+          // Autoconferma email disabilitata su Supabase → entra subito.
+          await redirectByRole(data.session.user.id);
+        } else {
+          setInfo("Account creato! Controlla la tua email (anche lo spam) per confermarlo.");
+          setPassword("");
+        }
       }
-      await redirectByRole(data.user.id);
     } catch {
       setError("Si è verificato un errore. Riprova più tardi.");
     } finally {
@@ -213,13 +251,47 @@ export function LoginForm() {
             className="text-3xl text-emerald-950"
             style={{ fontFamily: "'Playfair Display', serif", fontWeight: 400 }}
           >
-            Accesso
+            {mode === "signin" ? "Accesso" : "Crea il tuo account"}
           </h1>
           <div className="mt-3 mx-auto w-10 h-px bg-emerald-400/50" />
         </motion.div>
 
+        {/* Toggle Accedi / Registrati — sempre visibile in cima */}
+        <div className="grid grid-cols-2 gap-0 border border-emerald-200 rounded-lg overflow-hidden text-[11px] tracking-[0.2em] uppercase mb-5 bg-white/60">
+          <button
+            type="button"
+            onClick={() => {
+              setMode("signin");
+              setError(null);
+              setInfo(null);
+            }}
+            className={`py-2.5 transition-colors font-medium ${
+              mode === "signin"
+                ? "bg-emerald-900 text-emerald-50"
+                : "text-emerald-900/70 hover:bg-white"
+            }`}
+          >
+            Accedi
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setMode("signup");
+              setError(null);
+              setInfo(null);
+            }}
+            className={`py-2.5 transition-colors font-medium ${
+              mode === "signup"
+                ? "bg-emerald-900 text-emerald-50"
+                : "text-emerald-900/70 hover:bg-white"
+            }`}
+          >
+            Crea account
+          </button>
+        </div>
+
         <div>
-            <form onSubmit={handleSignIn} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label
                   htmlFor="email"
@@ -249,12 +321,13 @@ export function LoginForm() {
                   <input
                     id="password"
                     type={showPassword ? "text" : "password"}
-                    autoComplete="current-password"
+                    autoComplete={mode === "signin" ? "current-password" : "new-password"}
                     required
+                    minLength={mode === "signup" ? 6 : undefined}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full bg-white/60 border border-emerald-200 rounded-lg px-4 py-3 pr-11 text-sm text-emerald-950 placeholder:text-emerald-700/30 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-300 transition-all"
-                    placeholder="••••••••"
+                    placeholder={mode === "signin" ? "••••••••" : "Almeno 6 caratteri"}
                   />
                   <button
                     type="button"
@@ -266,18 +339,31 @@ export function LoginForm() {
                 </div>
               </div>
 
-              <SubmitButton isLoading={isLoading} label="Entra" loadingLabel="Accesso in corso…" />
-              <button
-                type="button"
-                onClick={() => {
-                  setForgotMode(true);
-                  setError(null);
-                  setInfo(null);
-                }}
-                className="block w-full text-center text-[10px] tracking-[0.25em] uppercase text-emerald-800/60 hover:text-emerald-900 mt-2"
-              >
-                Password dimenticata?
-              </button>
+              <SubmitButton
+                isLoading={isLoading}
+                label={mode === "signin" ? "Entra" : "Crea il mio account"}
+                loadingLabel={mode === "signin" ? "Accesso in corso…" : "Creazione account…"}
+              />
+              {mode === "signin" && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setForgotMode(true);
+                    setError(null);
+                    setInfo(null);
+                  }}
+                  className="block w-full text-center text-[10px] tracking-[0.25em] uppercase text-emerald-800/60 hover:text-emerald-900 mt-2"
+                >
+                  Password dimenticata?
+                </button>
+              )}
+              {mode === "signup" && (
+                <p className="text-[10px] tracking-[0.15em] text-emerald-800/60 text-center mt-2 leading-relaxed px-2">
+                  Creando un account accetti i nostri{" "}
+                  <a href="/termini" className="underline hover:text-emerald-900">Termini</a> e la{" "}
+                  <a href="/privacy" className="underline hover:text-emerald-900">Privacy Policy</a>.
+                </p>
+              )}
             </form>
 
             {forgotMode && (
@@ -342,7 +428,7 @@ export function LoginForm() {
         <div className="flex items-center gap-3 my-6">
           <div className="flex-1 h-px bg-emerald-300/40" />
           <span className="text-[9px] tracking-[0.3em] uppercase text-emerald-800/50">
-            oppure continua con
+            oppure
           </span>
           <div className="flex-1 h-px bg-emerald-300/40" />
         </div>
@@ -354,8 +440,45 @@ export function LoginForm() {
           className="w-full flex items-center justify-center gap-3 py-3 rounded-lg bg-white border border-emerald-200 text-sm text-emerald-950 hover:bg-emerald-50 hover:border-emerald-300 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed shadow-sm"
         >
           <GoogleIcon />
-          <span className="tracking-wide font-medium">Accedi con Google</span>
+          <span className="tracking-wide font-medium">
+            {mode === "signin" ? "Accedi con Google" : "Registrati con Google"}
+          </span>
         </button>
+
+        {/* Switch rapido fra le due modalita' (sotto Google, ben visibile) */}
+        <p className="mt-5 text-center text-xs text-emerald-900/70">
+          {mode === "signin" ? (
+            <>
+              Non hai un account?{" "}
+              <button
+                type="button"
+                onClick={() => {
+                  setMode("signup");
+                  setError(null);
+                  setInfo(null);
+                }}
+                className="underline font-medium text-emerald-800 hover:text-emerald-950"
+              >
+                Crealo qui
+              </button>
+            </>
+          ) : (
+            <>
+              Hai già un account?{" "}
+              <button
+                type="button"
+                onClick={() => {
+                  setMode("signin");
+                  setError(null);
+                  setInfo(null);
+                }}
+                className="underline font-medium text-emerald-800 hover:text-emerald-950"
+              >
+                Accedi
+              </button>
+            </>
+          )}
+        </p>
 
         <motion.p
           initial={{ opacity: 0 }}
