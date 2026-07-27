@@ -82,12 +82,16 @@ function MarqueeBand({ children, direction = "left", baseVelocity = 0.5, classNa
 const TrustMarquee = () => {
   const highlights = [
     "SUSTAINABLE FASHION",
+    "SCONTI −20%",
     "ECO LUXURY",
     "MADE IN ITALY",
+    "SCONTI −20%",
     "ECOLOGICAL FABRICS",
     "LUSSO SOSTENIBILE",
+    "SCONTI −20%",
     "COSTA SMERALDA STYLE",
     "ECO FRIENDLY",
+    "SCONTI −20%",
   ];
 
   return (
@@ -95,9 +99,16 @@ const TrustMarquee = () => {
       <div className="relative z-10">
         <MarqueeBand baseVelocity={0.8} direction="left" className="bg-[#e4ffec] border-y border-emerald-100/50">
           <div className="text-emerald-950 font-sans font-medium text-base md:text-lg tracking-[0.15em] flex items-center shrink-0 gap-6 pr-8">
-            {highlights.map((word) => (
-              <Fragment key={word}>
-                <span className="inline-flex items-center whitespace-nowrap">{word}</span>
+            {highlights.map((word, idx) => (
+              <Fragment key={`${word}-${idx}`}>
+                <span
+                  className={cn(
+                    "inline-flex items-center whitespace-nowrap",
+                    word === "SCONTI −20%" && "text-red-600 font-semibold",
+                  )}
+                >
+                  {word}
+                </span>
                 <img
                   src={logoED}
                   alt="Emerald divider"

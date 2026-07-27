@@ -7,6 +7,7 @@ import ImageFallback from "./ImageFallback";
 import FullscreenProductViewer from "./FullscreenProductViewer";
 import type { Product } from "@/hooks/useProducts";
 import { PriceTag } from "./PriceTag";
+import { DiscountBadge } from "./DiscountBadge";
 
 interface ProductCardProps {
   product: Product;
@@ -43,7 +44,8 @@ const ProductCard = ({ product, index = 0, siblings }: ProductCardProps) => {
         viewport={{ once: true }}
       >
         <Link href={href} onClick={handleClick} className="group block">
-          <div className="aspect-[3/4] overflow-hidden bg-gradient-to-br from-emerald-50/60 to-white mb-3 shadow-sm transition-shadow duration-300 group-hover:shadow-lg">
+          <div className="relative aspect-[3/4] overflow-hidden bg-gradient-to-br from-emerald-50/60 to-white mb-3 shadow-sm transition-shadow duration-300 group-hover:shadow-lg">
+            <DiscountBadge price={product.price} salePrice={product.sale_price} />
             <ImageFallback
               src={product.images?.[0]}
               hoverSrc={product.images?.[1]}

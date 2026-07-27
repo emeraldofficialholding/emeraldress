@@ -8,6 +8,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { PriceTag } from "./PriceTag";
+import { DiscountBadge } from "./DiscountBadge";
 
 const RelatedProducts = ({
   currentProductId,
@@ -86,7 +87,12 @@ const RelatedProducts = ({
               className="min-w-0 shrink-0 grow-0 basis-1/2 sm:basis-1/3 lg:basis-1/4 px-2"
             >
               <Link href={`/product/${product.slug ?? product.id}`} className="group block">
-                <div className="aspect-[3/4] overflow-hidden bg-muted mb-2">
+                <div className="relative aspect-[3/4] overflow-hidden bg-muted mb-2">
+                  <DiscountBadge
+                    price={product.price}
+                    salePrice={product.sale_price}
+                    className="w-10 h-10 text-[10px]"
+                  />
                   <ImageFallback
                     src={product.images?.[0]}
                     hoverSrc={product.images?.[1]}

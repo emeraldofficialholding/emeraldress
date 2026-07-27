@@ -217,10 +217,16 @@ export default function FullscreenProductViewer({
                   {product.name}
                 </h2>
                 <p className="text-white/80 text-sm mt-1">
-                  {hasDiscount(product.price, product.sale_price) && (
-                    <s className="text-white/50 mr-2">€ {Number(product.price).toFixed(2)}</s>
+                  {hasDiscount(product.price, product.sale_price) ? (
+                    <>
+                      <s className="text-white/50 mr-2">€ {Number(product.price).toFixed(2)}</s>
+                      <span className="text-red-400 font-medium">
+                        € {getEffectivePrice(product.price, product.sale_price).toFixed(2)}
+                      </span>
+                    </>
+                  ) : (
+                    <>€ {getEffectivePrice(product.price, product.sale_price).toFixed(2)}</>
                   )}
-                  € {getEffectivePrice(product.price, product.sale_price).toFixed(2)}
                 </p>
               </button>
 

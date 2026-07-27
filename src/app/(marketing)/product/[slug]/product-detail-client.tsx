@@ -38,6 +38,7 @@ import { useCart } from "@/contexts/CartContext";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { getEffectivePrice, hasDiscount } from "@/lib/pricing";
+import { DiscountBadge } from "@/components/DiscountBadge";
 import {
   Accordion,
   AccordionContent,
@@ -228,12 +229,14 @@ const DesktopGallery = ({
   setActiveImage,
   productName,
   onZoom,
+  badge,
 }: {
   images: string[];
   activeImage: number;
   setActiveImage: (i: number) => void;
   productName: string;
   onZoom: () => void;
+  badge?: React.ReactNode;
 }) => {
   const goNext = () => setActiveImage((activeImage + 1) % images.length);
   const goPrev = () => setActiveImage((activeImage - 1 + images.length) % images.length);
@@ -261,6 +264,7 @@ const DesktopGallery = ({
       )}
 
       <div className="relative flex-1 overflow-hidden group rounded-xl bg-gradient-to-br from-emerald-50/60 to-white border border-emerald-100/80">
+        {badge}
         <AnimatePresence mode="wait">
           <motion.button
             key={activeImage}
@@ -321,12 +325,14 @@ const MobileCarousel = ({
   onIndexChange,
   currentIndex,
   onZoom,
+  badge,
 }: {
   images: string[];
   productName: string;
   onIndexChange: (i: number) => void;
   currentIndex: number;
   onZoom: (i: number) => void;
+  badge?: React.ReactNode;
 }) => {
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true });
 
@@ -345,6 +351,7 @@ const MobileCarousel = ({
 
   return (
     <div className="lg:hidden relative -mx-4">
+      {badge}
       <div ref={emblaRef} className="overflow-hidden">
         <div className="flex">
           {images.map((img, i) => (
@@ -731,6 +738,13 @@ export function ProductDetailClient({ product }: { product: Product }) {
                   setActiveImage={setActiveImage}
                   productName={product.name}
                   onZoom={() => setZoomOpen(true)}
+                  badge={
+                    <DiscountBadge
+                      price={product.price}
+                      salePrice={product.sale_price}
+                      className="top-3 left-3 w-14 h-14 text-xs"
+                    />
+                  }
                 />
               </div>
 
@@ -743,6 +757,13 @@ export function ProductDetailClient({ product }: { product: Product }) {
                   setActiveImage(i);
                   setZoomOpen(true);
                 }}
+                badge={
+                  <DiscountBadge
+                    price={product.price}
+                    salePrice={product.sale_price}
+                    className="top-3 left-6"
+                  />
+                }
               />
             </motion.div>
 
@@ -795,7 +816,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
                   </s>
                 )}
                 <span
-                  className={`text-3xl ${hasDiscount(product.price, product.sale_price) ? "text-emerald-700" : "text-emerald-950"}`}
+                  className={`text-3xl ${hasDiscount(product.price, product.sale_price) ? "text-red-600" : "text-emerald-950"}`}
                   style={{ fontFamily: "'Playfair Display', serif", fontWeight: 400 }}
                 >
                   €{getEffectivePrice(product.price, product.sale_price).toFixed(2)}
@@ -1164,7 +1185,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
                   {hasDiscount(product.price, product.sale_price) && (
                     <s className="opacity-60 mr-1.5">€{Number(product.price).toFixed(2)}</s>
                   )}
-                  <span className="text-emerald-700 font-medium">
+                  <span className="text-red-600 font-medium">
                     €{getEffectivePrice(product.price, product.sale_price).toFixed(2)}
                   </span>
                 </p>

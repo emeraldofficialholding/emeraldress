@@ -9,7 +9,7 @@ export function PriceTag({
   salePrice,
   className = "",
   strikeClassName = "",
-  discountClassName = "text-emerald-700",
+  discountClassName = "text-red-600",
 }: {
   price: number | string;
   salePrice?: number | string | null;

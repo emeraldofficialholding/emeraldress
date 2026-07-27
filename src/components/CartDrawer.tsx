@@ -280,7 +280,7 @@ export function CartDrawer() {
                                 <s className="text-emerald-950/45 font-normal mr-1.5">
                                   €{(item.compareAtPrice * item.quantity).toFixed(2)}
                                 </s>
-                                <span className="text-emerald-700">
+                                <span className="text-red-600">
                                   €{(item.price * item.quantity).toFixed(2)}
                                 </span>
                               </>

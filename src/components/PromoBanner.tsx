@@ -10,8 +10,8 @@ export function PromoBanner() {
     <div
       role="status"
       aria-label="Promozione: sconti su tutti gli articoli meno venti percento"
-      className="fixed top-0 inset-x-0 z-[60] h-8 overflow-hidden text-emerald-50 select-none"
-      style={{ background: "linear-gradient(90deg, #052e1f 0%, #064e3b 50%, #047857 100%)" }}
+      className="fixed top-0 inset-x-0 z-[60] h-8 overflow-hidden text-red-50 select-none"
+      style={{ background: "linear-gradient(90deg, #7f1d1d 0%, #b91c1c 50%, #dc2626 100%)" }}
     >
       <div className="animate-marquee motion-reduce:[animation:none] flex w-max h-8 items-center">
         {[0, 1].map((half) => (
