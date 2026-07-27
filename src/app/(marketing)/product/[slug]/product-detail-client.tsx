@@ -37,6 +37,7 @@ import { useWishlist } from "@/contexts/WishlistContext";
 import { useCart } from "@/contexts/CartContext";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
+import { getEffectivePrice, hasDiscount } from "@/lib/pricing";
 import {
   Accordion,
   AccordionContent,
@@ -575,7 +576,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
       slug: product.slug ?? null,
       name: product.name,
       image: product.images?.[0] ?? "",
-      price: Number(product.price),
+      price: getEffectivePrice(product.price, product.sale_price),
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [product.id]);
@@ -621,7 +622,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
     addItem({
       id: product.id,
       name: product.name,
-      price: Number(product.price),
+      price: getEffectivePrice(product.price, product.sale_price),
       image: images[0] ?? "",
     });
     toast.success("Aggiunto alla wishlist");
@@ -659,7 +660,10 @@ export function ProductDetailClient({ product }: { product: Product }) {
       productId: product.id,
       slug: product.slug ?? product.id,
       name: product.name.trim(),
-      price: Number(product.price),
+      price: getEffectivePrice(product.price, product.sale_price),
+      compareAtPrice: hasDiscount(product.price, product.sale_price)
+        ? Number(product.price)
+        : undefined,
       image: images[0] ?? "",
       size: selectedSize,
     });
@@ -782,11 +786,19 @@ export function ProductDetailClient({ product }: { product: Product }) {
 
               {/* Price */}
               <div className="flex items-baseline gap-3 mb-4">
+                {hasDiscount(product.price, product.sale_price) && (
+                  <s
+                    className="text-xl text-emerald-950/50"
+                    style={{ fontFamily: "'Playfair Display', serif", fontWeight: 400 }}
+                  >
+                    €{Number(product.price).toFixed(2)}
+                  </s>
+                )}
                 <span
-                  className="text-3xl text-emerald-950"
+                  className={`text-3xl ${hasDiscount(product.price, product.sale_price) ? "text-emerald-700" : "text-emerald-950"}`}
                   style={{ fontFamily: "'Playfair Display', serif", fontWeight: 400 }}
                 >
-                  €{Number(product.price).toFixed(2)}
+                  €{getEffectivePrice(product.price, product.sale_price).toFixed(2)}
                 </span>
                 <span className="text-[11px] tracking-[0.2em] uppercase text-emerald-700/60">
                   IVA inclusa
@@ -1148,7 +1160,14 @@ export function ProductDetailClient({ product }: { product: Product }) {
                 <p className="text-xs font-medium text-emerald-950 truncate" style={{ fontFamily: "'Playfair Display', serif" }}>
                   {product.name}
                 </p>
-                <p className="text-[11px] text-emerald-900/70">€{Number(product.price).toFixed(2)}</p>
+                <p className="text-[11px] text-emerald-900/70">
+                  {hasDiscount(product.price, product.sale_price) && (
+                    <s className="opacity-60 mr-1.5">€{Number(product.price).toFixed(2)}</s>
+                  )}
+                  <span className="text-emerald-700 font-medium">
+                    €{getEffectivePrice(product.price, product.sale_price).toFixed(2)}
+                  </span>
+                </p>
               </div>
               {selectedSize ? (
                 <button
@@ -1187,7 +1206,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
           addItem({
             id: product.id,
             name: product.name,
-            price: Number(product.price),
+            price: getEffectivePrice(product.price, product.sale_price),
             image: images[0] ?? "",
           });
         }}

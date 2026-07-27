@@ -6,6 +6,7 @@ import { useState } from "react";
 import ImageFallback from "./ImageFallback";
 import FullscreenProductViewer from "./FullscreenProductViewer";
 import type { Product } from "@/hooks/useProducts";
+import { PriceTag } from "./PriceTag";
 
 interface ProductCardProps {
   product: Product;
@@ -51,7 +52,9 @@ const ProductCard = ({ product, index = 0, siblings }: ProductCardProps) => {
             />
           </div>
           <h3 className="font-serif text-sm md:text-base">{product.name}</h3>
-          <p className="text-muted-foreground text-sm font-sans mt-1">€{Number(product.price).toFixed(2)}</p>
+          <p className="text-muted-foreground text-sm font-sans mt-1">
+            <PriceTag price={product.price} salePrice={product.sale_price} />
+          </p>
         </Link>
       </motion.div>
 

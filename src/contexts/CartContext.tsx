@@ -8,8 +8,10 @@ export interface CartItem {
   productId: string;
   slug: string;
   name: string;
-  /** Prezzo unitario in EUR (con eventuale sale_price gia' risolto). */
+  /** Prezzo unitario in EUR (con eventuale sconto gia' risolto). */
   price: number;
+  /** Prezzo di listino pieno, presente solo se scontato (per il barrato in UI). */
+  compareAtPrice?: number;
   image: string;
   size: string;
   quantity: number;

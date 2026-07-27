@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { getEffectivePrice } from "@/lib/pricing";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -66,7 +67,7 @@ export async function GET(request: NextRequest) {
         const images = Array.isArray(p.images)
           ? (p.images as unknown[]).flat(Infinity).filter((u): u is string => typeof u === "string")
           : [];
-        const price = typeof p.sale_price === "number" && p.sale_price > 0 ? p.sale_price : p.price;
+        const price = getEffectivePrice(p.price, p.sale_price);
         const size = it.size ?? "";
         // Cap quantity al ricostruire — fino allo stock attuale per questa taglia
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -80,6 +81,7 @@ export async function GET(request: NextRequest) {
           slug: p.slug ?? p.id,
           name: p.name,
           price,
+          compareAtPrice: Number(p.price) > price ? Number(p.price) : undefined,
           image: images[0] ?? "",
           size,
           quantity: qty,

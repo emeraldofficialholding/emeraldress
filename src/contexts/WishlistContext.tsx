@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
+import { getEffectivePrice } from "@/lib/pricing";
 
 export interface WishlistItem {
   id: string; // product_id
@@ -56,7 +57,7 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       return ((data as any[]) ?? []).map((p) => ({
         id: p.id,
         name: p.name,
-        price: Number(p.sale_price ?? p.price ?? 0),
+        price: getEffectivePrice(p.price, p.sale_price),
         image: Array.isArray(p.images) && p.images[0] ? p.images[0] : "",
       }));
     },

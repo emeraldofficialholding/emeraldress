@@ -7,6 +7,7 @@ import useEmblaCarousel from "embla-carousel-react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
+import { PriceTag } from "./PriceTag";
 
 const RelatedProducts = ({
   currentProductId,
@@ -95,7 +96,7 @@ const RelatedProducts = ({
                 </div>
                 <p className="font-serif text-xs md:text-sm truncate">{product.name}</p>
                 <p className="text-muted-foreground text-xs font-sans mt-0.5">
-                  €{Number(product.price).toFixed(2)}
+                  <PriceTag price={product.price} salePrice={product.sale_price} />
                 </p>
               </Link>
             </div>
