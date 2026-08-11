@@ -1,5 +1,4 @@
 import Navbar from "@/components/Navbar";
-import { PromoBanner } from "@/components/PromoBanner";
 import Footer from "@/components/Footer";
 import CookieBanner from "@/components/CookieBanner";
 import { PageTracker } from "@/components/PageTracker";
@@ -12,7 +11,6 @@ import { CartRecovery } from "@/components/CartRecovery";
 export default function MarketingLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
-      <PromoBanner />
       <Navbar />
       <PageTracker />
       <CartRecovery />

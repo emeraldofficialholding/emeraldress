@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { createSupabasePublicClient } from "@/lib/supabase/public";
 import type { Product } from "@/hooks/useProducts";
-import { getEffectivePrice } from "@/lib/pricing";
 import { ProductDetailClient } from "./product-detail-client";
 
 export const revalidate = 60; // ISR 60s
@@ -144,7 +143,7 @@ export default async function ProductPage({ params }: PageProps) {
     offers: {
       "@type": "Offer",
       url: productUrl,
-      price: getEffectivePrice(product.price, product.sale_price).toFixed(2),
+      price: Number(product.price).toFixed(2),
       priceCurrency: "EUR",
       priceValidUntil,
       availability:

@@ -274,19 +274,7 @@ export function CartDrawer() {
                             </button>
                           </div>
                           <span className="text-sm font-medium text-emerald-950 tabular-nums">
-                            {typeof item.compareAtPrice === "number" &&
-                            item.compareAtPrice > item.price ? (
-                              <>
-                                <s className="text-emerald-950/45 font-normal mr-1.5">
-                                  €{(item.compareAtPrice * item.quantity).toFixed(2)}
-                                </s>
-                                <span className="text-red-600">
-                                  €{(item.price * item.quantity).toFixed(2)}
-                                </span>
-                              </>
-                            ) : (
-                              <>€{(item.price * item.quantity).toFixed(2)}</>
-                            )}
+                            €{(item.price * item.quantity).toFixed(2)}
                           </span>
                         </div>
                       </div>

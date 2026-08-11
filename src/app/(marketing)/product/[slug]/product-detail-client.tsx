@@ -37,8 +37,6 @@ import { useWishlist } from "@/contexts/WishlistContext";
 import { useCart } from "@/contexts/CartContext";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
-import { getEffectivePrice, hasDiscount } from "@/lib/pricing";
-import { DiscountBadge } from "@/components/DiscountBadge";
 import {
   Accordion,
   AccordionContent,
@@ -229,14 +227,12 @@ const DesktopGallery = ({
   setActiveImage,
   productName,
   onZoom,
-  badge,
 }: {
   images: string[];
   activeImage: number;
   setActiveImage: (i: number) => void;
   productName: string;
   onZoom: () => void;
-  badge?: React.ReactNode;
 }) => {
   const goNext = () => setActiveImage((activeImage + 1) % images.length);
   const goPrev = () => setActiveImage((activeImage - 1 + images.length) % images.length);
@@ -264,7 +260,6 @@ const DesktopGallery = ({
       )}
 
       <div className="relative flex-1 overflow-hidden group rounded-xl bg-gradient-to-br from-emerald-50/60 to-white border border-emerald-100/80">
-        {badge}
         <AnimatePresence mode="wait">
           <motion.button
             key={activeImage}
@@ -325,14 +320,12 @@ const MobileCarousel = ({
   onIndexChange,
   currentIndex,
   onZoom,
-  badge,
 }: {
   images: string[];
   productName: string;
   onIndexChange: (i: number) => void;
   currentIndex: number;
   onZoom: (i: number) => void;
-  badge?: React.ReactNode;
 }) => {
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true });
 
@@ -351,7 +344,6 @@ const MobileCarousel = ({
 
   return (
     <div className="lg:hidden relative -mx-4">
-      {badge}
       <div ref={emblaRef} className="overflow-hidden">
         <div className="flex">
           {images.map((img, i) => (
@@ -583,7 +575,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
       slug: product.slug ?? null,
       name: product.name,
       image: product.images?.[0] ?? "",
-      price: getEffectivePrice(product.price, product.sale_price),
+      price: Number(product.price),
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [product.id]);
@@ -629,7 +621,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
     addItem({
       id: product.id,
       name: product.name,
-      price: getEffectivePrice(product.price, product.sale_price),
+      price: Number(product.price),
       image: images[0] ?? "",
     });
     toast.success("Aggiunto alla wishlist");
@@ -667,10 +659,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
       productId: product.id,
       slug: product.slug ?? product.id,
       name: product.name.trim(),
-      price: getEffectivePrice(product.price, product.sale_price),
-      compareAtPrice: hasDiscount(product.price, product.sale_price)
-        ? Number(product.price)
-        : undefined,
+      price: Number(product.price),
       image: images[0] ?? "",
       size: selectedSize,
     });
@@ -738,13 +727,6 @@ export function ProductDetailClient({ product }: { product: Product }) {
                   setActiveImage={setActiveImage}
                   productName={product.name}
                   onZoom={() => setZoomOpen(true)}
-                  badge={
-                    <DiscountBadge
-                      price={product.price}
-                      salePrice={product.sale_price}
-                      className="top-3 left-3 w-14 h-14 text-xs"
-                    />
-                  }
                 />
               </div>
 
@@ -757,13 +739,6 @@ export function ProductDetailClient({ product }: { product: Product }) {
                   setActiveImage(i);
                   setZoomOpen(true);
                 }}
-                badge={
-                  <DiscountBadge
-                    price={product.price}
-                    salePrice={product.sale_price}
-                    className="top-3 left-6"
-                  />
-                }
               />
             </motion.div>
 
@@ -807,19 +782,11 @@ export function ProductDetailClient({ product }: { product: Product }) {
 
               {/* Price */}
               <div className="flex items-baseline gap-3 mb-4">
-                {hasDiscount(product.price, product.sale_price) && (
-                  <s
-                    className="text-xl text-emerald-950/50"
-                    style={{ fontFamily: "'Playfair Display', serif", fontWeight: 400 }}
-                  >
-                    €{Number(product.price).toFixed(2)}
-                  </s>
-                )}
                 <span
-                  className={`text-3xl ${hasDiscount(product.price, product.sale_price) ? "text-red-600" : "text-emerald-950"}`}
+                  className="text-3xl text-emerald-950"
                   style={{ fontFamily: "'Playfair Display', serif", fontWeight: 400 }}
                 >
-                  €{getEffectivePrice(product.price, product.sale_price).toFixed(2)}
+                  €{Number(product.price).toFixed(2)}
                 </span>
                 <span className="text-[11px] tracking-[0.2em] uppercase text-emerald-700/60">
                   IVA inclusa
@@ -1181,14 +1148,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
                 <p className="text-xs font-medium text-emerald-950 truncate" style={{ fontFamily: "'Playfair Display', serif" }}>
                   {product.name}
                 </p>
-                <p className="text-[11px] text-emerald-900/70">
-                  {hasDiscount(product.price, product.sale_price) && (
-                    <s className="opacity-60 mr-1.5">€{Number(product.price).toFixed(2)}</s>
-                  )}
-                  <span className="text-red-600 font-medium">
-                    €{getEffectivePrice(product.price, product.sale_price).toFixed(2)}
-                  </span>
-                </p>
+                <p className="text-[11px] text-emerald-900/70">€{Number(product.price).toFixed(2)}</p>
               </div>
               {selectedSize ? (
                 <button
@@ -1227,7 +1187,7 @@ export function ProductDetailClient({ product }: { product: Product }) {
           addItem({
             id: product.id,
             name: product.name,
-            price: getEffectivePrice(product.price, product.sale_price),
+            price: Number(product.price),
             image: images[0] ?? "",
           });
         }}

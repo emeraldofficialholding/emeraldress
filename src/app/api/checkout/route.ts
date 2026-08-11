@@ -4,7 +4,6 @@ import { getStripe } from "@/lib/stripe";
 import { createSupabasePublicClient } from "@/lib/supabase/public";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-import { getEffectivePrice } from "@/lib/pricing";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -128,7 +127,7 @@ export async function POST(request: NextRequest) {
         { status: 400 },
       );
     }
-    const unitPrice = getEffectivePrice(p.price, p.sale_price);
+    const unitPrice = Number(p.sale_price ?? p.price);
     if (!Number.isFinite(unitPrice) || unitPrice <= 0) {
       return NextResponse.json({ error: "Prezzo prodotto non valido" }, { status: 400 });
     }

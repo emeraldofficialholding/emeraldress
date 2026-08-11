@@ -6,8 +6,6 @@ import { useState } from "react";
 import ImageFallback from "./ImageFallback";
 import FullscreenProductViewer from "./FullscreenProductViewer";
 import type { Product } from "@/hooks/useProducts";
-import { PriceTag } from "./PriceTag";
-import { DiscountBadge } from "./DiscountBadge";
 
 interface ProductCardProps {
   product: Product;
@@ -44,8 +42,7 @@ const ProductCard = ({ product, index = 0, siblings }: ProductCardProps) => {
         viewport={{ once: true }}
       >
         <Link href={href} onClick={handleClick} className="group block">
-          <div className="relative aspect-[3/4] overflow-hidden bg-gradient-to-br from-emerald-50/60 to-white mb-3 shadow-sm transition-shadow duration-300 group-hover:shadow-lg">
-            <DiscountBadge price={product.price} salePrice={product.sale_price} />
+          <div className="aspect-[3/4] overflow-hidden bg-gradient-to-br from-emerald-50/60 to-white mb-3 shadow-sm transition-shadow duration-300 group-hover:shadow-lg">
             <ImageFallback
               src={product.images?.[0]}
               hoverSrc={product.images?.[1]}
@@ -54,9 +51,7 @@ const ProductCard = ({ product, index = 0, siblings }: ProductCardProps) => {
             />
           </div>
           <h3 className="font-serif text-sm md:text-base">{product.name}</h3>
-          <p className="text-muted-foreground text-sm font-sans mt-1">
-            <PriceTag price={product.price} salePrice={product.sale_price} />
-          </p>
+          <p className="text-muted-foreground text-sm font-sans mt-1">€{Number(product.price).toFixed(2)}</p>
         </Link>
       </motion.div>
 

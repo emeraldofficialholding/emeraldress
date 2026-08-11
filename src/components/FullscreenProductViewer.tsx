@@ -9,7 +9,6 @@ import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { useWishlist } from "@/contexts/WishlistContext";
 import { AuthDialog } from "./AuthDialog";
 import type { Product } from "@/hooks/useProducts";
-import { getEffectivePrice, hasDiscount } from "@/lib/pricing";
 
 interface FullscreenProductViewerProps {
   /** Lista di prodotti tra cui scorrere (deve includere quello iniziale). */
@@ -109,7 +108,7 @@ export default function FullscreenProductViewer({
     addItem({
       id: product.id,
       name: product.name,
-      price: getEffectivePrice(product.price, product.sale_price),
+      price: Number(product.price),
       image: cover,
     });
   };
@@ -216,18 +215,7 @@ export default function FullscreenProductViewer({
                 >
                   {product.name}
                 </h2>
-                <p className="text-white/80 text-sm mt-1">
-                  {hasDiscount(product.price, product.sale_price) ? (
-                    <>
-                      <s className="text-white/50 mr-2">€ {Number(product.price).toFixed(2)}</s>
-                      <span className="text-red-400 font-medium">
-                        € {getEffectivePrice(product.price, product.sale_price).toFixed(2)}
-                      </span>
-                    </>
-                  ) : (
-                    <>€ {getEffectivePrice(product.price, product.sale_price).toFixed(2)}</>
-                  )}
-                </p>
+                <p className="text-white/80 text-sm mt-1">€ {Number(product.price).toFixed(2)}</p>
               </button>
 
               <div className="flex items-center gap-3 shrink-0">
@@ -265,7 +253,7 @@ export default function FullscreenProductViewer({
           addItem({
             id: product.id,
             name: product.name,
-            price: getEffectivePrice(product.price, product.sale_price),
+            price: Number(product.price),
             image: cover,
           });
           setHasUser(true);

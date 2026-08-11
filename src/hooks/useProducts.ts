@@ -15,7 +15,6 @@ export interface Product {
   name: string;
   description: string | null;
   price: number;
-  sale_price?: number | null;
   category: string;
   images: string[];
   sizes: string[] | null;
