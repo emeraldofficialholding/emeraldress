@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 import { Playfair_Display, Alice } from "next/font/google";
 import { Providers } from "./providers";
 import "./globals.css";
@@ -156,11 +157,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
         />
-        {sentryLoader && <script src={sentryLoader} crossOrigin="anonymous" async />}
-        {posthogSnippet && <script dangerouslySetInnerHTML={{ __html: posthogSnippet }} />}
       </head>
       <body>
         <Providers>{children}</Providers>
+        {/* next/script con id: deduplica (il raw <script> nel head viene
+            renderizzato due volte dall'App Router; su marghine la doppia init
+            lasciava PostHog senza request queue) */}
+        {sentryLoader && <Script id="sentry-loader" src={sentryLoader} crossOrigin="anonymous" strategy="afterInteractive" />}
+        {posthogSnippet && <Script id="posthog-init" strategy="afterInteractive" dangerouslySetInnerHTML={{ __html: posthogSnippet }} />}
       </body>
     </html>
   );
