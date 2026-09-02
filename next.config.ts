@@ -6,7 +6,7 @@ const cspDirectives = [
   "default-src 'self'",
   // 'unsafe-inline'/'unsafe-eval' restano per GA4 gtag, Stripe inline, gtag dataLayer.
   // Quando estirperemo gli script inline (Next.js Script con nonce) potremo stringere.
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://js.stripe.com https://checkout.stripe.com https://connect.facebook.net https://vercel.live https://va.vercel-scripts.com",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://js.stripe.com https://checkout.stripe.com https://connect.facebook.net https://vercel.live https://va.vercel-scripts.com https://eu-assets.i.posthog.com https://js.sentry-cdn.com https://browser.sentry-cdn.com",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' data: https://fonts.gstatic.com",
   "img-src 'self' data: blob: https:",
